@@ -410,6 +410,8 @@ class SearchSettings(ModelSettings, LlmSettings, WorkersAiSettings, BedrockSetti
     cognito_pool_id: str | None = Field(None, alias="CAIRN_COGNITO_POOL_ID")
     cognito_client_id: str | None = Field(None, alias="CAIRN_COGNITO_CLIENT_ID")
     cognito_region: str = Field("ap-south-1", alias="CAIRN_COGNITO_REGION")
+    audit_anchor_bucket: str | None = Field(None, alias="CAIRN_AUDIT_ANCHOR_BUCKET")
+    """An S3 bucket with Object Lock where the audit chain's head is anchored. Empty: no anchors."""
     auth_auto_confirm: bool = Field(False, alias="CAIRN_AUTH_AUTO_CONFIRM")
     """Skip the email code at sign-up. For demos: anyone with an address can create a workspace."""
     session_secret: SecretStr = Field(alias="CAIRN_SESSION_SECRET", min_length=32)

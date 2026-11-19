@@ -49,7 +49,7 @@ class World:
             assert org
             self.org = int(org[0])
             owner_row = o.execute(
-                "SELECT principal_id FROM cairn_meta.org_members WHERE org_id=%s AND account_id=%s",  # noqa: E501
+                "SELECT principal_id FROM cairn_meta.org_members WHERE org_id=%s AND account_id=%s",
                 (self.org, acct[0]),
             ).fetchone()
             assert owner_row

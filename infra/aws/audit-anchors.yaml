@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cairn audit anchors. A bucket with Object Lock so a stored anchor cannot be replaced or deleted during its retention period.
+Parameters:
+  InstanceRoleName:
+    Type: String
+    Default: reliable-agent-ec2
+Resources:
+  AnchorBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub cairn-audit-anchors-${AWS::AccountId}-${AWS::Region}
+      ObjectLockEnabled: true
+      ObjectLockConfiguration:
+        ObjectLockEnabled: Enabled
+        Rule:
+          DefaultRetention:
+            Mode: GOVERNANCE
+            Days: 365
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: project
+          Value: cairn
+  AnchorPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: cairn-audit-anchors
+      Roles: [!Ref InstanceRoleName]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: WriteAndReadAnchors
+            Effect: Allow
+            Action: [s3:PutObject, s3:GetObject]
+            Resource: !Sub ${AnchorBucket.Arn}/anchors/*
+          - Sid: ListAnchors
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: !GetAtt AnchorBucket.Arn
+Outputs:
+  Bucket:
+    Value: !Ref AnchorBucket

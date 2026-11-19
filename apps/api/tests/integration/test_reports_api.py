@@ -5,9 +5,10 @@ from __future__ import annotations
 import datetime as dt
 import json
 import uuid
-from typing import Any
+from typing import Any, cast
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from cairn_retrieval.llm.types import LlmRequest, LlmResponse
@@ -187,7 +188,7 @@ def test_digest_cites_real_reports_only_and_is_cached(saas: Saas) -> None:  # no
         }
     )
     stub = StubLlm(reply)
-    providers = saas.main.app.state.runtime.providers
+    providers = cast(FastAPI, saas.main.app).state.runtime.providers
     old = providers.answer
     object.__setattr__(providers, "answer", stub)
     try:

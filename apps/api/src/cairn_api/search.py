@@ -78,6 +78,9 @@ class SearchRuntime:
     answer_cache: AnswerCache | None = None
     idp: Any = None  # the identity provider (Cognito or the fake); None disables password sign-in
     auth_limiter: FixedWindowLimiter | None = None  # always on: sign-in endpoints are public
+    anchor_store: Any = (
+        None  # where audit-chain anchors go (S3 with Object Lock); None disables them
+    )
 
     @property
     def secret(self) -> bytes:
@@ -126,6 +129,7 @@ def build_runtime(
         agent_limiter=FixedWindowLimiter(search.audit_hash_key.get_secret_value().encode()),
         auth_limiter=FixedWindowLimiter(search.audit_hash_key.get_secret_value().encode()),
         idp=_identity_provider(search),
+        anchor_store=_anchor_store(search),
         inbox_writer=_local_inbox_writer(search),
         answer_cache=AnswerCache(search.answer_cache_size, search.answer_cache_ttl_s)
         if search.answer_cache_size > 0
@@ -143,6 +147,14 @@ def _identity_provider(search: SearchSettings) -> Any:
             search.cognito_region,
             auto_confirm=search.auth_auto_confirm,
         )
+    return None
+
+
+def _anchor_store(search: SearchSettings) -> Any:
+    if search.audit_anchor_bucket:
+        from cairn_api.anchors import S3AnchorStore
+
+        return S3AnchorStore(search.audit_anchor_bucket, search.cognito_region)
     return None
 
 

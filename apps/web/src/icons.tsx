@@ -76,6 +76,12 @@ export const GovernanceIcon = () => (
     <path d="M5 10v7M10 10v7M14 10v7M19 10v7M3 20h18" />
   </Icon>
 );
+export const ComplianceIcon = () => (
+  <Icon>
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 4h6v3H9zM9 14l2 2 4-4" />
+  </Icon>
+);
 export const CopyIcon = () => (
   <Icon size={15}>
     <rect x="9" y="9" width="11" height="11" rx="2" />

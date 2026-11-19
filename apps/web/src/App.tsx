@@ -16,6 +16,7 @@ import {
   SourcesIcon,
 } from './icons';
 import { InvitePage } from './InvitePage';
+import { CompliancePage } from './CompliancePage';
 import { Onboarding } from './Onboarding';
 import { OrgAuditPage } from './OrgAuditPage';
 import { GovernancePage } from './GovernancePage';
@@ -32,6 +33,7 @@ import { Loading, RoleBadge } from './ui';
 type View =
   | 'reports'
   | 'governance'
+  | 'compliance'
   | 'ask'
   | 'decisions'
   | 'review'
@@ -239,6 +241,7 @@ function Shell({ session }: { session: Session }) {
           {view === 'decisions' ? <DecisionPage /> : null}
           {view === 'review' ? <ReviewPage /> : null}
           {view === 'sources' ? <SyncPage /> : null}
+          {view === 'compliance' ? <CompliancePage session={session} /> : null}
           {view === 'people' ? <PeoplePage session={session} /> : null}
           {view === 'audit' ? <OrgAuditPage session={session} /> : null}
           {view === 'settings' ? <SettingsPage session={session} /> : null}

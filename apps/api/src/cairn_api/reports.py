@@ -344,9 +344,11 @@ def install(app: FastAPI, rt: Any) -> None:
             by_day.setdefault(day, set()).add(author)
             blockers += 1 if has_blocker else 0
         names = {int(p[0]): str(p[1]) for p in people}
-        days = []
+        days: list[dict[str, Any]] = []
+        daily: list[tuple[dt.date, int, int]] = []
         for d in weekdays(window[0], window[1]):
             done = by_day.get(d, set()) & set(names)
+            daily.append((d, len(names), len(done)))
             days.append(
                 {
                     "date": d.isoformat(),
@@ -355,8 +357,9 @@ def install(app: FastAPI, rt: Any) -> None:
                     "missing": sorted(names[p] for p in set(names) - done) if d < today() else [],
                 }
             )
-        total_expected = sum(x["expected"] for x in days if x["date"] < today().isoformat())
-        total_done = sum(x["submitted"] for x in days if x["date"] < today().isoformat())
+        past = [(d, e, n) for d, e, n in daily if d < today()]
+        total_expected = sum(e for _, e, _ in past)
+        total_done = sum(n for _, _, n in past)
         return json_response(
             200,
             {

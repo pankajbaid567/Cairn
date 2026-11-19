@@ -654,3 +654,73 @@ export interface GovSummary {
   open_risks: number | null;
 }
 export const getGovSummary = () => request<GovSummary>('/governance/summary');
+
+// ---- compliance ----
+
+export interface ReviewItem2 {
+  item_id: number;
+  member: string;
+  role: string;
+  teams: string[];
+  reviewer: string;
+  decision: 'pending' | 'keep' | 'change' | 'remove';
+  new_role: string | null;
+  comment: string | null;
+  decided_at: string | null;
+  mine: boolean;
+}
+export interface AccessReview {
+  review_id: number;
+  title: string;
+  state: 'open' | 'closed';
+  started_at: string;
+  due_at: string;
+  closed_at: string | null;
+  started_by: string;
+  total: number;
+  decided: number;
+  overdue: boolean;
+  items: ReviewItem2[];
+}
+export const getAccessReviews = () => request<{ reviews: AccessReview[] }>('/compliance/reviews');
+export const startAccessReview = (title: string, due_days: number) =>
+  request<{ review_id: number }>('/compliance/reviews', {
+    method: 'POST',
+    body: JSON.stringify({ title, due_days }),
+  });
+export const decideReviewItem = (
+  id: number,
+  b: { decision: string; new_role?: string; comment: string },
+) =>
+  request<{ status: string }>(`/compliance/reviews/items/${id}/decide`, {
+    method: 'POST',
+    body: JSON.stringify(b),
+  });
+export const closeAccessReview = (id: number) =>
+  request<{ status: string }>(`/compliance/reviews/${id}/close`, { method: 'POST' });
+
+export interface Control {
+  id: string;
+  category: string;
+  title: string;
+  status: 'pass' | 'fail' | 'no_evidence';
+  detail: string;
+  route: string;
+}
+export const getControls = () =>
+  request<{
+    controls: Control[];
+    counts: { pass: number; fail: number; no_evidence: number };
+    note: string;
+  }>('/compliance/controls');
+export interface AnchorRow {
+  seq: number;
+  head_hash: string;
+  at: string;
+  status: 'match' | 'mismatch' | 'missing_event' | 'bad_signature';
+}
+export const getAnchors = () =>
+  request<{ anchors: AnchorRow[]; ok: boolean; latest_seq: number }>('/org/audit/anchors');
+export const anchorNow = () =>
+  request<{ seq: number; head_hash: string; at: string }>('/org/audit/anchor', { method: 'POST' });
+export const EVIDENCE_PACK_URL = '/api/compliance/evidence-pack';
