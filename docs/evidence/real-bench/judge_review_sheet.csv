@@ -1,0 +1,802 @@
+id,question,reference_answer,system_answer,cited_quote_1,ai_correct,ai_grounded,human_correct,human_grounded
+con-5896f409,How does the proposal suggest providing safe POSIX shell escaping for interpolated values in template literals?,It proposes adding a renderer named ``sh`` to the ``shlex`` module that automatically applies ``shlex.quote`` to each interpolated field value.,The proposal adds a renderer called ``shlex.sh`` to the :mod:`shlex` module; this renderer safely escapes each interpolated value by applying ``shlex.quote`` (POSIX‑style quoting) to the field values in a template literal. Subprocess functions can then automatically render template literals through ``shlex.sh`` to obtain safely escaped command strings.,"As a reference implementation, a renderer for safe POSIX shell escaping can be added to
+the :mod:`shlex` module. This renderer would be called ``sh`` and would be equivalent to
+calling ``shlex.quote`` on each field value in the template literal.
+
+Thus:
+
+would have the same behavior as:
+
+The implementation would be:
+
+The addition of ``shlex.sh`` will NOT change the existing admonishments in the
+:mod:`subprocess` documentation that passing ``shell=True`` is best avoided, nor the
+reference from the",yes,yes,,
+hea-5351b462,Who wrote the proposal titled 'The enumerate() built-in function'?,Raymond Hettinger <python@rcn.com>,Raymond Hettinger wrote the proposal titled 'The enumerate() built-in function'.,"# PEP 279: The enumerate() built-in function
+
+Status: Final; Author: Raymond Hettinger <python@rcn.com>; Created: 30-Jan-2002.
+
+Abstract
+========
+
+This PEP introduces a new built-in function, ``enumerate()`` to
+simplify a commonly used looping idiom.  It provides all iterable
+collections with the same advantage that ``iteritems()`` affords to
+dictionaries -- a compact, readable, reliable index notation.
+
+Rationale
+=========
+
+Python 2.2 introduced the concept of an iterable interface as
+proposed ",yes,yes,,
+per-8381a304,"In the HTTPS verification migration tools, what specific environment variable value causes the system to use an unverified SSL context?","If the environment variable is set to the string '0', the function returns the unverified SSL context factory.",Setting the environment variable PYTHONHTTPSVERIFY to the string '0' causes the system to use an unverified SSL context.,"    def _get_https_context_factory():
+        if not sys.flags.ignore_environment:
+            config_setting = os.environ.get(_https_verify_envvar)
+            if config_setting == '0':
+                return _create_unverified_context
+        return create_default_context
+
+    _create_default_https_context = _get_https_context_factory()
+
+Security Considerations
+-----------------------
+
+Relative to the behaviour in Python 3.4.3+ and Python 2.7.9->2.7.11, this
+approach does introduce a new downg",yes,yes,,
+con-c8505e08,How does the ordered dictionary determine the position of a key when it is added or overwritten?,"New keys are appended to the end, while overwriting an existing key does not change its position in the order.","When a key is added to an OrderedDict for the first time, its position is recorded at that point. If the same key is later overwritten, the OrderedDict keeps the original insertion position and only updates the value; the key is not moved to a new position.","What happens if keys appear multiple times in the list passed to the
+constructor?
+
+    The same as for regular dicts -- the latter item overrides the
+    former.  This has the side-effect that the position of the first
+    key is used because only the value is actually overwritten::
+
+        >>> OrderedDict([('a', 1), ('b', 2), ('a', 3)])
+        collections.OrderedDict([('a', 3), ('b', 2)])
+
+    This behavior is consistent with existing implementations in
+    Python, the PHP array and the hashm",yes,yes,,
+con-941a611d,"What type must each entry be in the optional dependencies list, and what happens if it is not?",Each entry must be a string; otherwise a TypeError is raised indicating the offending dependency number.,"Each entry in an optional‑dependencies list must be a string. If an entry is not a string, a TypeError is raised indicating that the dependency must be a string.","        for option, dependencies in optional_dependencies.items():
+            if not isinstance(dependencies, list):
+                raise TypeError(
+                    f'Dependencies for option `{option}` of field '
+                    '`project.optional-dependencies` must be an array'
+                )
+
+            entries = []
+
+            for i, entry in enumerate(dependencies, 1):
+                if not isinstance(entry, str):
+                    raise TypeError(
+                        f",yes,no,,
+hea-9640ee21,Who wrote the proposal titled 'Using ssize_t as the index type'?,Martin von Löwis <martin@v.loewis.de>,The proposal was written by Martin von Löwis.,"# PEP 353: Using ssize_t as the index type
+
+Status: Final; Author: Martin von Löwis <martin@v.loewis.de>; Created: 18-Dec-2005.
+
+Abstract
+========
+
+In Python 2.4, indices of sequences are restricted to the C type
+int. On 64-bit machines, sequences therefore cannot use the full
+address space, and are restricted to 2**31 elements. This PEP proposes
+to change this, introducing a platform-specific index type
+Py_ssize_t. An implementation of the proposed change is in
+http://svn.python.org/projects/py",yes,yes,,
+per-c15a8683,How many of the setattr calls mentioned rely on getattr to obtain the new value?,Fifteen of the setattr calls use getattr to find the new value.,15,"    c.5   uses of the 2-argument form with a literal string
+          attribute name, which I think could be replaced with the
+          standard ""x.attribute"" syntax;
+
+    c.120 uses of setattr, of which 15 use getattr to find the
+          new value; all could be replaced with the new syntax,
+          the 15 where getattr is also involved would show a
+          particular increase in clarity;
+
+    c.5   uses which would have to stay as ""getattr"" because they
+          are calls of a variable ",yes,yes,,
+hea-70328877,Who wrote the proposal titled 'API for Cryptographic Hash Functions v2.0'?,"A.M. Kuchling <amk@amk.ca>, Christian Heimes <christian@python.org>",The proposal was written by A.M. Kuchling and Christian Heimes.,"# PEP 452: API for Cryptographic Hash Functions v2.0
+
+Status: Final; Author: A.M. Kuchling <amk@amk.ca>, Christian Heimes <christian@python.org>; Created: 15-Aug-2013; Replaces: PEP 247.
+
+Abstract
+========
+
+There are several different modules available that implement
+cryptographic hashing algorithms such as MD5 or SHA.  This
+document specifies a standard API for such algorithms, to make it
+easier to switch between different implementations.
+
+Specification
+=============
+
+All hashing modules shoul",yes,yes,,
+hea-562a6472,Who wrote the proposal titled 'Module Repository Upload Mechanism'?,Sean Reifschneider <jafo-pep@tummy.com>,Sean Reifschneider wrote the proposal titled 'Module Repository Upload Mechanism'.,"# PEP 243: Module Repository Upload Mechanism
+
+Status: Withdrawn; Author: Sean Reifschneider <jafo-pep@tummy.com>; Created: 18-Mar-2001.
+
+Abstract
+========
+
+For a module repository system (such as Perl's CPAN) to be
+successful, it must be as easy as possible for module authors to
+submit their work.  An obvious place for this submit to happen is
+in the Distutils tools after the distribution archive has been
+successfully created.  For example, after a module author has
+tested their software (verif",yes,yes,,
+con-98058654,How does Python evaluate the first (outermost) for-expression in a generator expression compared to the other parts?,"The outermost for-expression is evaluated right away, while the rest of the generator's expressions are deferred until the generator is actually executed.","Python evaluates the first (outermost) for‑expression of a generator expression immediately, binding it to an iterator before the generator is created, while all remaining for‑expressions, if‑clauses, and the yielded expression are deferred until the generator is actually run.","   List comprehensions also ""leak"" their loop variable into the
+   surrounding scope.  This will also change in Python 3.0, so that
+   the semantic definition of a list comprehension in Python 3.0 will
+   be equivalent to list(<generator expression>).  Python 2.4 and
+   beyond should issue a deprecation warning if a list comprehension's
+   loop variable has the same name as a variable used in the
+   immediately surrounding scope.
+
+Early Binding versus Late Binding
+===============================",yes,yes,,
+hea-9229049f,Which proposal superseded the one titled 'Metadata for Python Software Packages 1.2'?,566,PEP 566 superseded the proposal titled 'Metadata for Python Software Packages 1.2'.,"# PEP 345: Metadata for Python Software Packages 1.2
+
+Status: Superseded; Author: Richard Jones <richard@python.org>; Created: 28-Apr-2005; Replaces: PEP 314; Superseded-By: PEP 566.
+
+Abstract
+========
+
+This PEP describes a mechanism for adding metadata to Python distributions.
+It includes specifics of the field names, and their semantics and
+usage.
+
+This document specifies version 1.2 of the metadata format.
+Version 1.0 is specified in :pep:`241`.
+Version 1.1 is specified in :pep:`314`.
+
+Versio",yes,yes,,
+con-6f57053e,How should an author name the new reStructuredText file when creating a PEP using this template?,"The author should copy the .rst file and name it pep-{NNNN}.rst, using the next available number and padding the filename with zeros (e.g., pep-0012.rst).","The author should name the new reStructuredText file pep-{NNNN}.rst, where {NNNN} is the next available PEP number.","To use this template you must first decide whether your PEP is going
+to be an Informational or Standards Track PEP.  Most PEPs are
+Standards Track because they propose a new feature for the Python
+language or standard library.  When in doubt, read :pep:`1` for details,
+or open a tracker issue on the PEPs repo to ask for assistance.
+
+Once you've decided which type of PEP yours is going to be, follow the
+directions below.
+
+- Make a copy of this file (the ``.rst`` file, **not** the HTML!) and
+  per",yes,no,,
+hea-dc8714a8,What is the status of the proposal titled 'Removing External Hosting Support on PyPI'?,Final,The proposal 'Removing External Hosting Support on PyPI' has status Final.,"# PEP 470: Removing External Hosting Support on PyPI
+
+Status: Final; Author: Donald Stufft <donald@stufft.io>; Created: 12-May-2014; Replaces: PEP 438.
+
+Abstract
+========
+
+This PEP proposes the deprecation and removal of support for hosting files
+externally to PyPI as well as the deprecation and removal of the functionality
+added by :pep:`438`, particularly rel information to classify different types of
+links and the meta-tag to indicate API version.
+
+Rationale
+=========
+
+Historically PyPI did n",yes,yes,,
+con-71fb9a17,How can a program choose a different handling strategy when obtaining random bytes might block on Linux?,"By using the newly added os.getrandom() function, which lets the caller specify how to behave when os.urandom() would block.","Developers can choose how to handle BlockingIOError, e.g., fallback to a non‑secure entropy source or poll os.urandom() until it succeeds. [1]","This PEP does not change the API:
+
+* ``os.urandom()``, ``random.SystemRandom`` and ``secrets`` for security
+* ``random`` module (except ``random.SystemRandom``) for all other usages
+
+Raise BlockingIOError in os.urandom()
+-------------------------------------
+
+Proposition
+^^^^^^^^^^^
+
+:pep:`PEP 522: Allow BlockingIOError in security sensitive APIs on Linux
+<522>`.
+
+Python should not decide for the developer how to handle `The bug`_:
+raising immediately a ``BlockingIOError`` if ``os.urandom()`` is",no,yes,,
+per-75909bc0,How does the proposal describe a cryptographically strong pseudo random number generator?,It is defined as an algorithm that generates numbers that look random and are resistant to prediction.,The proposal defines a cryptographically strong pseudo random number generator (CSPRNG) as an algorithm used to produce random‑looking numbers which are resistant to prediction.,"# PEP 506: Adding A Secrets Module To The Standard Library
+
+Status: Final; Author: Steven D'Aprano <steve@pearwood.info>; Created: 19-Sep-2015.
+
+Abstract
+========
+
+This PEP proposes the addition of a module for common security-related
+functions such as generating tokens to the Python standard library.
+
+Definitions
+===========
+
+Some common abbreviations used in this proposal:
+
+* PRNG:
+
+  Pseudo Random Number Generator.  A deterministic algorithm used
+  to produce random-looking numbers with certa",yes,yes,,
+con-d6ef0d27,Which Python version is described as the most compatible interpreter for the variety of division-related code after the true division change?,Python 2.7 is identified as the most compatible interpreter for division-related code.,Python 2.7 is described as the most compatible interpreter for the variety of division-related code after the true division change.,"A consequence of this asymmetry is that, with respect to a breaking
+change, the older (pre-breaking) version of the Python interpreter is
+more capable than the newer (breaking) version; the older interpreter
+can use both code designed prior to the change and newer code, whereas
+the newer interpreter is only capable of using code that has been
+upgraded to support the changed feature.
+
+As an example, consider the changes to the division operator
+introduced in :pep:`238` in 2001, soon after :pep:`2",yes,yes,,
+con-15a02a36,What is a wheel installer required to do with the hashes listed in the RECORD file?,It must verify that the hashes in RECORD match the contents of the extracted files.,A wheel installer must verify the hashes listed in the RECORD file against the extracted file contents.,"#. Wheel .dist-info directories include at a minimum METADATA, WHEEL,
+   and RECORD.
+#. METADATA is the package metadata, the same format as PKG-INFO as
+   found at the root of sdists.
+#. WHEEL is the wheel metadata specific to a build of the package.
+#. RECORD is a list of (almost) all the files in the wheel and their
+   secure hashes.  Unlike :pep:`376`, every file except RECORD, which
+   cannot contain a hash of itself, must include its hash.  The hash
+   algorithm must be sha256 or better; s",yes,yes,,
+hea-917e8d2f,What is the status of the proposal titled 'Elementwise/Objectwise Operators'?,Rejected,The proposal titled 'Elementwise/Objectwise Operators' has the status 'Rejected'.,"# PEP 225: Elementwise/Objectwise Operators
+
+Status: Rejected; Author: Huaiyu Zhu <hzhu@users.sourceforge.net>, Gregory Lielens <gregory.lielens@fft.be>; Created: 19-Sep-2000.
+
+Introduction
+============
+
+This PEP describes a proposal to add new operators to Python which are useful
+for distinguishing elementwise and objectwise operations, and summarizes
+discussions in the news group comp.lang.python on this topic.  See Credits and
+Archives section at end.  Issues discussed here include:
+
+- Backgr",yes,yes,,
+hea-71993140,Which proposal superseded the one titled 'General purpose template literal strings'?,750,PEP 750 superseded the 'General purpose template literal strings' proposal.,"# PEP 501: General purpose template literal strings
+
+Status: Withdrawn; Author: Alyssa Coghlan <ncoghlan@gmail.com>, Nick Humrich <nick@humrich.us>; Created: 08-Aug-2015; Superseded-By: PEP 750.
+
+Abstract
+========
+
+Though easy and elegant to use, Python :term:`f-string`\s
+can be vulnerable to injection attacks when used to construct
+shell commands, SQL queries, HTML snippets and similar
+(for example, ``os.system(f""echo {message_from_user}"")``).
+This PEP introduces template literal strings (or ""t",yes,yes,,
+hea-19b3042f,Who wrote the proposal titled 'Multi-phase extension module initialization'?,"Petr Viktorin <encukou@gmail.com>, Stefan Behnel <stefan_ml@behnel.de>, Alyssa Coghlan <ncoghlan@gmail.com>","The proposal was authored by Petr Viktorin, Stefan Behnel, and Alyssa Coghlan.","# PEP 489: Multi-phase extension module initialization
+
+Status: Final; Author: Petr Viktorin <encukou@gmail.com>, Stefan Behnel <stefan_ml@behnel.de>, Alyssa Coghlan <ncoghlan@gmail.com>; Created: 11-Aug-2013.
+
+Abstract
+========
+
+This PEP proposes a redesign of the way in which built-in and extension modules
+interact with the import machinery. This was last revised for Python 3.0 in PEP
+3121, but did not solve all problems at the time. The goal is to solve
+import-related problems by bringing ext",yes,yes,,
+hea-c3004a0f,Who wrote the proposal titled 'Qualified Names for Modules'?,Alyssa Coghlan <ncoghlan@gmail.com>,Alyssa Coghlan wrote the proposal titled 'Qualified Names for Modules'.,"# PEP 395: Qualified Names for Modules
+
+Status: Withdrawn; Author: Alyssa Coghlan <ncoghlan@gmail.com>; Created: 04-Mar-2011.
+
+PEP Withdrawal
+==============
+
+This PEP was withdrawn by the author in December 2013, as other significant
+changes in the time since it was written have rendered several aspects
+obsolete. Most notably :pep:`420` namespace packages rendered some of the
+proposals related to package detection unworkable and :pep:`451` module
+specifications resolved the multiprocessing issue",yes,yes,,
+con-28f8cbb5,What kind of type arguments are allowed for generic aliases beyond simple types?,"Generic aliases can accept variadic type arguments, such as a TypeVarTuple.","Generic aliases can accept variadic type arguments, including unpacked TypeVarTuples and arbitrary‑length tuple types, not just simple concrete types.","First, type arguments to generic aliases can be variadic. For example, a
+``TypeVarTuple`` can be used as a type argument:
+
+::
+
+    Ts1 = TypeVar('Ts1')
+    Ts2 = TypeVar('Ts2')
+
+    IntTuple = Tuple[int, *Ts1]
+    IntFloatTuple = IntTuple[float, *Ts2]  # Valid
+
+Here, ``*Ts1`` in the ``IntTuple`` alias is bound to ``Tuple[float, *Ts2]``,
+resulting in an alias ``IntFloatTuple`` equivalent to
+``Tuple[int, float, *Ts2]``.
+
+Unpacked arbitrary-length tuples can also be used as type arguments, with
+sim",partial,no,,
+con-53a0ab72,What naming convention must an acceleration module follow relative to the pure Python module it speeds up?,The acceleration module must be named exactly like the pure Python module but with a leading underscore.,"The acceleration module must be named the same as the pure Python module it accelerates, but with a leading underscore (e.g., `_warnings` for `warnings`).","Even though a pure Python implementation is mandated by this PEP, it
+does not preclude the use of a companion acceleration module. If an
+acceleration module is provided it is to be named the same as the
+module it is accelerating with an underscore attached as a prefix,
+e.g., ``_warnings`` for ``warnings``. The common pattern to access
+the accelerated code from the pure Python implementation is to import
+it with an ``import *``, e.g., ``from _warnings import *``. This is
+typically done at the end",yes,yes,,
+hea-f7c512dc,What is the status of the proposal titled 'Suppressing exception context'?,Final,The proposal is in Final status.,"# PEP 409: Suppressing exception context
+
+Status: Final; Author: Ethan Furman <ethan@stoneleaf.us>; Created: 26-Jan-2012; Superseded-By: PEP 415.
+
+Abstract
+========
+
+One of the open issues from :pep:`3134` is suppressing context:  currently
+there is no way to do it.  This PEP proposes one.
+
+Rationale
+=========
+
+There are two basic ways to generate exceptions:
+
+1) Python does it (buggy code, missing resources, ending loops, etc.)
+
+2) manually (with a raise statement)
+
+When writing libraries, or e",yes,yes,,
+hea-2e60d753,Who wrote the proposal titled 'Rich Comparisons'?,"Guido van Rossum <guido@python.org>, David Ascher <DavidA@ActiveState.com>",Guido van Rossum and David Ascher wrote the proposal titled 'Rich Comparisons'.,"# PEP 207: Rich Comparisons
+
+Status: Final; Author: Guido van Rossum <guido@python.org>, David Ascher <DavidA@ActiveState.com>; Created: 25-Jul-2000.
+
+Abstract
+========
+
+This PEP proposes several new features for comparisons:
+
+- Allow separately overloading of <, >, <=, >=, ==, !=, both in
+  classes and in C extensions.
+
+- Allow any of those overloaded operators to return something else
+  besides a Boolean result.
+
+Motivation
+==========
+
+The main motivation comes from NumPy, whose users agree th",yes,yes,,
+per-975717de,"According to the definition given, what type of objects do the names 'roletypes' and 'format' become after the make-statements are executed?",They become instances of the namespace type.,They become instances of the namespace class.,"(2) Create ``roletypes`` and ``format`` classes, and move the
+    attributes to the classes.
+
+The former is a fair chunk of refactoring work, and produces two tiny
+modules without much content.  The latter keeps the attributes local
+to the module, but creates classes when there is no intention of ever
+creating instances of those classes.
+
+In situations like this, it would be nice to simply be able to declare
+a ""namespace"" to hold the few attributes.  With the new make
+statement, I could introduc",partial,yes,,
+con-727d37b5,Why does adding a keyword argument to a single index not turn the index into a tuple?,"Because the language design specifies that a single value followed by a keyword argument is passed directly, and converting it to a tuple would be confusing.","Because the language design treats a single positional index the same way whether or not keyword arguments are present, avoiding a change in the index's type; a single index is never automatically wrapped into a tuple just because keywords are added.","4. Keyword arguments, if any, must follow positional arguments::
+
+       obj[1, 2, spam=None, 3]  # SyntaxError
+
+   This is like function calls, where intermixing positional and keyword
+   arguments give a SyntaxError.
+
+5. Keyword subscripts, if any, will be handled like they are in
+   function calls. Examples::
+
+       # Single index with keywords:
+
+       obj[index, spam=1, eggs=2]
+       # calls type(obj).__getitem__(obj, index, spam=1, eggs=2)
+
+       obj[index, spam=1, eggs=2] = value
+     ",yes,yes,,
+hea-a8e4eeb6,What is the status of the proposal titled 'Docutils Design Specification'?,Rejected,The proposal titled 'Docutils Design Specification' has a status of Rejected.,"# PEP 258: Docutils Design Specification
+
+Status: Rejected; Author: David Goodger <goodger@python.org>; Created: 31-May-2001.
+
+================
+Rejection Notice
+================
+
+While this may serve as an interesting design document for the
+now-independent docutils, it is no longer slated for inclusion in the
+standard library.
+
+==========
+ Abstract
+==========
+
+This PEP documents design issues and implementation details for
+Docutils, a Python Docstring Processing System (DPS).  The rationale
+and",yes,yes,,
+hea-46daa1d4,What is the status of the proposal titled 'Executing modules as scripts'?,Final,The proposal is in Final status.,"# PEP 338: Executing modules as scripts
+
+Status: Final; Author: Alyssa Coghlan <ncoghlan@gmail.com>; Created: 16-Oct-2004.
+
+Abstract
+========
+
+This PEP defines semantics for executing any Python module as a
+script, either with the ``-m`` command line switch, or by invoking
+it via ``runpy.run_module(modulename)``.
+
+The ``-m`` switch implemented in Python 2.4 is quite limited. This
+PEP proposes making use of the :pep:`302` import hooks to allow any
+module which provides access to its code object t",yes,yes,,
+con-e4292e26,How does the activation script for a virtual environment make the environment use the venv's executables?,"It prepends the virtual environment’s bin (or Scripts) directory to the beginning of the user’s shell PATH, so the venv’s executables are found first.","The activation script works by prepending the virtual environment’s bin (or Scripts) directory to the front of the user’s shell PATH, so that the environment’s executables are found first.","The ``venv`` module also places ""shell activation scripts"" for POSIX and
+Windows systems in the ``bin`` or ``Scripts`` directory of the
+venv. These scripts simply add the virtual environment's ``bin`` (or
+``Scripts``) directory to the front of the user's shell PATH.  This is
+not strictly necessary for use of a virtual environment (as an explicit
+path to the venv's python binary or scripts can just as well be used),
+but it is convenient.
+
+In order to allow ``pysetup`` and other Python package man",yes,yes,,
+con-d43f6d93,How can a user enable runtime warnings for classic division when running Python?,By using a specific command‑line option that turns on warnings for classic division applied to int or long arguments.,"Run Python with the -Q warn command‑line option (e.g., python -Q warn script.py) to enable DeprecationWarnings for classic division.","The ``-Q`` command line option takes a string argument that can take four
+values: ``old``, ``warn``, ``warnall``, or ``new``.  The default is ``old``
+in Python 2.2 but will change to ``warn`` in later 2.x versions.  The ``old``
+value means the classic division operator acts as described.  The ``warn``
+value means the classic division operator issues a warning (a
+``DeprecationWarning`` using the standard warning framework) when applied
+to ints or longs.  The ``warnall`` value also issues warnings",yes,yes,,
+con-451ef937,What must happen to audit hook objects when the interpreter or runtime is finalizing?,"Audit hook objects must be freed during interpreter or runtime finalization, and they should not be triggered at any other time, raising an event if unexpectedly called.",Audit hook objects must be freed during interpreter or runtime finalization.,"As hooks may be Python objects, they need to be freed during
+interpreter or runtime finalization. These should not be triggered at
+any other time, and should raise an event hook to ensure that any
+unexpected calls are observed.
+
+Below in `Suggested Audit Hook Locations`_, we recommend some important
+operations that should raise audit events. In general, events should be
+raised at the lowest possible level. Given the choice between raising an
+event from Python code or native code, raising from na",yes,yes,,
+con-5a66721c,How does an in-place function indicate whether it actually modified the original object or created a new one?,"It always returns a reference: if the operation was truly in-place it returns the original object, otherwise it returns a new object.","An in‑place function signals whether it actually mutated the original object by the object it returns: it must return a reference to the original object (typically self) if the operation was performed in‑place, or a reference to a newly created object if it had to create a copy.","The in-place function should always return a new reference, either to the
+old ``x`` object if the operation was indeed performed in-place, or to a new
+object.
+
+Rationale
+=========
+
+There are two main reasons for adding this feature to Python: simplicity of
+expression, and support for in-place operations. The end result is a tradeoff
+between simplicity of syntax and simplicity of expression; like most new
+features, augmented assignment doesn't add anything that was previously
+impossible. It merel",yes,yes,,
+con-5af06f41,What content is recommended for the error message file that appears when a user cannot create a virtual environment?,"It should contain a helpful, distribution-specific error message that explains how to install system-wide packages using the distro's package manager and how to set up a virtual environment.","The file should contain a useful, distro‑specific error message that tells the user how to install the package via the system package manager and how to create a virtual environment. For example, it can include a section like:
+
+[externally‑managed]
+Error=To install Python packages system‑wide, try apt install python3‑xyz, where xyz is the package you are trying to install.
+
+If you wish to install a non‑Debian‑packaged Python package, create a virtual environment using `python3 -m venv path/to/venv`. Then use `path/to/venv/bin/python` and `path/to/venv/bin/pip`. Make sure you have `python3‑full` installed.
+
+If you wish to install a non‑Debian packaged Python application, it may be easiest to use `pipx install xyz`, which will manage a virtual environment for you. Make sure you have pipx installed.
+
+Additional optional translations can be provided with keys like `Error-de_DE=…`.","If the installer cannot find an error message in the file (either
+because the file cannot be parsed or because no suitable error key
+exists), then the installer should just use a pre-defined error
+message of its own, which should suggest that the user create a
+virtual environment to install packages.
+
+Software distributors who have a non-Python-specific package manager
+that manages libraries in the ``sys.path`` of their Python package
+should, in general, ship a ``EXTERNALLY-MANAGED`` file in the",yes,yes,,
+per-2b16eaee,Why does the proposal say the problem cannot wait until the next Python release?,Because postponing it would also delay the ports to Cygwin and MacOS X.,"The proposal argues that many projects only become compatible weeks or months after a Python final release, making the new version barely usable for large applications, and that discovering incompatibilities after the final release makes fixing them far more complicated and expensive.","Too many projects are only updated to the new Python after the final
+Python release, which makes this new Python version barely usable to run
+large applications when Python is released.
+
+It is proposed to block a Python release until a compatible version of
+all selected projects is available.
+
+Shorter Python release schedule
+-------------------------------
+
+The :pep:`PEP 602: Annual Release Cycle for Python
+<602>` and the :pep:`PEP 605: A
+rolling feature release stream for CPython
+<605>` would l",no,no,,
+con-9316dea1,Why would adding import‑style syntax to the with statement not solve the issue that this PEP addresses?,"Because such syntax would still prevent contextlib.contextmanager from reliably factoring out with statements, reproducing the same semantic differences as the combined() manager.","Adding import‑style syntax to the with statement would not solve the problem because, although the compiler could emit multiple with statements to mimic nested semantics, it would still not allow contextlib.contextmanager‑based managers to behave reliably; they would exhibit the same semantic differences as the combined context manager example the PEP is trying to fix.","    def __enter__(self):
+      if self.cmA is not None:
+        raise RuntimeError(""Can't re-use this CM"")
+      self.cmA = cmA()
+      self.cmA.__enter__()
+      try:
+        self.cmB = cmB()
+        self.cmB.__enter__()
+      except:
+        if self.cmA.__exit__(*sys.exc_info()):
+          # Suppress the exception, but don't run
+          # the body of the with statement either
+          raise SkipStatement
+        raise
+
+    def __exit__(self, *args):
+      suppress = False
+      try:
+       ",yes,no,,
+hea-393feaae,Which proposal superseded the one titled 'Dependency specification in pyproject.toml based on PEP 508'?,621,PEP 621 superseded the proposal titled 'Dependency specification in pyproject.toml based on PEP 508'.,"# PEP 631: Dependency specification in pyproject.toml based on PEP 508
+
+Status: Superseded; Author: Ofek Lev <ofekmeister@gmail.com>; Created: 20-Aug-2020; Superseded-By: PEP 621.
+
+Abstract
+========
+
+This PEP specifies how to write a project's dependencies in a
+``pyproject.toml`` file for packaging-related tools to consume
+using the :pep:`fields defined in PEP 621 <621#dependencies-optional-dependencies>`.
+
+Entries
+=======
+
+All dependency entries MUST be valid :pep:`PEP 508 strings <508>`.
+
+Buil",yes,yes,,
+per-f46ea87d,How should installation tools handle a situation where a new package tries to install a module that is already supplied by an existing package?,"They should raise an error, refusing to install the conflicting distribution.",Installation tools should treat the conflict as an error: they must report an error when a distribution being installed provides a module that is already supplied by a previously installed distribution (and may also emit a warning).,"``prebuilt`` is a list of script paths, relative to the scripts directory in
+a wheel file or following installation. They are provided for informational
+purpose only - installing them is handled through the normal processes for
+files created when building a distribution.
+
+Build tools SHOULD mark this extension as requiring handling by installers.
+
+Index servers SHOULD allow multiple distributions to publish the same
+commands, but MAY notify distribution authors of potential conflicts.
+
+Installat",yes,yes,,
+con-e1ebe1e1,How does requiring static metadata help clarify when project metadata is intentionally missing?,"Requiring static metadata forces any dynamic metadata to be explicitly declared, so if metadata is absent it is clear that it was intentionally left out rather than being pending dynamic generation.","Requiring static metadata makes the absence of a field unambiguous: if a piece of metadata is allowed to be dynamic, its omission could mean it will be supplied later, but when the PEP mandates that any dynamic metadata must be explicitly declared, a missing field can only be interpreted as intentionally omitted rather than pending dynamic generation.","Requiring the distinction between static and dynamic metadata also
+helps with disambiguation for when metadata isn't specified. When any
+metadata *may* be dynamic, it means you never know if the absence of
+metadata is on purpose or because it is to be provided later. By
+requiring that dynamic metadata be specified, it disambiguates the
+intent when metadata goes unspecified.
+
+This PEP does **not** attempt to standardize all possible metadata
+required by a build back-end, only the metadata covered",yes,yes,,
+per-06b3818d,Who should receive comments and questions about the Python Database API Specification?,They should be directed to the SIG for Database Interfacing with Python at the provided email address.,Comments and questions about the Python Database API Specification should be directed to the SIG for Database Interfacing with Python <db-sig@python.org>.,"# PEP 249: Python Database API Specification v2.0
+
+Status: Final; Author: Marc-André Lemburg <mal@lemburg.com>; Created: 12-Apr-1999; Replaces: PEP 248.
+
+Introduction
+============
+
+This API has been defined to encourage similarity between the Python
+modules that are used to access databases.  By doing this, we hope to
+achieve a consistency leading to more easily understood modules, code
+that is generally more portable across databases, and a broader reach
+of database connectivity from Python.
+
+C",yes,yes,,
+hea-b78e490b,Who wrote the proposal titled 'Simpler customisation of class creation'?,"Alyssa Coghlan <ncoghlan@gmail.com>, Daniel Urban <urban.dani+py@gmail.com>",Alyssa Coghlan and Daniel Urban wrote the proposal titled 'Simpler customisation of class creation'.,"# PEP 422: Simpler customisation of class creation
+
+Status: Withdrawn; Author: Alyssa Coghlan <ncoghlan@gmail.com>, Daniel Urban <urban.dani+py@gmail.com>; Created: 05-Jun-2012.
+
+Abstract
+========
+
+Currently, customising class creation requires the use of a custom metaclass.
+This custom metaclass then persists for the entire lifecycle of the class,
+creating the potential for spurious metaclass conflicts.
+
+This PEP proposes to instead support a wide range of customisation
+scenarios through a new ",yes,yes,,
+con-91d57d04,"According to the document, how is the term ""expression"" defined for decorator grammar?","It is defined as anything that can be used as a test in an if, elif, or while statement.","The document defines ""expression"" for decorator grammar as anything that is valid as a test in `if`, `elif`, and `while` blocks, i.e., the definition from the Python Language Reference.","Throughout this document, the word ""expression"" is used as defined in
+the `Python Language Reference
+<https://docs.python.org/3.9/reference/expressions.html#grammar-token-expression>`_.
+This can be summarized as ""anything that's valid as a test in ``if``,
+``elif``, and ``while`` blocks"".  This differs subtly from a perhaps
+more popular `definition
+<https://docs.python.org/3/glossary.html#term-expression>`_, which can
+be summarized as ""anything that's valid as string input to ``eval``"".
+
+This def",yes,yes,,
+hea-d8577340,What is the status of the proposal titled 'Allow __enter__() methods to skip the statement body'?,Rejected,The proposal titled 'Allow __enter__() methods to skip the statement body' was rejected.,"# PEP 377: Allow __enter__() methods to skip the statement body
+
+Status: Rejected; Author: Alyssa Coghlan <ncoghlan@gmail.com>; Created: 08-Mar-2009.
+
+Abstract
+========
+
+This PEP proposes a backwards compatible mechanism that allows ``__enter__()``
+methods to skip the body of the associated ``with`` statement. The lack of
+this ability currently means the ``contextlib.contextmanager`` decorator
+is unable to fulfil its specification of being able to turn arbitrary
+code into a context manager by mo",yes,yes,,
+con-8860471a,What does the proposal say about handling the new attributes for the KeyError exception?,It notes that adding the new attributes to KeyError may require special care because a common usage pattern already exists.,"The proposal adds optional, keyword‑only attributes to KeyError – specifically a weak‑reference‑compatible `target` and a `key` (or alias `index`). [1]","This issue is also related to the fact that opcodes only have line number
+information and not the offset. This proposal would help in this case but not as
+much as having offsets.
+
+Proposal
+========
+
+Extend the exceptions ``AttributeError``, ``IndexError``, ``KeyError``,
+``LookupError``, ``NameError``, ``TypeError``, and ``ValueError`` with the
+following:
+
+* ``AttributeError``: target :sup:`w`, attribute
+
+* ``IndexError``: target :sup:`w`, key :sup:`w`, index (just an alias to
+  key)
+
+* ``KeyErro",no,no,,
+con-d03c4806,What happens to the macro PY_SSIZE_T_CLEAN according to the specification?,It will be deprecated and the type Py_ssize_t will be assumed for all length arguments.,The specification requires that PY_SSIZE_T_CLEAN be defined before including Python.h when updating PyArg_ParseTuple calls to use the new ssize_t‑based converters.,"If the module should be extended to use Py_ssize_t indices, all usages
+of the type int should be reviewed, to see whether it should be
+changed to Py_ssize_t. The compiler will help in finding the spots,
+but a manual review is still necessary.
+
+Particular care must be taken for PyArg_ParseTuple calls:
+they need all be checked for s# and t# converters, and
+PY_SSIZE_T_CLEAN must be defined before including Python.h
+if the calls have been updated accordingly.
+
+Fredrik Lundh has written a scanner_ wh",no,no,,
+per-e977bcec,How does the system decide which stored credentials to use when it must send a request but does not yet know the authentication realm?,"It looks up credentials by matching the host, port, and request path, allowing hierarchical credential reuse for sub‑paths.","When a request is being sent and the authentication realm is not yet known, the system looks up stored credentials by using the tuple (host, port, path) from the request URL. This path‑based lookup allows it to select appropriate credentials before the server has provided a realm.","A ""protection space"" (see :rfc:`2617`, section 1.2) is defined as a tuple
+of the host, port, and authentication realm. When a request is
+initially sent to an HTTP server, we do not know the authentication
+realm (the realm is only returned when authentication fails). However,
+we do have the path from the URL, and that can be useful in
+determining the credentials to send to the server.  The Basic
+authentication scheme is typically set up hierarchically: the
+credentials for ``/path`` can be tried f",yes,yes,,
+con-0f189315,Why does Python need new time functions that return nanoseconds as integers?,"Because large timestamps, such as those based on the UNIX epoch, can lose precision when represented as floats at nanosecond resolution, so integer-returning variants are required.","Python needs new time functions that return nanoseconds as integers because the float type loses nanosecond precision after about 104 days, making the existing float‑based clocks unsuitable for high‑resolution timing. [1][2]","# PEP 564: Add new time functions with nanosecond resolution
+
+Status: Final; Author: Victor Stinner <vstinner@python.org>; Created: 16-Oct-2017.
+
+Abstract
+========
+
+Add six new ""nanosecond"" variants of existing functions to the ``time``
+module: ``clock_gettime_ns()``, ``clock_settime_ns()``,
+``monotonic_ns()``, ``perf_counter_ns()``, ``process_time_ns()`` and
+``time_ns()``.  While similar to the existing functions without the
+``_ns`` suffix, they provide nanosecond resolution: they return a numb",yes,yes,,
+con-8c14b59c,Why must the PyModuleDef object remain available for the entire lifetime of a module?,"Because the module’s definition data is needed as long as the module exists, so it is typically declared statically to ensure it persists.",The PyModuleDef object must stay available for the whole lifetime of the module because the module’s implementation relies on it for its entire existence; typically it is declared statically to ensure it remains accessible.,"The ``PyModuleDef`` object must be available for the lifetime of the module created
+from it – usually, it will be declared statically.
+
+Pseudo-code Overview
+--------------------
+
+Here is an overview of how the modified importers will operate.
+Details such as logging or handling of errors and invalid states
+are left out, and C code is presented with a concise Python-like syntax.
+
+The framework that calls the importers is explained in
+:pep:`451#how-loading-will-work`.
+
+``importlib/_bootstrap.py``:",yes,yes,,
+per-5181c305,How can a client retrieve the list of alternative PyPI mirrors to use?,The client gets the list of mirrors from the host last.pypi.python.org.,"A client can obtain the list of alternative PyPI mirrors by resolving the hostname last.pypi.python.org, which returns the current last mirror host (e.g., h.pypi.python.org). This mechanism is described as the way clients discover mirrors.","User-agent request header
+:::::::::::::::::::::::::
+
+In order to be able to differentiate actions taken by clients over
+PyPI, a specific user agent name should be provided by all mirroring
+software.
+
+This is also true for all clients like:
+
+- zc.buildout [#zc.buildout]_.
+- setuptools [#setuptools]_.
+- pip [#pip]_.
+
+XXX user agent registering mechanism at PyPI ?
+
+How a client can use PyPI and its mirrors
+:::::::::::::::::::::::::::::::::::::::::
+
+Clients that are browsing PyPI should be able to u",yes,no,,
+con-117d12db,Why does the proposal suggest adding an implicit class decoration hook instead of using the older __metaclass__ approach?,"Because it can provide class‑creation customization that works well with inheritance, super() and mixins while avoiding the compatibility and flexibility issues of the Python 2 __metaclass__ hook.","It reduces the chance of metaclass conflicts, which are a major reason library authors avoid metaclasses. [1]","Understanding Python's metaclasses requires a deep understanding of
+the type system and the class construction process. This is legitimately
+seen as challenging, due to the need to keep multiple moving parts (the code,
+the metaclass hint, the actual metaclass, the class object, instances of the
+class object) clearly distinct in your mind. Even when you know the rules,
+it's still easy to make a mistake if you're not being extremely careful.
+An earlier version of this PEP actually included such a ",partial,no,,
+con-b527d9be,In which parts of a try statement can a generator safely use the yield expression?,"Yield can appear in finally clauses, except clauses, and in the try block of a try/except construct, but it is not allowed in the try block of a try/finally construct.","A generator can safely use a yield expression in the body of a try block, in any except block, and, since PEP 342, also inside a finally block of a try‑finally statement.","    # Today this is not valid Python: yield is not allowed between
+    # try and finally, and generator type instances support no
+    # close method.
+
+    def all_lines(index_path):
+        index = file(index_path, ""r"")
+        try:
+            for path in index:
+                document = file(path.strip(), ""r"")
+            try:
+                for line in document:
+                    yield line
+            finally:
+                document.close()
+        finally:
+            index.close()
+
+ ",partial,yes,,
+con-36f903bd,"When executing a git fetch command from a subdirectory, what relative path should be used to refer to the target project directory?","Use ""../project-v1"" as the path, not ""../../project-v1"".","Use ""../project-v1"" as the relative path when running the git fetch command from a subdirectory.","Please note the path in ``git fetch ../project-v1 v1:v1`` is
+``../project-v1`` and not ``../../project-v1`` despite the fact that
+we run the commands from a subdirectory, not from the root.
+
+ReReRe
+------
+
+Rerere is a mechanism that helps to resolve repeated merge conflicts.
+The most frequent source of recurring merge conflicts are topic
+branches that are merged into mainline and then the merge commits are
+removed; that's often performed to test the topic branches and train
+rerere; merge commits",yes,yes,,
+hea-e1f0cdb8,Which proposal superseded the one titled 'Suppressing exception context'?,415,PEP 415 superseded the proposal titled 'Suppressing exception context'.,"# PEP 409: Suppressing exception context
+
+Status: Final; Author: Ethan Furman <ethan@stoneleaf.us>; Created: 26-Jan-2012; Superseded-By: PEP 415.
+
+Abstract
+========
+
+One of the open issues from :pep:`3134` is suppressing context:  currently
+there is no way to do it.  This PEP proposes one.
+
+Rationale
+=========
+
+There are two basic ways to generate exceptions:
+
+1) Python does it (buggy code, missing resources, ending loops, etc.)
+
+2) manually (with a raise statement)
+
+When writing libraries, or e",yes,yes,,
+con-b4ea56e1,Why does the implementation use a 64-bit unsigned type for the dictionary version even on 32-bit systems?,"Because using a 32-bit version would overflow after only about 4 seconds of continuous modifications, making guard checks unreliable, whereas a 64-bit version would take centuries to overflow.","The implementation uses a 64‑bit unsigned integer for the dictionary version even on 32‑bit systems because a 64‑bit counter would take an extremely long time to overflow (over 584 years at a modification rate of one per nanosecond), making the risk of overflow‑related bugs negligible, whereas a 32‑bit counter would overflow in only a few seconds.","When the version does not change, ``PyDict_GetItem()`` takes 14.8 ns for
+a dictionary lookup, whereas a guard check only takes 3.8 ns. Moreover,
+a guard can watch for multiple keys. For example, for an optimization
+using 10 global variables in a function, 10 dictionary lookups costs 148
+ns, whereas the guard still only costs 3.8 ns when the version does not
+change (39x as fast).
+
+The `fat module
+<http://fatoptimizer.readthedocs.org/en/latest/fat.html>`_ implements
+such guards: ``fat.GuardDict`` ",yes,no,,
+con-0f3820a0,Why do explicit relative imports fail when a module is executed as the main program?,"Because the module’s __name__ is set to '__main__' when run as a script, and relative imports need the module’s package name to resolve the import hierarchy.","When a module is run as the main program (using the -m switch), the import machinery treats the module as top‑level and does not have a package context, so an explicit relative import (e.g., starting with a dot) cannot be resolved and raises an ImportError such as “Attempted relative import beyond top level package”. This is because the calculation of the module’s qualified name and the insertion of the appropriate path entry rely on package information that is missing for a main module.","    # -m switch (permitting explicit relative imports)
+    in_package, path_entry, pkg_name = split_path_module(os.getcwd(), '')
+    qualname= <<arguments to -m switch>>
+    if qualname.startswith('.'):
+        modname = qualname
+        while modname.startswith('.'):
+            modname = modname[1:]
+            pkg_name, sep, _ignored = pkg_name.rpartition('.')
+            if not sep:
+                raise ImportError(""Attempted relative import beyond top level package"")
+        qualname = pkg",yes,no,,
+hea-8fc310d3,Which proposal superseded the one titled 'Time zone support improvements'?,615,PEP 615 superseded the 'Time zone support improvements' proposal.,"# PEP 431: Time zone support improvements
+
+Status: Superseded; Author: Lennart Regebro <regebro@gmail.com>; Created: 11-Dec-2012; Superseded-By: PEP 615.
+
+Abstract
+========
+
+This PEP proposes the implementation of concrete time zone support in the
+Python standard library, and also improvements to the time zone API to deal
+with ambiguous time specifications during DST changes.
+
+Withdrawal
+==========
+
+After lengthy discussion it has turned out that the things I thought was
+problem in datetime's im",yes,yes,,
+per-efbe920e,Why are functions that take a FILE* argument excluded from the stable ABI?,Because including them would tie the ABI to a particular version of the Microsoft C runtime DLL on Windows.,Functions that take a FILE* argument are excluded from the stable ABI to avoid depending on a specific version of the Microsoft C runtime DLL on Windows.,"If continued provision of the old function is not possible, it may get
+deprecated, then removed, causing
+applications that use that function to break.
+
+Excluded Functions
+------------------
+
+All functions starting with _Py are not available to applications.
+Also, all functions that expect parameter types that are unavailable
+to applications are excluded from the ABI, such as PyAST_FromNode
+(which expects a ``node*``).
+
+Functions declared in the following header files are not part
+of the ABI:
+
+- ",yes,no,,
+per-5eb8e408,"What is the name pattern of the file that, if present, is used to initialize sys.path for the interpreter?","A file that shares the full path of the executable and has a ._pth suffix (e.g., spython._pth on Windows or spythonX.Y._pth on Linux) is used to set up sys.path.",The file is named ``python._pth``.,"* If ``isolated`` is non-zero, ``use_environment`` and
+  ``user_site_directory`` are set to 0.
+* If ``dev_mode`` is non-zero, ``allocator`` is set to ``""debug""``,
+  ``faulthandler`` is set to 1, and ``""default""`` filter is added to
+  ``warnoptions``. But the ``PYTHONMALLOC`` environment variable has the
+  priority over ``dev_mode`` to set the memory allocator.
+* If ``base_prefix`` is not set, it inherits ``prefix`` value.
+* If ``base_exec_prefix`` is not set, it inherits ``exec_prefix`` value.
+*",no,no,,
+con-b8d1a976,What does the passage say about the role of dictionary values in lookup operations for the key‑transforming dictionary?,"Dictionary values are irrelevant to lookup; they are not used for finding keys, so keeping both original and transformed values would be pointless.","The passage states that dictionary values are not used for lookup and are irrelevant to the container's operation, so there is no need to store both original and transformed values.","Providing a transformation function for values
+----------------------------------------------
+
+Dictionary values are not used for lookup, their semantics are totally
+irrelevant to the container's operation.  Therefore, there is no point in
+having both an ""original"" and a ""transformed"" value: the transformed
+value wouldn't be used for anything.
+
+Providing a specialized container, not generic
+----------------------------------------------
+
+It was asked why we would provide the generic TransformDic",yes,yes,,
+con-787d13cc,"Why was the name ""[build-system]"" chosen for the table instead of the shorter ""[build]""?","Because the shorter name did not clearly express what information the table holds, whereas ""[build-system]"" better conveys its purpose.","The shorter name ""[build]"" was rejected because it did not convey as clearly the intention of the information stored in the table, and after a vote on the distutils‑sig mailing list the longer name ""[build-system]"" was chosen instead.","Other table names
+-----------------
+
+Another name proposed for the ``[build-system]`` table was
+``[build]``. The alternative name is shorter, but doesn't convey as
+much of the intention of what information is stored in the table. After
+a vote on the distutils-sig mailing list, the current name won out.
+
+Other file formats
+------------------
+
+Several other file formats were put forward for consideration, all
+rejected for various reasons. Key requirements were that the format
+be editable by human ",partial,yes,,

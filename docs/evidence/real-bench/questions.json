@@ -1,0 +1,2754 @@
+[
+ {
+  "id": "con-fcb6992e",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why might an author receive a non\u2011sequential PEP number instead of the next available one?",
+  "gold_peps": [
+   1
+  ],
+  "expected": "answer",
+  "gold_quote": "but sometimes it's a special/joke number, like 666 or 3141",
+  "gold_answer": "Because occasionally a special or joke number is chosen for the PEP.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-286e8e7d",
+  "kind": "content",
+  "asker": "alice",
+  "text": "When naming a function, what should you use instead of assigning a lambda expression directly to an identifier?",
+  "gold_peps": [
+   8
+  ],
+  "expected": "answer",
+  "gold_quote": "Always use a def statement instead of an assignment statement that binds a lambda expression directly to an identifier:",
+  "gold_answer": "You should use a def statement to define the function rather than binding a lambda directly to a name.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-6f57053e",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How should an author name the new reStructuredText file when creating a PEP using this template?",
+  "gold_peps": [
+   12
+  ],
+  "expected": "answer",
+  "gold_quote": "Make a copy of this file (the ``.rst`` file, **not** the HTML!) and perform the following edits. Name the new file :file:`pep-{NNNN}.rst`, using the next available number (not used by a published or in-PR PEP).",
+  "gold_answer": "The author should copy the .rst file and name it pep-{NNNN}.rst, using the next available number and padding the filename with zeros (e.g., pep-0012.rst).",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-5fa8f7d0",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the proposal recommend using UTF-8 rather than UTF-16 for certain encodings?",
+  "gold_peps": [
+   100
+  ],
+  "expected": "answer",
+  "gold_quote": "Using UTF-8 instead of UTF-16 has the advantage of eliminating the need to store a BOM mark.",
+  "gold_answer": "Because UTF-8 avoids the need to store a byte order mark, simplifying the data representation.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-36f903bd",
+  "kind": "content",
+  "asker": "alice",
+  "text": "When executing a git fetch command from a subdirectory, what relative path should be used to refer to the target project directory?",
+  "gold_peps": [
+   103
+  ],
+  "expected": "answer",
+  "gold_quote": "Please note the path in ``git fetch ../project-v1 v1:v1`` is ``../project-v1`` and not ``../../project-v1`` despite the fact that we run the commands from a subdirectory, not from the root.",
+  "gold_answer": "Use \"../project-v1\" as the path, not \"../../project-v1\".",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-5a66721c",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does an in-place function indicate whether it actually modified the original object or created a new one?",
+  "gold_peps": [
+   203
+  ],
+  "expected": "answer",
+  "gold_quote": "The in-place function should always return a new reference, either to the old ``x`` object if the operation was indeed performed in-place, or to a new object.",
+  "gold_answer": "It always returns a reference: if the operation was truly in-place it returns the original object, otherwise it returns a new object.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-c9781fcd",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the existing Python object comparison protocol not work well for NumPy array comparisons?",
+  "gold_peps": [
+   207
+  ],
+  "expected": "answer",
+  "gold_quote": "they cannot be compared in the current framework - the released version of NumPy compares the pointers, (thus yielding junk information) which was the only solution before the recent addition of the ability (in 1.5) to raise exceptions in comparison functions.",
+  "gold_answer": "Because the protocol only returns -1, 0, or 1 and, for arrays, ends up comparing memory addresses, producing meaningless results, so element\u2011wise comparisons become useless.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-9766b11c",
+  "kind": "content",
+  "asker": "alice",
+  "text": "When using the proposed '@' operator for outer product iteration, what form should the resulting tuples have?",
+  "gold_peps": [
+   211
+  ],
+  "expected": "answer",
+  "gold_quote": "would have to return ``(1, 3, 5) ... (2, 4, 6)``, and *not* ``((1, 3), 5) ... ((2, 4), 6)``.",
+  "gold_answer": "The outer iterator should produce flat tuples like (1, 3, 5) rather than nested tuples such as ((1, 3), 5).",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-2f58207f",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the built\u2011in set type let you perform common set operations using operators?",
+  "gold_peps": [
+   218
+  ],
+  "expected": "answer",
+  "gold_quote": "``|``          union\n``&``          intersection\n``^``          symmetric difference\n``-``          asymmetric difference\n``== !=``      equality and inequality tests\n``< <= >= >``  subset and superset tests",
+  "gold_answer": "It overloads standard symbols: \u2018|\u2019 for union, \u2018&\u2019 for intersection, \u2018^\u2019 for symmetric difference, \u2018-\u2019 for asymmetric difference, and comparison operators for equality and subset tests.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-c2ef511a",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why do some people consider elementwise operators to be more natural?",
+  "gold_peps": [
+   225
+  ],
+  "expected": "answer",
+  "gold_quote": "Perception that elementwise operations are more natural.",
+  "gold_answer": "Because there is a perception that elementwise operations feel more natural to users.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-7e04c8df",
+  "kind": "content",
+  "asker": "alice",
+  "text": "When the attribute name passed to __findattr__ is 'aq_base', what value does the method return?",
+  "gold_peps": [
+   231
+  ],
+  "expected": "answer",
+  "gold_quote": "elif name == 'aq_base':\n                base = self.__contained\n                try:\n                    while 1:\n                        base = base.aq_self\n                except AttributeError:\n                    return base",
+  "gold_answer": "It returns the ultimate base object by repeatedly following the aq_self attribute until an AttributeError occurs.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-d43f6d93",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How can a user enable runtime warnings for classic division when running Python?",
+  "gold_peps": [
+   238
+  ],
+  "expected": "answer",
+  "gold_quote": "A command line option will enable run-time warnings for classic division applied to int or long arguments; another command line option will make true division the default.",
+  "gold_answer": "By using a specific command\u2011line option that turns on warnings for classic division applied to int or long arguments.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-624f385e",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the upload client need to use the same multipart/form-data page format as an old Netscape Navigator when uploading a file?",
+  "gold_peps": [
+   243
+  ],
+  "expected": "answer",
+  "gold_quote": "<FORM NAME=\"fileupload\" METHOD=\"POST\" ACTION=\"pypi\" ENCTYPE=\"multipart/form-data\">",
+  "gold_answer": "Because the server expects the upload request to match the exact form layout used by Netscape Navigator 4.76 for Linux, ensuring compatibility with its processing logic.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-ed1dadb2",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What does calling adapt on an instance of C with protocol B return?",
+  "gold_peps": [
+   246
+  ],
+  "expected": "answer",
+  "gold_quote": "c is adapt(c, B)   # case (b)\nTrue",
+  "gold_answer": "It returns the original C instance itself.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-b527d9be",
+  "kind": "content",
+  "asker": "alice",
+  "text": "In which parts of a try statement can a generator safely use the yield expression?",
+  "gold_peps": [
+   255
+  ],
+  "expected": "answer",
+  "gold_quote": "There is no restriction on ``yield`` otherwise appearing in ``finally`` clauses, ``except`` clauses, or in the ``try`` clause of a ``try/except`` construct::",
+  "gold_answer": "Yield can appear in finally clauses, except clauses, and in the try block of a try/except construct, but it is not allowed in the try block of a try/finally construct.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-48e27aa3",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the design propose keeping the styling component small and modular?",
+  "gold_peps": [
+   258
+  ],
+  "expected": "answer",
+  "gold_quote": "By keeping the piece of code that does the styling small and modular, it becomes much easier for people to roll their own styles.",
+  "gold_answer": "Because a small, modular stylist makes it easier for users to create their own styles, lowering the barrier to entry.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-a0d49f38",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What modification was introduced in version 1.8 concerning the coding regular expression?",
+  "gold_peps": [
+   263
+  ],
+  "expected": "answer",
+  "gold_quote": "1.8: Added '.' to the coding RE.",
+  "gold_answer": "Version 1.8 added a period character to the coding regular expression.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-593c103a",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How can a switch statement be extended to match several constants with a single case?",
+  "gold_peps": [
+   275
+  ],
+  "expected": "answer",
+  "gold_quote": "The switch statement could be extended to allow multiple values for one section (e.g. case 'a', 'b', 'c': ...).",
+  "gold_answer": "By allowing a case label to list multiple values separated by commas, so one case can handle all of those constants.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-bba439dd",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why was the originally proposed iterzip() function not added as a built-in?",
+  "gold_peps": [
+   279
+  ],
+  "expected": "answer",
+  "gold_quote": "That was subsequently implemented as the ``izip()`` function in the ``itertools`` module.",
+  "gold_answer": "Because it was later provided as the izip() function in the itertools module instead of a built-in.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-987c54ea",
+  "kind": "content",
+  "asker": "alice",
+  "text": "In the proposed integer for-loop syntax, what restriction is placed on the two comparison operators used in the loop header?",
+  "gold_peps": [
+   284
+  ],
+  "expected": "answer",
+  "gold_quote": "The two comp_operators in a for_test must be required to be both of similar types, unlike chained comparisons in expressions which do not have such a restriction.",
+  "gold_answer": "Both comparison operators must be of the same kind (both less-than style or both greater-than style).",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-98058654",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does Python evaluate the first (outermost) for-expression in a generator expression compared to the other parts?",
+  "gold_peps": [
+   289
+  ],
+  "expected": "answer",
+  "gold_quote": "After much discussion, it was decided that the first (outermost) for-expression should be evaluated immediately and that the remaining expressions be evaluated when the generator is executed.",
+  "gold_answer": "The outermost for-expression is evaluated right away, while the rest of the generator's expressions are deferred until the generator is actually executed.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-0bbe5975",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the proposal suggest passing each divisor as a separate argument to divmod() instead of using a single sequence argument?",
+  "gold_peps": [
+   303
+  ],
+  "expected": "answer",
+  "gold_quote": "This is mainly because it is expected that the most common uses will have the divisors as constants right in the call (as the 7, 24, 60, 60 above), and adding a set of parentheses or brackets would just clutter the call.",
+  "gold_answer": "Because the most common use case involves constant divisors written directly in the call, and using a sequence would add unnecessary parentheses or brackets, making the call more cluttered.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-58ddba72",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What is the new name of the argument that used to be called 'bin' for selecting the pickle protocol?",
+  "gold_peps": [
+   307
+  ],
+  "expected": "answer",
+  "gold_quote": "Several functions, methods and constructors used for pickling used to take a positional argument named 'bin' which was a flag, defaulting to 0, indicating binary mode.  This argument is renamed to 'protocol' and now gives the protocol number, still defaulting to 0.",
+  "gold_answer": "The argument is now named 'protocol'.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-9651515e",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does a KeyboardInterrupt that occurs after the __enter__ method finishes but before the try block starts affect the execution of the __exit__ method?",
+  "gold_peps": [
+   310
+  ],
+  "expected": "answer",
+  "gold_quote": "if a ``KeyboardInterrupt`` exception is raised between the completion of the ``__enter__`` method call and the start of the try block, the ``__exit__`` method will not be called.",
+  "gold_answer": "If a KeyboardInterrupt is raised in that window, the __exit__ method will not be called, potentially causing resource leaks or deadlocks.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-4503ea29",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why are the warnings about raise statements removed in Python 3.0?",
+  "gold_peps": [
+   317
+  ],
+  "expected": "answer",
+  "gold_quote": "These warnings are to appear in Python 2.4, and disappear in Python 3.0, when the conditions which cause them are simply errors.",
+  "gold_answer": "Because the situations that triggered those warnings become outright errors in Python 3.0, so the warnings are no longer needed.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-9747df98",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Which two standard library modules are slated for pending deprecation according to the schedule?",
+  "gold_peps": [
+   320
+  ],
+  "expected": "answer",
+  "gold_quote": "Use pending deprecation for the ``types`` and ``string`` modules.",
+  "gold_answer": "The\u202ftypes\u202fmodule and the\u202fstring\u202fmodule are the ones marked for pending deprecation.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-61b76cb7",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How do leading dots indicate the level of a relative import in Python?",
+  "gold_peps": [
+   328
+  ],
+  "expected": "answer",
+  "gold_quote": "A single leading dot indicates a relative import, starting with the current package.  Two or more leading dots give a relative import to the parent(s) of the current package, one level per dot after the first.",
+  "gold_answer": "A single leading dot means import from the current package, while each additional dot after the first moves one level up to a parent package.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-0f3820a0",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why do explicit relative imports fail when a module is executed as the main program?",
+  "gold_peps": [
+   338
+  ],
+  "expected": "answer",
+  "gold_quote": "In a main module, the value of ``__name__`` is always ``'__main__'``, so explicit relative imports will always fail (as they only work for a module inside a package).",
+  "gold_answer": "Because the module\u2019s __name__ is set to '__main__' when run as a script, and relative imports need the module\u2019s package name to resolve the import hierarchy.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-4df3a25b",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What value does a yield-expression evaluate to when it is used on the right-hand side of an assignment and no non-None argument was sent to it?",
+  "gold_peps": [
+   342
+  ],
+  "expected": "answer",
+  "gold_quote": "The value of this yield-expression is ``None`` unless ``send()`` was called with a non-``None`` argument; see below.",
+  "gold_answer": "It evaluates to None.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-9035031c",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does a distribution specify that it makes another distribution obsolete, preventing them from being installed together?",
+  "gold_peps": [
+   345
+  ],
+  "expected": "answer",
+  "gold_quote": "Each entry contains a string describing a distutils project's distribution which this distribution renders obsolete, meaning that the two projects should not be installed at the same time.",
+  "gold_answer": "It includes an entry listing the other distribution that it renders obsolete, indicating the two should not be installed at the same time.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-f9a78392",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the proposal introduce a new signed index type for Python containers?",
+  "gold_peps": [
+   353
+  ],
+  "expected": "answer",
+  "gold_quote": "A new type Py_ssize_t is introduced, which has the same size as the compiler's size_t type, but is signed.",
+  "gold_answer": "Because a signed type the same size as size_t (Py_ssize_t) is needed to represent container sizes and indices, especially on 64\u2011bit machines where existing types are insufficient.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-650917b6",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What new utilities are added to the functools module to assist writing wrapper functions?",
+  "gold_peps": [
+   356
+  ],
+  "expected": "answer",
+  "gold_quote": "New utilities in ``functools`` to help write wrapper functions that support naive introspection (e.g. having ``f.__name__`` return the original function name).",
+  "gold_answer": "Utilities are added to functools that help write wrapper functions supporting naive introspection, such as making f.__name__ return the original function name.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-c8505e08",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the ordered dictionary determine the position of a key when it is added or overwritten?",
+  "gold_peps": [
+   372
+  ],
+  "expected": "answer",
+  "gold_quote": "New keys are appended at the end, but keys that are overwritten are not moved to the end.",
+  "gold_answer": "New keys are appended to the end, while overwriting an existing key does not change its position in the order.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-9316dea1",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why would adding import\u2011style syntax to the with statement not solve the issue that this PEP addresses?",
+  "gold_peps": [
+   377
+  ],
+  "expected": "answer",
+  "gold_quote": "However, such a change would highlight rather than alleviate the problem the current PEP aims to address: it would not be possible to use ``contextlib.contextmanager`` to reliably factor out such ``with`` statements, as they would exhibit exactly the same semantic differences as are seen with the ``combined()`` context manager in the above example.",
+  "gold_answer": "Because such syntax would still prevent contextlib.contextmanager from reliably factoring out with statements, reproducing the same semantic differences as the combined() manager.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-6686897c",
+  "kind": "content",
+  "asker": "alice",
+  "text": "According to the compatibility policy, how many years should you preferably wait before removing a feature after it starts issuing a warning?",
+  "gold_peps": [
+   387
+  ],
+  "expected": "answer",
+  "gold_quote": "It is preferred, though, to wait 5 years before removal (e.g., warn starting in Python 3.10, removal in 3.15; this happens to coincide with the current lifetime of a minor release of Python).",
+  "gold_answer": "The policy prefers waiting five years before removal, such as warning in Python 3.10 and removing in Python 3.15.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-f5a26c25",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the configuration indicate whether existing loggers should be turned off when loading a logging setup?",
+  "gold_peps": [
+   391
+  ],
+  "expected": "answer",
+  "gold_quote": "If absent, this parameter defaults to ``True``. This value is ignored if ``incremental`` is ``True``.",
+  "gold_answer": "If the key 'disable_existing_loggers' is omitted, it defaults to True, meaning existing loggers are disabled unless incremental configuration is being used.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-511a7e8c",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does this proposal suggest removing the implicit relative imports that currently work for main modules via sys.path[0]?",
+  "gold_peps": [
+   395
+  ],
+  "expected": "answer",
+  "gold_quote": "This PEP proposes that the de facto implicit relative imports from main modules that are provided by the current initialisation behaviour for ``sys.path[0]`` also be eliminated.",
+  "gold_answer": "Because it aims to eliminate the de facto implicit relative imports from main modules, aligning with the removal of implicit relative imports elsewhere.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-53a0ab72",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What naming convention must an acceleration module follow relative to the pure Python module it speeds up?",
+  "gold_peps": [
+   399
+  ],
+  "expected": "answer",
+  "gold_quote": "If an acceleration module is provided it is to be named the same as the module it is accelerating with an underscore attached as a prefix, e.g., ``_warnings`` for ``warnings``.",
+  "gold_answer": "The acceleration module must be named exactly like the pure Python module but with a leading underscore.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-e4292e26",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the activation script for a virtual environment make the environment use the venv's executables?",
+  "gold_peps": [
+   405
+  ],
+  "expected": "answer",
+  "gold_quote": "These scripts simply add the virtual environment's ``bin`` (or ``Scripts``) directory to the front of the user's shell PATH.",
+  "gold_answer": "It prepends the virtual environment\u2019s bin (or Scripts) directory to the beginning of the user\u2019s shell PATH, so the venv\u2019s executables are found first.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-dc37d91a",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the language need a different default value for __cause__ to support 'raise ... from None'?",
+  "gold_peps": [
+   409
+  ],
+  "expected": "answer",
+  "gold_quote": "Currently, ``None`` is the default for both ``__context__`` and ``__cause__``. In order to support ``raise ... from None`` (which would set ``__cause__`` to ``None``) we need a different default value for ``__cause__``.",
+  "gold_answer": "Because __cause__ currently defaults to None, which would be indistinguishable from an explicit 'from None' clause, so a separate default (e.g., False) is required to tell them apart.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-c4cf2925",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What happens to third\u2011party modules that modify the internal implementation of dictionaries?",
+  "gold_peps": [
+   412
+  ],
+  "expected": "answer",
+  "gold_quote": "Third party modules which meddle with the internals of the dictionary implementation will break.",
+  "gold_answer": "They will break because such modules are already considered broken and should use the public API instead.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-defa2535",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the built\u2011in dictproxy type behave when the underlying dictionary is changed?",
+  "gold_peps": [
+   416
+  ],
+  "expected": "answer",
+  "gold_quote": "If a dictionary is modified, the dictproxy is also modified.",
+  "gold_answer": "dictproxy reflects changes to the original dictionary, so modifying the dictionary also updates the dictproxy view.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-117d12db",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the proposal suggest adding an implicit class decoration hook instead of using the older __metaclass__ approach?",
+  "gold_peps": [
+   422
+  ],
+  "expected": "answer",
+  "gold_quote": "Restores the ability for class namespaces to have some influence on the class creation process (above and beyond populating the namespace itself), but potentially without the full flexibility of the Python 2 style ``__metaclass__`` hook",
+  "gold_answer": "Because it can provide class\u2011creation customization that works well with inheritance, super() and mixins while avoiding the compatibility and flexibility issues of the Python\u00a02 __metaclass__ hook.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-15a02a36",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What is a wheel installer required to do with the hashes listed in the RECORD file?",
+  "gold_peps": [
+   427
+  ],
+  "expected": "answer",
+  "gold_quote": "A wheel installer is not required to understand digital signatures but MUST verify the hashes in RECORD against the extracted file contents.",
+  "gold_answer": "It must verify that the hashes in RECORD match the contents of the extracted files.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-126b6fed",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How is daylight\u2011saving\u2011time (is_dst) support provided for static time zones?",
+  "gold_peps": [
+   431
+  ],
+  "expected": "answer",
+  "gold_quote": "The class ``pytz.StaticTzInfo`` is there to provide the ``is_dst`` support for static time zones. When ``is_dst`` support is included in ``datetime.tzinfo`` it is no longer needed.",
+  "gold_answer": "It is supplied by the class\u202fpytz.StaticTzInfo, but once datetime.tzinfo includes is_dst support, that class is unnecessary.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-b1c8ca73",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why was a second patch needed after the context\u2011menu changes were made?",
+  "gold_peps": [
+   434
+  ],
+  "expected": "answer",
+  "gold_quote": "extensions that added items to the context menu (rare) would be broken because the patch a) added a new item to standard rmenu_specs and b) expected every rmenu_spec to be lengthened.",
+  "gold_answer": "Because the first patch added a new item to the standard menu specifications and assumed every specification would be lengthened, which would break extensions that add their own menu items.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-d03c4806",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What happens to the macro PY_SSIZE_T_CLEAN according to the specification?",
+  "gold_peps": [
+   437
+  ],
+  "expected": "answer",
+  "gold_quote": "In order to keep the converter complexity manageable, PY_SSIZE_T_CLEAN will be deprecated and Py_ssize_t will be assumed for all length arguments.",
+  "gold_answer": "It will be deprecated and the type Py_ssize_t will be assumed for all length arguments.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-a619ff75",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the automatic mirror discovery mechanism choose a PyPI mirror for a client?",
+  "gold_peps": [
+   449
+  ],
+  "expected": "answer",
+  "gold_quote": "The auto discovery protocol was designed to enable a client to automatically select a mirror for use.",
+  "gold_answer": "It uses an unauthenticated DNS\u2011based protocol that lets the client automatically select a mirror, but this approach is insecure and no longer needed because the CDN now picks a nearby server automatically.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-cb07d4d2",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does version 2.0 require the 'string' and 'key' arguments to be bytes-like objects?",
+  "gold_peps": [
+   452
+  ],
+  "expected": "answer",
+  "gold_quote": "Version 2.0 takes the separation of binary and text data in Python 3.0 into account. The 'string' argument to ``new()`` and ``update()`` as well as the 'key' argument must be bytes-like objects.",
+  "gold_answer": "Because version 2.0 was updated to reflect Python 3.0's separation of binary and text data, so these arguments must be binary data.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-b8d1a976",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What does the passage say about the role of dictionary values in lookup operations for the key\u2011transforming dictionary?",
+  "gold_peps": [
+   455
+  ],
+  "expected": "answer",
+  "gold_quote": "Dictionary values are not used for lookup, their semantics are totally irrelevant to the container's operation.",
+  "gold_answer": "Dictionary values are irrelevant to lookup; they are not used for finding keys, so keeping both original and transformed values would be pointless.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-41526fee",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why will projects that are currently hosted only on PyPI be automatically switched to the PyPI\u2011only mode after a month?",
+  "gold_peps": [
+   470
+  ],
+  "expected": "answer",
+  "gold_quote": "A month after these emails have been sent any of those projects which were emailed, which still are hosted only on PyPI will have their mode set permanently to ``pypi-only``.",
+  "gold_answer": "Because once they are notified, any project still hosting solely on PyPI will have its mode permanently set to pypi\u2011only to enforce the new default.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-8860471a",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What does the proposal say about handling the new attributes for the KeyError exception?",
+  "gold_peps": [
+   473
+  ],
+  "expected": "answer",
+  "gold_quote": "However, it may need special care for ``KeyError`` as the following pattern is already widespread.",
+  "gold_answer": "It notes that adding the new attributes to KeyError may require special care because a common usage pattern already exists.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-c4ced987",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How can a system administrator temporarily turn off HTTPS certificate verification for all Python code without modifying each application?",
+  "gold_peps": [
+   476
+  ],
+  "expected": "answer",
+  "gold_quote": "ssl._create_default_https_context = _create_unverified_https_context",
+  "gold_answer": "By monkey\u2011patching the ssl module to replace the default HTTPS context creator with an unverified one, for example in sitecustomize.py.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-8c14b59c",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why must the PyModuleDef object remain available for the entire lifetime of a module?",
+  "gold_peps": [
+   489
+  ],
+  "expected": "answer",
+  "gold_quote": "The ``PyModuleDef`` object must be available for the lifetime of the module created from it \u2013 usually, it will be declared statically.",
+  "gold_answer": "Because the module\u2019s definition data is needed as long as the module exists, so it is typically declared statically to ensure it persists.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-d6ef0d27",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Which Python version is described as the most compatible interpreter for the variety of division-related code after the true division change?",
+  "gold_peps": [
+   497
+  ],
+  "expected": "answer",
+  "gold_quote": "the \"most compatible\" interpreter with respect to the variety of division-related Python code in the wild is Python 2.7, the version before the breaking change was first enforced.",
+  "gold_answer": "Python 2.7 is identified as the most compatible interpreter for division-related code.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-5896f409",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the proposal suggest providing safe POSIX shell escaping for interpolated values in template literals?",
+  "gold_peps": [
+   501
+  ],
+  "expected": "answer",
+  "gold_quote": "As a reference implementation, a renderer for safe POSIX shell escaping can be added to the :mod:`shlex` module. This renderer would be called ``sh`` and would be equivalent to calling ``shlex.quote`` on each field value in the template literal.",
+  "gold_answer": "It proposes adding a renderer named ``sh`` to the ``shlex`` module that automatically applies ``shlex.quote`` to each interpolated field value.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-b4ea56e1",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the implementation use a 64-bit unsigned type for the dictionary version even on 32-bit systems?",
+  "gold_peps": [
+   509
+  ],
+  "expected": "answer",
+  "gold_quote": "That's why a 64-bit unsigned type is also used on 32-bit systems. A dictionary lookup at the C level takes 14.8 ns.",
+  "gold_answer": "Because using a 32-bit version would overflow after only about 4 seconds of continuous modifications, making guard checks unreliable, whereas a 64-bit version would take centuries to overflow.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-9c1039b1",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Where will the new bot that showcases asynchronous programming be hosted?",
+  "gold_peps": [
+   512
+  ],
+  "expected": "answer",
+  "gold_quote": "As no pre-existing bot exists to meet our needs, it will be hosted on Heroku [#heroku]_ and written to target Python 3.5 to act as a showcase for asynchronous programming.",
+  "gold_answer": "It will be hosted on Heroku.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-a59edf51",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the PEP restrict the placement of consecutive underscores in numeric literals?",
+  "gold_peps": [
+   515
+  ],
+  "expected": "answer",
+  "gold_quote": "* Multiple consecutive underscores allowed, but only between digits.",
+  "gold_answer": "It allows multiple consecutive underscores, but only when they appear between digits.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-787d13cc",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why was the name \"[build-system]\" chosen for the table instead of the shorter \"[build]\"?",
+  "gold_peps": [
+   518
+  ],
+  "expected": "answer",
+  "gold_quote": "The alternative name is shorter, but doesn't convey as much of the intention of what information is stored in the table.",
+  "gold_answer": "Because the shorter name did not clearly express what information the table holds, whereas \"[build-system]\" better conveys its purpose.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-f98b10e1",
+  "kind": "content",
+  "asker": "alice",
+  "text": "When iterating a generator inside a loop, which context manager should be applied around each call to next() to ensure warnings are handled correctly?",
+  "gold_peps": [
+   521
+  ],
+  "expected": "answer",
+  "gold_quote": "while True:\n          with warnings.catch_warnings():\n              try:\n                  x = next(it)",
+  "gold_answer": "The warnings.catch_warnings() context manager should be used around each next() call.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-71fb9a17",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How can a program choose a different handling strategy when obtaining random bytes might block on Linux?",
+  "gold_peps": [
+   524
+  ],
+  "expected": "answer",
+  "gold_quote": "Add also a new ``os.getrandom()`` function (for Linux and Solaris) to be able to choose how to handle when ``os.urandom()`` is going to block on Linux.",
+  "gold_answer": "By using the newly added os.getrandom() function, which lets the caller specify how to behave when os.urandom() would block.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-d7ab743b",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why would you use existence checking operators when you expect a None or other non\u2011existent value as input?",
+  "gold_peps": [
+   531
+  ],
+  "expected": "answer",
+  "gold_quote": "if ``None`` or another \"non-existent\" value is an expected input, and the correct handling is to propagate that to the result, then the existence checking operators are likely what you want",
+  "gold_answer": "Because they automatically propagate such values to the result and can short\u2011circuit the expression, making them the appropriate choice for handling missing data.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-5d03aae6",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What effect does setting the environment variable PYTHONCOERCECLOCALE to 0 have on locale initialization and warnings?",
+  "gold_peps": [
+   538
+  ],
+  "expected": "answer",
+  "gold_quote": "If ``PYTHONCOERCECLOCALE=0`` is explicitly set, initialization will continue in the C locale and the Unicode compatibility warning described in the next section will be automatically suppressed.",
+  "gold_answer": "When PYTHONCOERCECLOCALE is set to 0, Python continues initialization in the C locale and automatically suppresses the Unicode compatibility warning.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-b3f747a3",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How can the Package Index maintainers respond to an intellectual property infringement complaint before the package owner replies?",
+  "gold_peps": [
+   541
+  ],
+  "expected": "answer",
+  "gold_quote": "In some cases, action may be taken by the Package Index maintainers before the owner responds.",
+  "gold_answer": "They may take action prior to the owner's response when a complaint is received.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-d2dcf6f1",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why is backporting ssl.MemoryBIO and ssl.SSLObject to Python\u202f2.7 important for pip\u2019s bundled installation?",
+  "gold_peps": [
+   546
+  ],
+  "expected": "answer",
+  "gold_quote": "Only backporting ``ssl.MemoryBIO`` and ``ssl.SSLObject`` would avoid the need to embed pyOpenSSL, and would fix the bootstrap issue (python -> ensurepip -> pip -> requests -> MemoryBIO).",
+  "gold_answer": "Because without the backport, pip would have to include the pyOpenSSL C extension to provide a MemoryBIO, which would make installing pip harder and cause CPython to bundle a compiled dependency.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-087f33c5",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What happens to the value of a context variable after exiting a with block that used cvar.assign()?",
+  "gold_peps": [
+   555
+  ],
+  "expected": "answer",
+  "gold_quote": "the assignment of ``cvar`` to ``new_value`` is no longer visible\n    assert cvar.value == \"the default value\"",
+  "gold_answer": "When the with block ends, the assignment is undone and the variable reverts to its previous value, typically the default.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-2edd5d63",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How should a type checker decide which files to check first when both stub (.pyi) and source (.py) files are present?",
+  "gold_peps": [
+   561
+  ],
+  "expected": "answer",
+  "gold_quote": "Thus type checkers MUST maintain the normal resolution order of checking ``*.pyi`` before ``*.py`` files.",
+  "gold_answer": "It must always check the stub files before the source files, preserving the normal resolution order of *.pyi before *.py.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-0f189315",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does Python need new time functions that return nanoseconds as integers?",
+  "gold_peps": [
+   564
+  ],
+  "expected": "answer",
+  "gold_quote": "These functions are needed because they may return \"large\" timestamps, like ``time.time()`` which uses the UNIX epoch as reference, and so their ``float``-returning variants are likely to lose precision at the nanosecond resolution.",
+  "gold_answer": "Because large timestamps, such as those based on the UNIX epoch, can lose precision when represented as floats at nanosecond resolution, so integer-returning variants are required.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-fd51117f",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Which Python version changed the signatures of all context variable C APIs to use PyObject* pointers?",
+  "gold_peps": [
+   567
+  ],
+  "expected": "answer",
+  "gold_quote": "In **Python 3.7.1** the signatures of all context variables C APIs were **changed** to use ``PyObject *`` pointers instead of ``PyContext *``, ``PyContextVar *``, and ``PyContextToken *``",
+  "gold_answer": "Python 3.7.1 changed the signatures of all context variable C APIs to use PyObject* pointers.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-ab3d83e4",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the implementation ensure that a variable assigned inside a comprehension has the same scope as if the assignment were done in the outer block?",
+  "gold_peps": [
+   572
+  ],
+  "expected": "answer",
+  "gold_quote": "nonlocal TARGET\n                for VAR in iterator:\n                    TARGET = EXPR\n                    yield TARGET",
+  "gold_answer": "By synthesizing a nested generator function for the comprehension and adding a nonlocal declaration for the target variable, the assignment expression binds to the same scope as the outer block.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-0de624cf",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the fast-call C API place the values of keyword arguments after the positional arguments in the same args array?",
+  "gold_peps": [
+   575
+  ],
+  "expected": "answer",
+  "gold_quote": "The positional arguments are passed as C array ``args`` of length ``nargs``. The *values* of the keyword arguments follow in that array, starting at position ``nargs``.",
+  "gold_answer": "Because the fast-call convention uses a single contiguous C array for all argument values, with the positional arguments first and the keyword argument values appended, while the keyword names are supplied separately in a tuple.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-451ef937",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What must happen to audit hook objects when the interpreter or runtime is finalizing?",
+  "gold_peps": [
+   578
+  ],
+  "expected": "answer",
+  "gold_quote": "As hooks may be Python objects, they need to be freed during interpreter or runtime finalization. These should not be triggered at any other time, and should raise an event hook to ensure that any unexpected calls are observed.",
+  "gold_answer": "Audit hook objects must be freed during interpreter or runtime finalization, and they should not be triggered at any other time, raising an event if unexpectedly called.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-20c45c07",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does using GitHub issues create a consistent experience for contributors and maintainers?",
+  "gold_peps": [
+   581
+  ],
+  "expected": "answer",
+  "gold_quote": "By using GitHub issues, where the CPython source code is currently hosted and where pull requests are taking place, we'll be providing consistent experience to contributors and maintainers, while not having to jump from one interface to another.",
+  "gold_answer": "Because the CPython source code and pull requests already live on GitHub, using its issue tracker lets everyone work within the same interface without needing to switch to a different system.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-c089e467",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why is using a single keyword argument to control collision handling considered a poor design choice?",
+  "gold_peps": [
+   584
+  ],
+  "expected": "answer",
+  "gold_quote": "Hard to override behavior if you need something like \"first wins\", without losing the ability to process arbitrary keyword arguments.",
+  "gold_answer": "Because it makes it difficult to implement custom collision strategies such as \"first wins\" while still allowing arbitrary keyword arguments.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-e2a28cf9",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How do you attach additional metadata to an existing type using the new annotation feature?",
+  "gold_peps": [
+   593
+  ],
+  "expected": "answer",
+  "gold_quote": "Specifically, a type ``T`` can be annotated with metadata ``x`` via the typehint ``Annotated[T, x]``.",
+  "gold_answer": "By using the syntax `Annotated[T, x]`, where `T` is the original type and `x` is the metadata.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-31485aa5",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How should you open a text file to avoid the common mistake of reading UTF-8 files on Windows?",
+  "gold_peps": [
+   597
+  ],
+  "expected": "answer",
+  "gold_quote": "Omitting the ``encoding`` argument is not a bug when opening text files encoded in the locale encoding, but ``encoding=\"locale\"`` is recommended in Python 3.10 and later because it is more explicit.",
+  "gold_answer": "Specify the encoding argument when calling open, for example using encoding=\"locale\" (or another explicit encoding) instead of relying on the default.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-67545337",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the compatibility check reject a manylinux tag when the system's glibc version is older than the tag's required version?",
+  "gold_peps": [
+   600
+  ],
+  "expected": "answer",
+  "gold_quote": "if (sys_major, sys_minor) < (tag_major, tag_minor):\n          return False",
+  "gold_answer": "Because the function compares the system's glibc version to the tag's version and returns False if the system's version is lower.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-8b4a7926",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Can the new X\u202f|\u202fY union syntax be used as the second argument to isinstance and issubclass, and what restriction applies?",
+  "gold_peps": [
+   604
+  ],
+  "expected": "answer",
+  "gold_quote": "The new syntax should be accepted for calls to ``isinstance`` and ``issubclass`` as long as the Union items are valid arguments to ``isinstance`` and ``issubclass`` themselves.",
+  "gold_answer": "Yes, the union syntax can be used with isinstance and issubclass, but only when each type in the union is itself a valid argument for those functions.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-fddd6063",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does the Python release manager decide whether to proceed with a final release when some selected projects are not yet compatible?",
+  "gold_peps": [
+   608
+  ],
+  "expected": "answer",
+  "gold_quote": "The Python release manager can decide to release Python even if a project is not compatible, if they decide that the project is going to be fixed soon enough, or if the issue severity is low enough.",
+  "gold_answer": "The release manager may still release the new Python version if they expect the incompatible project to be fixed soon enough or if the incompatibility is considered low severity.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-a2b0b4d1",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why should a general\u2011purpose Python implementation adopt a one\u2011million limit for this feature?",
+  "gold_peps": [
+   611
+  ],
+  "expected": "answer",
+  "gold_quote": "General purpose implementations, such as PyPy, should use the one million limit.",
+  "gold_answer": "Because the proposal sets a one\u2011million soft limit for Python 3.13 and expects general\u2011purpose implementations to match that limit for maximum compatibility.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-91d57d04",
+  "kind": "content",
+  "asker": "alice",
+  "text": "According to the document, how is the term \"expression\" defined for decorator grammar?",
+  "gold_peps": [
+   614
+  ],
+  "expected": "answer",
+  "gold_quote": "This can be summarized as \"anything that's valid as a test in ``if``, ``elif``, and ``while`` blocks\".",
+  "gold_answer": "It is defined as anything that can be used as a test in an if, elif, or while statement.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-e1ebe1e1",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does requiring static metadata help clarify when project metadata is intentionally missing?",
+  "gold_peps": [
+   621
+  ],
+  "expected": "answer",
+  "gold_quote": "By requiring that dynamic metadata be specified, it disambiguates the intent when metadata goes unspecified.",
+  "gold_answer": "Requiring static metadata forces any dynamic metadata to be explicitly declared, so if metadata is absent it is clear that it was intentionally left out rather than being pending dynamic generation.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-e32f83e5",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why is a new method introduced to provide line number information instead of fixing the existing attribute?",
+  "gold_peps": [
+   626
+  ],
+  "expected": "answer",
+  "gold_quote": "Rather than attempt to fix the ``co_lnotab`` attribute, a new method ``co_lines()`` will be added, which returns an iterator over bytecode offsets and source code lines.",
+  "gold_answer": "Because adding a new method avoids breaking existing tools while allowing accurate line number annotation, and the old attribute can be kept for compatibility.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-941a611d",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What type must each entry be in the optional dependencies list, and what happens if it is not?",
+  "gold_peps": [
+   631
+  ],
+  "expected": "answer",
+  "gold_quote": "if not isinstance(entry, str):\n                    raise TypeError(\n                        f'Dependency #{i} of option `{option}` of field '\n                        '`project.optional-dependencies` must be a string'\n                    )",
+  "gold_answer": "Each entry must be a string; otherwise a TypeError is raised indicating the offending dependency number.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-f0e5d32a",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How does a guard expression affect the selection of a case block in a match statement?",
+  "gold_peps": [
+   634
+  ],
+  "expected": "answer",
+  "gold_quote": "If a guard is present on a case block, once the pattern or patterns in the case block succeed, the expression in the guard is evaluated.  If this raises an exception, the exception bubbles up.  Otherwise, if the condition is \"truthy\" the case block is selected; if it is \"falsy\" the case block is not selected.",
+  "gold_answer": "After a pattern matches, the guard is evaluated; if it raises an exception it propagates, otherwise a truthy guard selects the case block and a falsy guard rejects it.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-727d37b5",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does adding a keyword argument to a single index not turn the index into a tuple?",
+  "gold_peps": [
+   637
+  ],
+  "expected": "answer",
+  "gold_quote": "a single value followed by a keyword argument will not be changed into a tuple, i.e.: ``d[1, a=3]`` is treated as ``__getitem__(d, 1, a=3)``",
+  "gold_answer": "Because the language design specifies that a single value followed by a keyword argument is passed directly, and converting it to a tuple would be confusing.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-28f8cbb5",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What kind of type arguments are allowed for generic aliases beyond simple types?",
+  "gold_peps": [
+   646
+  ],
+  "expected": "answer",
+  "gold_quote": "First, type arguments to generic aliases can be variadic. For example, a ``TypeVarTuple`` can be used as a type argument:",
+  "gold_answer": "Generic aliases can accept variadic type arguments, such as a TypeVarTuple.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-3a0cf8c9",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How can a user disable the fine\u2011grained error location feature when running Python?",
+  "gold_peps": [
+   657
+  ],
+  "expected": "answer",
+  "gold_quote": "For these reasons we have decided to use the -O flag to opt-out of this behaviour.",
+  "gold_answer": "By using the -O command\u2011line flag, which opts out of the fine\u2011grained error location behavior.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-f185049a",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why must the wheel file created for an editable install include a .dist-info directory?",
+  "gold_peps": [
+   660
+  ],
+  "expected": "answer",
+  "gold_quote": "The .whl file must comply with the Wheel binary file format specification (PEP 427). In particular it must contain a compliant .dist-info directory.",
+  "gold_answer": "Because the wheel has to follow the Wheel binary file format specification, which requires a compliant .dist-info directory.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-5af06f41",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What content is recommended for the error message file that appears when a user cannot create a virtual environment?",
+  "gold_peps": [
+   668
+  ],
+  "expected": "answer",
+  "gold_quote": "The file should contain a useful and distro-relevant error message indicating both how to install system-wide packages via the distro's package manager and how to set up a virtual environment.",
+  "gold_answer": "It should contain a helpful, distribution-specific error message that explains how to install system-wide packages using the distro's package manager and how to set up a virtual environment.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-e03563ed",
+  "kind": "content",
+  "asker": "alice",
+  "text": "How can a programmer use the new signed\u2011zero option with Python's formatting mechanisms?",
+  "gold_peps": [
+   682
+  ],
+  "expected": "answer",
+  "gold_quote": "While f-strings, built-in ``format()``, and ``str.format()`` can access the new option, %-formatting cannot.",
+  "gold_answer": "The option can be used with f\u2011strings, the built\u2011in format() function, and str.format(), but it is not available with %-formatting.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "con-cd95da49",
+  "kind": "content",
+  "asker": "alice",
+  "text": "Why does the PEP suggest that recording only the normalized extra name in core metadata will help reduce the problem of extra name clashes?",
+  "gold_peps": [
+   685
+  ],
+  "expected": "answer",
+  "gold_quote": "By requiring tools writing core metadata to only record the normalized name, the issue of preexisting, invalid extra names should diminish over time.",
+  "gold_answer": "Because limiting metadata to the normalized name prevents tools from using the many invalid variants that cause clashes, so over time fewer conflicting extra names will exist.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "con-cd0e67d8",
+  "kind": "content",
+  "asker": "alice",
+  "text": "What new capability does the proposal aim to provide for Python code regarding the buffer protocol?",
+  "gold_peps": [
+   688
+  ],
+  "expected": "answer",
+  "gold_quote": "This PEP proposes a Python-level API for the buffer protocol, which is currently accessible only to C code.",
+  "gold_answer": "It aims to add a Python-level API that lets Python code inspect and implement the buffer protocol.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-2b16eaee",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why does the proposal say the problem cannot wait until the next Python release?",
+  "gold_peps": [
+   235
+  ],
+  "expected": "answer",
+  "gold_quote": "can't be put off until 2.2 without also delaying the Cygwin and MacOS X ports.",
+  "gold_answer": "Because postponing it would also delay the ports to Cygwin and MacOS X.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-c58c085e",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why does the proposal say the problem cannot wait until the next Python release?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   235
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-06b3818d",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Who should receive comments and questions about the Python Database API Specification?",
+  "gold_peps": [
+   249
+  ],
+  "expected": "answer",
+  "gold_quote": "Comments and questions about this specification may be directed to the `SIG for Database Interfacing with Python <db-sig@python.org>`__.",
+  "gold_answer": "They should be directed to the SIG for Database Interfacing with Python at the provided email address.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-a04e8658",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Who should receive comments and questions about the Python Database API Specification?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   249
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-e977bcec",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How does the system decide which stored credentials to use when it must send a request but does not yet know the authentication realm?",
+  "gold_peps": [
+   268
+  ],
+  "expected": "answer",
+  "gold_quote": "looked up using ``(host, port, path)`` -- this lookup scheme is used when generating a request for a path where we don't know the authentication realm.",
+  "gold_answer": "It looks up credentials by matching the host, port, and request path, allowing hierarchical credential reuse for sub\u2011paths.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-c00f2603",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How does the system decide which stored credentials to use when it must send a request but does not yet know the authentication realm?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   268
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-afe6b3b1",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why does this proposal claim its string interpolation feature is simpler than the earlier alternative that introduced a new '$' prefix?",
+  "gold_peps": [
+   292
+  ],
+  "expected": "answer",
+  "gold_quote": ":pep:`292` is simpler than this because it involves no syntax changes and has much simpler rules for what substitutions can occur in the string.",
+  "gold_answer": "Because it does not require any new syntax and has much simpler rules for what can be substituted in the string.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-9aa54c52",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why does this proposal claim its string interpolation feature is simpler than the earlier alternative that introduced a new '$' prefix?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   292
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-1e6a238b",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "What does the locked buffer interface expose compared to the old buffer interface?",
+  "gold_peps": [
+   298
+  ],
+  "expected": "answer",
+  "gold_quote": "The locked buffer interface omits the memory segment model which is present in the old buffer interface - only a single memory block can be exposed.",
+  "gold_answer": "It only exposes a single contiguous memory block, omitting the older memory segment model.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-b53c6b5d",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "What does the locked buffer interface expose compared to the old buffer interface?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   298
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-4d90a807",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How should a generator behave when it is closed using the exception\u2011semantics approach?",
+  "gold_peps": [
+   325
+  ],
+  "expected": "answer",
+  "gold_quote": "The generator should be resumed and execution should continue as if a special-purpose exception (e.g. CloseGenerator) has been raised at re-entry point. Close implementation should consume and not propagate further this exception.",
+  "gold_answer": "When a generator is closed, it should be resumed and run as if a special internal exception (like CloseGenerator) was raised at the point of re\u2011entry, and this exception must be consumed by the close implementation rather than being propagated.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-1a00fef8",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How should a generator behave when it is closed using the exception\u2011semantics approach?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   325
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-c15a8683",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How many of the setattr calls mentioned rely on getattr to obtain the new value?",
+  "gold_peps": [
+   363
+  ],
+  "expected": "answer",
+  "gold_quote": "c.120 uses of setattr, of which 15 use getattr to find the new value; all could be replaced with the new syntax,",
+  "gold_answer": "Fifteen of the setattr calls use getattr to find the new value.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-4b0254a7",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How many of the setattr calls mentioned rely on getattr to obtain the new value?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   363
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-41934ebb",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How is the reference implementation of post import hooks provided?",
+  "gold_peps": [
+   369
+  ],
+  "expected": "answer",
+  "gold_quote": "A reference implementation is already written and is available in the *py3k-importhook* branch.",
+  "gold_answer": "It is already written and can be found in the py3k-importhook branch, though it still needs cleanup, documentation, and more tests.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-2c1ec7d1",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How is the reference implementation of post import hooks provided?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   369
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-efbe920e",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why are functions that take a FILE* argument excluded from the stable ABI?",
+  "gold_peps": [
+   384
+  ],
+  "expected": "answer",
+  "gold_quote": "In addition, functions expecting ``FILE*`` are not part of the ABI, to avoid depending on a specific version of the Microsoft C runtime DLL on Windows.",
+  "gold_answer": "Because including them would tie the ABI to a particular version of the Microsoft C runtime DLL on Windows.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-26dec06e",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why are functions that take a FILE* argument excluded from the stable ABI?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   384
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-aa948726",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "When creating a zip application, if you provide an interpreter name and the target is a regular file, what file permission is automatically modified?",
+  "gold_peps": [
+   441
+  ],
+  "expected": "answer",
+  "gold_quote": "If an interpreter is specified, and the target is a filename, the executable bit of the target file will be set.",
+  "gold_answer": "The target file\u2019s executable bit is set.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-4b49fe6e",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "When creating a zip application, if you provide an interpreter name and the target is a regular file, what file permission is automatically modified?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   441
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-f46ea87d",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How should installation tools handle a situation where a new package tries to install a module that is already supplied by an existing package?",
+  "gold_peps": [
+   459
+  ],
+  "expected": "answer",
+  "gold_quote": "Installation tools SHOULD report an error when asked to install a distribution that provides a module that is also provided by a different, previously installed, distribution.",
+  "gold_answer": "They should raise an error, refusing to install the conflicting distribution.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-bfb362ea",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How should installation tools handle a situation where a new package tries to install a module that is already supplied by an existing package?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   459
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-6f43a1e0",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why must you verify a contributor's PSF CLA before merging their bug tracker change?",
+  "gold_peps": [
+   462
+  ],
+  "expected": "answer",
+  "gold_quote": "If applying a change submitted to bugs.python.org by another user, first check they have signed the PSF Contributor Licensing Agreement. If not, request that they sign one before continuing with merging the change.",
+  "gold_answer": "Because only contributors who have signed the PSF Contributor Licensing Agreement are allowed to have their changes merged.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-d3987ea4",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why must you verify a contributor's PSF CLA before merging their bug tracker change?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   462
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-171c9c8c",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "What alternative platform is offered for contributors who prefer not to use GitHub?",
+  "gold_peps": [
+   481
+  ],
+  "expected": "answer",
+  "gold_quote": "We are also utilizing Phabricator to provide an alternative for people who do not wish to use GitHub.",
+  "gold_answer": "Phabricator is provided as an alternative for those who do not wish to use GitHub.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-0795a481",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "What alternative platform is offered for contributors who prefer not to use GitHub?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   481
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-0a53e898",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "Why does the proposal suggest keeping the names of existing exceptions unchanged during the hierarchy reorganization?",
+  "gold_peps": [
+   348
+  ],
+  "expected": "answer",
+  "gold_quote": "First and foremost was to not break anything that works. This meant that renaming exceptions was out of the question unless the name was deemed severely bad.",
+  "gold_answer": "Because the main goal was to avoid breaking working code, so renaming was only allowed for severely bad names.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-b9d40041",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why does the proposal suggest keeping the names of existing exceptions unchanged during the hierarchy reorganization?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   348
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-13e045f0",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why does the proposal suggest keeping the names of existing exceptions unchanged during the hierarchy reorganization?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   348
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-975717de",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "According to the definition given, what type of objects do the names 'roletypes' and 'format' become after the make-statements are executed?",
+  "gold_peps": [
+   359
+  ],
+  "expected": "answer",
+  "gold_quote": "Given this definition, at the end of the make-statements above, ``roletypes`` and ``format`` would be namespace instances.",
+  "gold_answer": "They become instances of the namespace type.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-3dacd20b",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "According to the definition given, what type of objects do the names 'roletypes' and 'format' become after the make-statements are executed?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   359
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-81940874",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "According to the definition given, what type of objects do the names 'roletypes' and 'format' become after the make-statements are executed?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   359
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-5181c305",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "How can a client retrieve the list of alternative PyPI mirrors to use?",
+  "gold_peps": [
+   381
+  ],
+  "expected": "answer",
+  "gold_quote": "Clients that are browsing PyPI should be able to use alternative mirrors, by getting the list of the mirrors using ``last.pypi.python.org``.",
+  "gold_answer": "The client gets the list of mirrors from the host last.pypi.python.org.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-964b8f2a",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How can a client retrieve the list of alternative PyPI mirrors to use?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   381
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-bf9fb84c",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How can a client retrieve the list of alternative PyPI mirrors to use?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   381
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-a71d81a3",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "Why does calling the function that installs debug hooks have no effect when Python is not built in debug mode?",
+  "gold_peps": [
+   445
+  ],
+  "expected": "answer",
+  "gold_quote": "The function does nothing is Python is not compiled in debug mode.",
+  "gold_answer": "Because the function is designed to be a no\u2011op unless Python was compiled with debugging enabled.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-cfb9757a",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why does calling the function that installs debug hooks have no effect when Python is not built in debug mode?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   445
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-7d9cb7cf",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why does calling the function that installs debug hooks have no effect when Python is not built in debug mode?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   445
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-8381a304",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "In the HTTPS verification migration tools, what specific environment variable value causes the system to use an unverified SSL context?",
+  "gold_peps": [
+   493
+  ],
+  "expected": "answer",
+  "gold_quote": "if config_setting == '0':\n    return _create_unverified_context",
+  "gold_answer": "If the environment variable is set to the string '0', the function returns the unverified SSL context factory.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-0c7c5d51",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "In the HTTPS verification migration tools, what specific environment variable value causes the system to use an unverified SSL context?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   493
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-30fd8625",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "In the HTTPS verification migration tools, what specific environment variable value causes the system to use an unverified SSL context?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   493
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-75909bc0",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "How does the proposal describe a cryptographically strong pseudo random number generator?",
+  "gold_peps": [
+   506
+  ],
+  "expected": "answer",
+  "gold_quote": "Cryptographically Strong Pseudo Random Number Generator.  An algorithm used to produce random-looking numbers which are resistant to prediction.",
+  "gold_answer": "It is defined as an algorithm that generates numbers that look random and are resistant to prediction.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-69b933c6",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How does the proposal describe a cryptographically strong pseudo random number generator?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   506
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-5a97fd48",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How does the proposal describe a cryptographically strong pseudo random number generator?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   506
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-93a9f296",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "Why does the proposal aim to cause minimal disruption to existing projects on PyPI?",
+  "gold_peps": [
+   527
+  ],
+  "expected": "answer",
+  "gold_quote": "This plan should provide minimal disruption since it does not remove any existing files, and the types of files it does prevent from being uploaded are either not particularly useful (or used) types of files *or* they can continue to upload a similar type of file with a slight change to their process.",
+  "gold_answer": "Because it never deletes existing files and only stops new uploads of rarely used file types, giving projects time to adjust and allowing them to use alternative formats.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-73cd09dd",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why does the proposal aim to cause minimal disruption to existing projects on PyPI?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   527
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-840b783f",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why does the proposal aim to cause minimal disruption to existing projects on PyPI?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   527
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-5eb8e408",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "What is the name pattern of the file that, if present, is used to initialize sys.path for the interpreter?",
+  "gold_peps": [
+   551
+  ],
+  "expected": "answer",
+  "gold_quote": "If a file with the same full path as the process with a ``._pth`` suffix (``spython._pth`` on Windows, ``spythonX.Y._pth`` on Linux) exists, it will be used to initialize ``sys.path``",
+  "gold_answer": "A file that shares the full path of the executable and has a ._pth suffix (e.g., spython._pth on Windows or spythonX.Y._pth on Linux) is used to set up sys.path.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-23171077",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "What is the name pattern of the file that, if present, is used to initialize sys.path for the interpreter?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   551
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-985fcfdb",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "What is the name pattern of the file that, if present, is used to initialize sys.path for the interpreter?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   551
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-54f4799f",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "How can a custom memory allocator be installed relative to Python's preinitialization step?",
+  "gold_peps": [
+   587
+  ],
+  "expected": "answer",
+  "gold_quote": "``PyMem_SetAllocator()`` can be called after ``Py_PreInitialize()`` and before ``Py_InitializeFromConfig()`` to install a custom memory allocator. It can be called before ``Py_PreInitialize()`` if ``allocator`` is set to ``PYMEM_ALLOCATOR_NOT_SET`` (default value).",
+  "gold_answer": "You can call PyMem_SetAllocator() after Py_PreInitialize() and before Py_InitializeFromConfig(), or before Py_PreInitialize() only if the allocator argument is PYMEM_ALLOCATOR_NOT_SET.",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "per-4b248bc3",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "How can a custom memory allocator be installed relative to Python's preinitialization step?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   587
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-32e58b57",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "How can a custom memory allocator be installed relative to Python's preinitialization step?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   587
+  ],
+  "split": "test"
+ },
+ {
+  "id": "per-6a9e184a",
+  "kind": "permission",
+  "asker": "carol",
+  "text": "Why might code that looks correctly ordered in the source file appear with misplaced parentheses or reversed text when displayed, especially when mixing right\u2011to\u2011left scripts with left\u2011to\u2011right code?",
+  "gold_peps": [
+   672
+  ],
+  "expected": "answer",
+  "gold_quote": "Default reordering rules do not always yield the intended direction of text, so Unicode provides several ways to alter it.",
+  "gold_answer": "Because the default bidirectional reordering algorithm can change the visual order of characters in mixed scripts, causing symbols like parentheses to appear reversed.",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "per-792421cb",
+  "kind": "permission",
+  "asker": "bob",
+  "text": "Why might code that looks correctly ordered in the source file appear with misplaced parentheses or reversed text when displayed, especially when mixing right\u2011to\u2011left scripts with left\u2011to\u2011right code?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   672
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "per-b05a696c",
+  "kind": "permission",
+  "asker": "alice",
+  "text": "Why might code that looks correctly ordered in the source file appear with misplaced parentheses or reversed text when displayed, especially when mixing right\u2011to\u2011left scripts with left\u2011to\u2011right code?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [
+   672
+  ],
+  "split": "test"
+ },
+ {
+  "id": "hea-2f6bf2b9",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'PEP Purpose and Guidelines'?",
+  "gold_peps": [
+   1
+  ],
+  "expected": "answer",
+  "gold_quote": "Barry Warsaw, Jeremy Hylton, David Goodger, Alyssa Coghlan",
+  "gold_answer": "Barry Warsaw, Jeremy Hylton, David Goodger, Alyssa Coghlan",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-2e60d753",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'Rich Comparisons'?",
+  "gold_peps": [
+   207
+  ],
+  "expected": "answer",
+  "gold_quote": "Guido van Rossum <guido@python.org>, David Ascher <DavidA@ActiveState.com>",
+  "gold_answer": "Guido van Rossum <guido@python.org>, David Ascher <DavidA@ActiveState.com>",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-562a6472",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'Module Repository Upload Mechanism'?",
+  "gold_peps": [
+   243
+  ],
+  "expected": "answer",
+  "gold_quote": "Sean Reifschneider <jafo-pep@tummy.com>",
+  "gold_answer": "Sean Reifschneider <jafo-pep@tummy.com>",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-5351b462",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'The enumerate() built-in function'?",
+  "gold_peps": [
+   279
+  ],
+  "expected": "answer",
+  "gold_quote": "Raymond Hettinger <python@rcn.com>",
+  "gold_answer": "Raymond Hettinger <python@rcn.com>",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-37076f30",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'Eliminate Implicit Exception Instantiation'?",
+  "gold_peps": [
+   317
+  ],
+  "expected": "answer",
+  "gold_quote": "Steven Taschuk <staschuk@telusplanet.net>",
+  "gold_answer": "Steven Taschuk <staschuk@telusplanet.net>",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-9640ee21",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'Using ssize_t as the index type'?",
+  "gold_peps": [
+   353
+  ],
+  "expected": "answer",
+  "gold_quote": "Martin von L\u00f6wis <martin@v.loewis.de>",
+  "gold_answer": "Martin von L\u00f6wis <martin@v.loewis.de>",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-c3004a0f",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'Qualified Names for Modules'?",
+  "gold_peps": [
+   395
+  ],
+  "expected": "answer",
+  "gold_quote": "Alyssa Coghlan <ncoghlan@gmail.com>",
+  "gold_answer": "Alyssa Coghlan <ncoghlan@gmail.com>",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-b78e490b",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'Simpler customisation of class creation'?",
+  "gold_peps": [
+   422
+  ],
+  "expected": "answer",
+  "gold_quote": "Alyssa Coghlan <ncoghlan@gmail.com>, Daniel Urban <urban.dani+py@gmail.com>",
+  "gold_answer": "Alyssa Coghlan <ncoghlan@gmail.com>, Daniel Urban <urban.dani+py@gmail.com>",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-70328877",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'API for Cryptographic Hash Functions v2.0'?",
+  "gold_peps": [
+   452
+  ],
+  "expected": "answer",
+  "gold_quote": "A.M. Kuchling <amk@amk.ca>, Christian Heimes <christian@python.org>",
+  "gold_answer": "A.M. Kuchling <amk@amk.ca>, Christian Heimes <christian@python.org>",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-19b3042f",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Who wrote the proposal titled 'Multi-phase extension module initialization'?",
+  "gold_peps": [
+   489
+  ],
+  "expected": "answer",
+  "gold_quote": "Petr Viktorin <encukou@gmail.com>, Stefan Behnel <stefan_ml@behnel.de>, Alyssa Coghlan <ncoghlan@gmail.com>",
+  "gold_answer": "Petr Viktorin <encukou@gmail.com>, Stefan Behnel <stefan_ml@behnel.de>, Alyssa Coghlan <ncoghlan@gmail.com>",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-fc11ef46",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Python Unicode Integration'?",
+  "gold_peps": [
+   100
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Final",
+  "gold_answer": "Final",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-917e8d2f",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Elementwise/Objectwise Operators'?",
+  "gold_peps": [
+   225
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Rejected",
+  "gold_answer": "Rejected",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-a8e4eeb6",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Docutils Design Specification'?",
+  "gold_peps": [
+   258
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Rejected",
+  "gold_answer": "Rejected",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-2b9cbd43",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Extend divmod() for Multiple Divisors'?",
+  "gold_peps": [
+   303
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Rejected",
+  "gold_answer": "Rejected",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-46daa1d4",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Executing modules as scripts'?",
+  "gold_peps": [
+   338
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Final",
+  "gold_answer": "Final",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-d8577340",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Allow __enter__() methods to skip the statement body'?",
+  "gold_peps": [
+   377
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Rejected",
+  "gold_answer": "Rejected",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-f7c512dc",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Suppressing exception context'?",
+  "gold_peps": [
+   409
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Final",
+  "gold_answer": "Final",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-28e3dcef",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'IDLE Enhancement Exception for All Branches'?",
+  "gold_peps": [
+   434
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Active",
+  "gold_answer": "Active",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-dc8714a8",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Removing External Hosting Support on PyPI'?",
+  "gold_peps": [
+   470
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Final",
+  "gold_answer": "Final",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-79279149",
+  "kind": "header",
+  "asker": "alice",
+  "text": "What is the status of the proposal titled 'Add a private version to dict'?",
+  "gold_peps": [
+   509
+  ],
+  "expected": "answer",
+  "gold_quote": "Status: Superseded",
+  "gold_answer": "Superseded",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-9229049f",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Which proposal superseded the one titled 'Metadata for Python Software Packages 1.2'?",
+  "gold_peps": [
+   345
+  ],
+  "expected": "answer",
+  "gold_quote": "566",
+  "gold_answer": "566",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-e1f0cdb8",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Which proposal superseded the one titled 'Suppressing exception context'?",
+  "gold_peps": [
+   409
+  ],
+  "expected": "answer",
+  "gold_quote": "415",
+  "gold_answer": "415",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-8fc310d3",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Which proposal superseded the one titled 'Time zone support improvements'?",
+  "gold_peps": [
+   431
+  ],
+  "expected": "answer",
+  "gold_quote": "615",
+  "gold_answer": "615",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-71993140",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Which proposal superseded the one titled 'General purpose template literal strings'?",
+  "gold_peps": [
+   501
+  ],
+  "expected": "answer",
+  "gold_quote": "750",
+  "gold_answer": "750",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "hea-a6b88e18",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Which proposal superseded the one titled 'Add a private version to dict'?",
+  "gold_peps": [
+   509
+  ],
+  "expected": "answer",
+  "gold_quote": "699",
+  "gold_answer": "699",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "hea-393feaae",
+  "kind": "header",
+  "asker": "alice",
+  "text": "Which proposal superseded the one titled 'Dependency specification in pyproject.toml based on PEP 508'?",
+  "gold_peps": [
+   631
+  ],
+  "expected": "answer",
+  "gold_quote": "621",
+  "gold_answer": "621",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-e3fbb673",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Bug Fix Releases' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-726e602e",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Style Guide for C Code' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-4a3ac334",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Sample Plaintext PEP Template' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-83ff76d0",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'CPython platform support' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-b7fe6d79",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Python Language Governance' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-82e56234",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Feature Requests' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-27d2369b",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Doing Python Releases 101' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-25387c25",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Doing Python Micro Releases' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-bd3c936d",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Python 2.0 Release Schedule' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-99e7a850",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Lockstep Iteration' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-a9bf7403",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Range Literals' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-ba586cbe",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does the proposal titled 'Weak References' decide?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-642a56e6",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does PEP 9001 propose and who approved it?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-3df6bd0b",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does PEP 9100 propose and who approved it?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-fc6eef87",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does PEP 9250 propose and who approved it?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-923fd695",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does PEP 9500 propose and who approved it?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-8c3a1885",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What does PEP 9999 propose and who approved it?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-e31dcca4",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What did the Rust RFC process decide about async traits?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-9a7fa7f9",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What is the release date of Python 4.0?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-2514063c",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "Which company funds the Python Software Foundation's largest grant?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-8f341ba9",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "How many contributors voted for the Go generics proposal?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-894e7123",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What did the Java Community Process decide about records?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "dev"
+ },
+ {
+  "id": "una-69e07838",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "Who is the current Steering Council chair's employer?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ },
+ {
+  "id": "una-79fe5c18",
+  "kind": "unanswerable",
+  "asker": "alice",
+  "text": "What is the default garbage collection threshold in the PyPy interpreter?",
+  "gold_peps": [],
+  "expected": "abstain",
+  "gold_quote": "",
+  "gold_answer": "",
+  "must_not_cite": [],
+  "split": "test"
+ }
+]

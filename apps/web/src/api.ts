@@ -212,6 +212,9 @@ const CODE_TEXT: Record<string, string> = {
   slug_taken: 'That workspace name is taken. Try another.',
   invalid_date: 'Reports can be written for today or the last 14 days.',
   empty_report: 'Write what you did, or a blocker, before saving.',
+  refused: 'That was not allowed.',
+  policy_exists: 'A policy with that name already exists.',
+  not_pending: 'That request is no longer pending.',
   digest_unavailable: 'The digest could not be produced right now. Try again in a moment.',
 };
 
@@ -485,3 +488,169 @@ export const makeDigest = (b: { start: string; end: string; scope: string }) =>
   request<Digest>('/reports/digest', { method: 'POST', body: JSON.stringify(b) });
 export const reportsExportUrl = (start: string, end: string) =>
   `/api/reports/export?start=${start}&end=${end}`;
+
+// ---- governance ----
+
+export interface Approval {
+  approval_id: number;
+  kind: 'decision' | 'policy' | 'access' | 'exception';
+  title: string;
+  detail: Record<string, unknown>;
+  requested_by: string;
+  mine: boolean;
+  required: number;
+  state: 'pending' | 'approved' | 'rejected' | 'withdrawn';
+  approvals: number;
+  created_at: string;
+  decided_at: string | null;
+  can_vote: boolean;
+  voted: boolean;
+}
+export const getApprovals = (state: 'pending' | 'all') =>
+  request<{ approvals: Approval[] }>(`/governance/approvals?state=${state}`);
+export const voteOnApproval = (id: number, vote: 'approve' | 'reject', comment: string) =>
+  request<{ state: string }>(`/governance/approvals/${id}/vote`, {
+    method: 'POST',
+    body: JSON.stringify({ vote, comment }),
+  });
+export const withdrawApproval = (id: number) =>
+  request<{ state: string }>(`/governance/approvals/${id}/withdraw`, { method: 'POST' });
+export const requestApproval = (b: {
+  kind: 'access' | 'exception';
+  title: string;
+  role?: string;
+  reason: string;
+  expires_at?: string;
+}) =>
+  request<{ approval_id: number }>('/governance/approvals', {
+    method: 'POST',
+    body: JSON.stringify(b),
+  });
+
+export interface ManualDecision {
+  decision_id: number;
+  key: string;
+  title: string;
+  question: string | null;
+  outcome: string;
+  status: string;
+  created_at: string;
+  proposed_by: string | null;
+  approval_id: number | null;
+  approval_state: string | null;
+  required: number | null;
+  approvals: number | null;
+}
+export const getManualDecisions = () =>
+  request<{ decisions: ManualDecision[] }>('/governance/decisions');
+export const proposeDecision = (b: {
+  title: string;
+  question: string;
+  outcome: string;
+  required: number;
+}) =>
+  request<{ decision_id: number; key: string; approval_id: number }>('/governance/decisions', {
+    method: 'POST',
+    body: JSON.stringify(b),
+  });
+export const markImplemented = (id: number, note: string) =>
+  request<{ status: string }>(`/governance/decisions/${id}/implemented`, {
+    method: 'POST',
+    body: JSON.stringify({ note }),
+  });
+
+export interface PolicyRow {
+  policy_id: number;
+  slug: string;
+  title: string;
+  state: string;
+  version: number | null;
+  published_at: string | null;
+  attest_by: string | null;
+  review_due: string | null;
+  review_overdue: boolean;
+  attested: number | null;
+  expected: number;
+  mine: boolean;
+  needs_my_attestation: boolean;
+  overdue: boolean;
+  latest_version_state: string | null;
+}
+export const getPolicies = () => request<{ policies: PolicyRow[] }>('/governance/policies');
+export interface PolicyDetail {
+  policy: { policy_id: number; slug: string; title: string; state: string; version: number | null };
+  can_edit: boolean;
+  versions: {
+    version: number;
+    title: string;
+    body: string;
+    summary: string | null;
+    state: string;
+    published_at: string | null;
+    attest_by: string | null;
+    author: string;
+    approval_id: number | null;
+  }[];
+  attested: { name: string; at: string }[];
+  missing: string[];
+}
+export const getPolicy = (id: number) => request<PolicyDetail>(`/governance/policies/${id}`);
+export const createPolicy = (b: {
+  title: string;
+  body: string;
+  review_days: number;
+  attest_days: number;
+}) =>
+  request<{ policy_id: number }>('/governance/policies', {
+    method: 'POST',
+    body: JSON.stringify(b),
+  });
+export const savePolicyDraft = (id: number, b: { title: string; body: string; summary: string }) =>
+  request<{ version: number }>(`/governance/policies/${id}/draft`, {
+    method: 'PUT',
+    body: JSON.stringify(b),
+  });
+export const submitPolicy = (id: number) =>
+  request<{ approval_id: number }>(`/governance/policies/${id}/submit`, { method: 'POST' });
+export const attestPolicy = (id: number) =>
+  request<{ attested: boolean }>(`/governance/policies/${id}/attest`, { method: 'POST' });
+
+export interface Risk {
+  risk_id: number;
+  title: string;
+  description: string;
+  category: string;
+  likelihood: number;
+  impact: number;
+  score: number;
+  state: string;
+  mitigation: string;
+  review_by: string | null;
+  owner: string;
+  can_edit: boolean;
+  review_overdue: boolean;
+}
+export const getRisks = () => request<{ risks: Risk[] }>('/governance/risks');
+export const addRisk = (b: {
+  title: string;
+  description: string;
+  category: string;
+  likelihood: number;
+  impact: number;
+  mitigation: string;
+}) =>
+  request<{ risk_id: number }>('/governance/risks', { method: 'POST', body: JSON.stringify(b) });
+export const patchRisk = (id: number, b: { state?: string; mitigation?: string }) =>
+  request<{ status: string }>(`/governance/risks/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(b),
+  });
+
+export interface GovSummary {
+  approvals_waiting_for_me: number;
+  approvals_pending: number;
+  policies_to_attest: number;
+  high_risks: number | null;
+  open_risks: number | null;
+}
+export const getGovSummary = () => request<GovSummary>('/governance/summary');

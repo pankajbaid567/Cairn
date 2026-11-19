@@ -18,6 +18,7 @@ import {
 import { InvitePage } from './InvitePage';
 import { Onboarding } from './Onboarding';
 import { OrgAuditPage } from './OrgAuditPage';
+import { GovernancePage } from './GovernancePage';
 import { PeoplePage } from './PeoplePage';
 import { ReportsPage } from './ReportsPage';
 import { PersonaSwitcher } from './PersonaSwitcher';
@@ -29,7 +30,15 @@ import { initials } from './personas';
 import { Loading, RoleBadge } from './ui';
 
 type View =
-  'reports' | 'ask' | 'decisions' | 'review' | 'sources' | 'people' | 'audit' | 'settings';
+  | 'reports'
+  | 'governance'
+  | 'ask'
+  | 'decisions'
+  | 'review'
+  | 'sources'
+  | 'people'
+  | 'audit'
+  | 'settings';
 
 interface NavItem {
   id: View;
@@ -225,6 +234,7 @@ function Shell({ session }: { session: Session }) {
         </header>
         <main className="content">
           {view === 'reports' ? <ReportsPage session={session} /> : null}
+          {view === 'governance' ? <GovernancePage session={session} /> : null}
           {view === 'ask' ? <AskPage withPersona={false} /> : null}
           {view === 'decisions' ? <DecisionPage /> : null}
           {view === 'review' ? <ReviewPage /> : null}

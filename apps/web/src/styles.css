@@ -1243,3 +1243,16 @@ tr:last-child td {
     display: none;
   }
 }
+
+.policy-body {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 13.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  max-height: 340px;
+  overflow: auto;
+}

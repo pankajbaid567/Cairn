@@ -70,6 +70,12 @@ export const ReportsIcon = () => (
     <path d="M8 8h8M8 12h8M8 16h5" />
   </Icon>
 );
+export const GovernanceIcon = () => (
+  <Icon>
+    <path d="M12 3l9 4H3l9-4Z" />
+    <path d="M5 10v7M10 10v7M14 10v7M19 10v7M3 20h18" />
+  </Icon>
+);
 export const CopyIcon = () => (
   <Icon size={15}>
     <rect x="9" y="9" width="11" height="11" rx="2" />
