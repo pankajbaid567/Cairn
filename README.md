@@ -1,5 +1,20 @@
 # Cairn
 
+**The system of record for how an engineering company decides and what it did, with evidence an auditor accepts.** One workspace for cited answers from your own history, daily work reports and roll-ups, approvals with segregation of duties, policies with attestations, access reviews, and a tamper-evident audit trail with a signed evidence pack.
+
+Live demo: **https://cairn.3-109-36-90.sslip.io**. Sign in as a demo persona (Dev the owner, Priya the admin, Carla the manager, Asha and Ben members, Iris the auditor) or create your own workspace with an email address. Walkthrough: [docs/product/demo-script.md](docs/product/demo-script.md). Plan and status: [docs/product/saas-plan.md](docs/product/saas-plan.md). Design record: [ADR-0019](docs/adr/ADR-0019-saas-tenancy-identity-and-audit-chain.md).
+
+| Area | What it does | Where the rules live |
+|---|---|---|
+| Ask | Cited answers; refuses when the sources do not support one; never shows what the asker may not read | Row-level security, verifier, canary tests |
+| Daily reports | Write yours, read your team's, manager roll-up with who is missing, AI digest that cites the reports it used | Report visibility policy; 14-day edit window; no deletes |
+| Governance | Propose decisions, approvals with quorum, policies with versions and attestations, risk register | Nobody votes on their own request (function and trigger); published versions and attestations are immutable |
+| Compliance | Fifteen control checks from the platform's own records, access reviews, signed evidence pack | Reviewer is never the person reviewed; controls say "no evidence" instead of guessing |
+| Audit | Hash-chained event log per workspace, integrity check, anchors in S3 Object Lock | Append-only triggers; anchor check catches a fully rewritten chain |
+| People | Sign up and sign in (Amazon Cognito), invitations, roles, teams, deactivation that ends access at once | Roles enforced in SQL as well as the API |
+
+The original description, kept for the search and answer engine:
+
 Permission-aware evidence search and decision memory for engineering teams. Ask why something was built the way it was, and get an answer that cites the documents, chats and meeting notes you are allowed to read, shows what was decided and when, and says "not found" instead of guessing.
 
 > **Name check (plan 6.8), decision needed.** A web search on 2026-11-04 found several unrelated projects also called "Cairn" in the same space (for example `cranmer/cairn`, a decision-memory MCP server for research groups, and `isaacriehm/cairn`, persistent decisions for Claude Code). The name may cause confusion if this goes public. Renaming means changing the `cairn_*` packages, roles and docs; I have not done it. Decide before publishing.
@@ -20,7 +35,7 @@ Permission-aware evidence search and decision memory for engineering teams. Ask 
 * Answer quality with real models is **not yet measured** (see Results). Everything below labelled "fake" checks the pipeline, not the models.
 * The verifier is lexical: it can pass a claim that rearranges true words into a false meaning.
 * Public issues and pull requests are attacker-writable text; Cairn labels and fences them but a model may still quote them.
-* Not multi-tenant; one organisation per deployment.
+* It is a working product prototype, not a certified compliance product: the controls map evidence to themes and say so. Sign-in has no MFA, Google or SAML yet, invitations are shared as links (no email), billing is not built, and MCP agent tokens are bound to the demo workspace.
 
 ## Architecture (free-tier topology)
 

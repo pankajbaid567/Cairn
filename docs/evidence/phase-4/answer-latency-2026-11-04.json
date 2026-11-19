@@ -1,16 +1,16 @@
 {
-  "max_ms": 203.9,
+  "max_ms": 17.0,
   "n": 20,
   "note": "fake models, local compose; excludes Workers AI latency and Render cold start",
-  "p50_ms": 18.5,
-  "p95_ms": 74.2,
+  "p50_ms": 14.1,
+  "p95_ms": 16.4,
   "per_step_p95_ms": {
-    "analyze": 0.1,
-    "compose": 0.2,
+    "analyze": 0.0,
+    "compose": 0.1,
     "expand": 0.0,
-    "plan": 0.1,
+    "plan": 0.0,
     "rerank": 0.0,
-    "retrieve": 22.6,
+    "retrieve": 7.3,
     "verify": 0.1
   }
 }

@@ -54,7 +54,7 @@ select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "PT", "SIM", "RUF"]
 # pytest asserts with plain `assert`; test credentials are fake by construction;
 # tests and dev scripts shell out to docker, uv and pnpm on purpose.
 "**/tests/**/*.py" = ["S101", "S105", "S106", "S603", "S607"]
-"scripts/**/*.py" = ["S603", "S607"]
+"scripts/**/*.py" = ["S603", "S607", "E501", "S101", "S608"]
 
 # ---------------------------------------------------------------------------
 # mypy (design §2, PD-03). `make types` runs it twice: `--strict` over

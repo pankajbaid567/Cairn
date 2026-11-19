@@ -26,12 +26,13 @@ Start from [template.md](template.md). The decision log with ids D1 to D20 lives
 | [ADR-0014](ADR-0014-free-tier-deployment-cloudflare-render-neon.md) | Deploy on Cloudflare Pages, one Render free web service in combined mode, and Neon free | accepted | 2026-11-03 | D18 (amends), D10 (confirms ADR-0002 on Neon) |
 | [ADR-0015](ADR-0015-workers-ai-models-and-neuron-budget.md) | Embed, rerank and answer through Cloudflare Workers AI behind provider interfaces, with a neuron budget | accepted | 2026-11-03 | D16 (amends) |
 | [ADR-0018](ADR-0018-aws-deployment-neon-database-bedrock-models.md) | Deploy on AWS with Neon as the database, Amazon Bedrock for models, and an app host that sleeps when idle | accepted | 2026-11-19 | D18, D16 (amends ADR-0014, ADR-0015) |
+| [ADR-0019](ADR-0019-saas-tenancy-identity-and-audit-chain.md) | Multi-tenant SaaS on one database: restrictive row-level security, Cognito sign-in, roles in the database, and a hash-chained audit log with external anchors | accepted | 2026-11-19 | extends ADR-0004, ADR-0018 |
 
 "Accepted" here means the decision is final for the MVP and can be reopened by a new ADR. The status in the file is the source of truth. `make docs-check` checks ADR-0001 to ADR-0005 and ADR-0013 to ADR-0015 and requires `status: superseded by ADR-0013` on ADR-0001 and `status: accepted` on the others. Merging them is a user step (U4 in the Phase 0 design).
 
 ### Reserved numbers
 
-ADR-0006, ADR-0007, ADR-0008, ADR-0011 and ADR-0012 are written (Phase 1); ADR-0009 is written (Phase 2, proposed until spike S4 is measured); ADR-0010 is written (Phase 3, proposed until spike S5 is run live); ADR-0016 is written (Phase 3). ADR-0006, ADR-0007, ADR-0008, ADR-0011 and ADR-0012 belong to Phase 1. ADR-0009 and ADR-0010 belong to the spike tracker (Phase 2 and Phase 3). ADR-0013 to ADR-0015 are the free-tier retarget. ADR-0018 is the AWS deployment. The next free number is ADR-0019.
+ADR-0006, ADR-0007, ADR-0008, ADR-0011 and ADR-0012 are written (Phase 1); ADR-0009 is written (Phase 2, proposed until spike S4 is measured); ADR-0010 is written (Phase 3, proposed until spike S5 is run live); ADR-0016 is written (Phase 3). ADR-0006, ADR-0007, ADR-0008, ADR-0011 and ADR-0012 belong to Phase 1. ADR-0009 and ADR-0010 belong to the spike tracker (Phase 2 and Phase 3). ADR-0013 to ADR-0015 are the free-tier retarget. ADR-0018 is the AWS deployment. ADR-0019 is the SaaS tenancy, identity and audit-chain design. The next free number is ADR-0020.
 
 | ADR | Source | Question | Due | Refines |
 |---|---|---|---|---|

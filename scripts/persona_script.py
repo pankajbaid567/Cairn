@@ -7,7 +7,7 @@
 Needs the corpus manifest (``make scenario-render``) to know which sources exist. Uses persona login,
 so the target must have it enabled (local, or demo with CAIRN_DEMO_PERSONAS=on). Prints findings
 only, never response text. Exit status 0 passes, 1 findings, 2 setup problem.
-"""  # noqa: E501
+"""
 
 from __future__ import annotations
 

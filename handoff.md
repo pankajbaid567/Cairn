@@ -102,3 +102,11 @@ The user chose AWS for everything except the database: Neon stays, models are Am
 Done: Bedrock embedder, LLM reranker, answer and judge adapters with a daily dollar cap (`packages/retrieval/src/cairn_retrieval/bedrock/`); `cairn-db init --embed-dim` (`cairn_core/embed_dim.py`); the waker; `scripts/aws_push_neon_secrets.py`; `infra/aws/cairn.yaml` (stack `cairn` is created); SSM parameters for the session secret, audit key and proxy token; the image is built on the host; the systemd unit is installed and enabled but **not started** (it needs the Neon parameters); a Caddy site `cairn.3-109-36-90.sslip.io` points at the waker.
 
 **Update, same day:** AU1 to AU3 are done (Neon in ap-southeast-1), the waker is started, the corpus is seeded, the app answers with citations, idle stop works, and the live Phase 5 run is in `docs/evidence/phase-5/runs/2026-11-19-live/`. Repo: github.com/pankajbaid567/Cairn. Open: a larger real corpus and question set, the reranker ablation, a Neon owner password rotation (it was pasted in a chat), the rename. Never read `.env` or `.env.neon`.
+
+## 9. SaaS build (added 2026-11-19, overnight)
+
+Cairn is now a multi-tenant SaaS: see [docs/product/saas-plan.md](docs/product/saas-plan.md) (section 9 lists what is built), [ADR-0019](docs/adr/ADR-0019-saas-tenancy-identity-and-audit-chain.md) and [docs/product/demo-script.md](docs/product/demo-script.md).
+
+State: migrations 0013 to 0018 are on Neon; the app is live at https://cairn.3-109-36-90.sslip.io with Cognito sign-in (`cairn-cognito` stack) and the S3 anchor bucket (`cairn-audit-anchors` stack); the demo organisation (Kestrel Pay) is seeded by `scripts/seed_demo_org.py` through the real flows. Deploy: `make aws-package`, build the web app (`make web-dist`), `make remote-init` if a migration is new, then `scripts/aws_deploy.py`.
+
+Open: MFA wiring, Google and SAML, invitation email, billing, MCP agent tokens per organisation, a Playwright suite, the benchmark's over-refusal (see `docs/evidence/real-bench/README.md`), and a person's check of `judge_review_sheet.csv` (`scripts/realbench_review.py`). Sign-up auto-confirms (`CAIRN_AUTH_AUTO_CONFIRM=true` in `deploy/aws/cairn-run.sh`) for the demo: turn it off before real use.

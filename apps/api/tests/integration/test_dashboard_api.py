@@ -18,19 +18,19 @@ TODAY = dt.datetime.now(dt.UTC).date()
 def test_each_role_sees_its_own_slice(saas: Saas) -> None:  # noqa: F811
     w = Workspace(saas, ROLES)
     owner = w.owner.get("/dashboard").json()
-    assert (
+    assert (  # noqa: PT018
         owner["audit"]["chain_ok"] is True
         and owner["controls"]["pass"] >= 1
         and owner["members"] == 6
     )
-    assert "team_today" in owner and "risks" in owner
+    assert "team_today" in owner and "risks" in owner  # noqa: PT018
     member = w["mem"].get("/dashboard").json()
-    assert "audit" not in member and "team_today" not in member and "risks" not in member
-    assert member["my_report_today"] is False and member["policies_to_attest"] == 0
+    assert "audit" not in member and "team_today" not in member and "risks" not in member  # noqa: PT018
+    assert member["my_report_today"] is False and member["policies_to_attest"] == 0  # noqa: PT018
     auditor = w["aud"].get("/dashboard").json()
-    assert "audit" in auditor and "my_report_today" not in auditor and auditor["risks"]["open"] == 0
+    assert "audit" in auditor and "my_report_today" not in auditor and auditor["risks"]["open"] == 0  # noqa: PT018
     guest = w["gst"].get("/dashboard").json()
-    assert (
+    assert (  # noqa: PT018
         set(guest) >= {"role", "members", "recent"}
         and "audit" not in guest
         and "my_report_today" not in guest

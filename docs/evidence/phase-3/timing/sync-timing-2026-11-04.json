@@ -1,43 +1,43 @@
 {
   "freshness.all": {
-    "max_s": 0.768,
+    "max_s": 0.762,
     "n": 20,
-    "p50_s": 0.158,
-    "p95_s": 0.767,
+    "p50_s": 0.169,
+    "p95_s": 0.662,
     "unsettled": 0
   },
   "freshness.asleep": {
-    "max_s": 0.768,
+    "max_s": 0.762,
     "n": 10,
-    "p50_s": 0.594,
-    "p95_s": 0.768,
+    "p50_s": 0.603,
+    "p95_s": 0.762,
     "unsettled": 0
   },
   "freshness.warm": {
-    "max_s": 0.158,
+    "max_s": 0.169,
     "n": 10,
-    "p50_s": 0.142,
-    "p95_s": 0.158,
+    "p50_s": 0.139,
+    "p95_s": 0.169,
     "unsettled": 0
   },
   "revocation.all": {
-    "max_s": 0.015,
+    "max_s": 0.016,
     "n": 20,
     "p50_s": 0.011,
-    "p95_s": 0.014,
+    "p95_s": 0.015,
     "unsettled": 0
   },
   "revocation.asleep": {
-    "max_s": 0.014,
+    "max_s": 0.016,
     "n": 10,
     "p50_s": 0.011,
-    "p95_s": 0.014,
+    "p95_s": 0.016,
     "unsettled": 0
   },
   "revocation.warm": {
     "max_s": 0.015,
     "n": 10,
-    "p50_s": 0.011,
+    "p50_s": 0.01,
     "p95_s": 0.015,
     "unsettled": 0
   }

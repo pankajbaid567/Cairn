@@ -81,7 +81,7 @@ async def draft(
             )
             m = re.search(r"\{.*\}", res.text, re.S)
             d = json.loads(m.group(0)) if m else {}
-        except Exception:
+        except Exception:  # noqa: S112
             continue
         q, a, quote = (str(d.get(k, "")).strip() for k in ("question", "answer", "quote"))
         if not (q.endswith("?") and a and quote and norm(quote) in norm(body)):
@@ -97,7 +97,7 @@ def qid(kind: str, key: str) -> str:
 
 
 async def main_async(out: Path, seed: int) -> None:
-    rng = random.Random(seed)
+    rng = random.Random(seed)  # noqa: S311, F841
     peps = json.loads((out / "peps.json").read_text())
     docs = {
         p["number"]: (out / "corpus/docs/peps" / f"pep-{p['number']:04d}.md")
@@ -121,7 +121,7 @@ async def main_async(out: Path, seed: int) -> None:
 
     async def make(p: dict[str, Any], kind: str, k: int) -> dict[str, Any] | None:
         async with gate:
-            r = random.Random(f"{seed}-{p['number']}-{k}")
+            r = random.Random(f"{seed}-{p['number']}-{k}")  # noqa: S311
             d = await draft(client, p["title"], docs[p["number"]], kind, r)
         if d is None:
             return None
@@ -209,7 +209,7 @@ async def main_async(out: Path, seed: int) -> None:
             )
     # unanswerable
     tree = (
-        json.loads(Path(out / "all_titles.json").read_text())
+        json.loads(Path(out / "all_titles.json").read_text())  # noqa: ASYNC240
         if (out / "all_titles.json").exists()
         else []
     )

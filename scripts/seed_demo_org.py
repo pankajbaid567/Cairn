@@ -100,7 +100,8 @@ TEAM_OF = {
 
 
 def weekdays_back(n: int, today: dt.date) -> list[dt.date]:
-    out, d = [], today
+    out: list[dt.date] = []
+    d = today
     while len(out) < n:
         d -= dt.timedelta(days=1)
         if d.weekday() < 5:
@@ -131,7 +132,7 @@ def seed_reports() -> int:
             (DEMO_ORG,),
         ).fetchall()
         for pid, handle, _role in people:
-            rng = random.Random(f"{handle}-seed")
+            rng = random.Random(f"{handle}-seed")  # noqa: S311
             pool = WORK[TEAM_OF.get(handle, "other")]
             for day in [*weekdays_back(10, today), today]:
                 skip = (
@@ -153,7 +154,7 @@ def seed_reports() -> int:
 def seed_attestations(policy_slugs: list[str]) -> int:
     made = 0
     with db_connect() as conn:
-        rng = random.Random("attest")
+        rng = random.Random("attest")  # noqa: S311
         people = [
             r[0]
             for r in conn.execute(

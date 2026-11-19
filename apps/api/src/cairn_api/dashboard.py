@@ -37,7 +37,7 @@ def install(app: FastAPI, rt: Any) -> None:
             writer = ctx.role in ("owner", "admin", "manager", "member")
             if writer:
                 mine = await one(
-                    "SELECT count(*) FROM cairn.work_reports WHERE author_principal = %s AND report_date = %s",
+                    "SELECT count(*) FROM cairn.work_reports WHERE author_principal = %s AND report_date = %s",  # noqa: E501
                     ctx.principal_id,
                     today,
                 )
@@ -46,7 +46,7 @@ def install(app: FastAPI, rt: Any) -> None:
                 people = await one(
                     "SELECT count(*) FROM cairn_meta.directory() d WHERE d.state = 'active' "
                     "AND d.role IN ('owner', 'admin', 'manager', 'member') "
-                    "AND (%s IN ('owner', 'admin') OR d.principal_id = %s OR d.principal_id IN (SELECT cairn.teammates()))",
+                    "AND (%s IN ('owner', 'admin') OR d.principal_id = %s OR d.principal_id IN (SELECT cairn.teammates()))",  # noqa: E501
                     ctx.role,
                     ctx.principal_id,
                 )
@@ -54,7 +54,7 @@ def install(app: FastAPI, rt: Any) -> None:
                     "SELECT count(*) FROM cairn.work_reports WHERE report_date = %s", today
                 )
                 blockers = await one(
-                    "SELECT count(*) FROM cairn.work_reports WHERE report_date >= %s AND length(btrim(blockers)) > 0",
+                    "SELECT count(*) FROM cairn.work_reports WHERE report_date >= %s AND length(btrim(blockers)) > 0",  # noqa: E501
                     today - dt.timedelta(days=2),
                 )
                 out["team_today"] = {
@@ -63,36 +63,36 @@ def install(app: FastAPI, rt: Any) -> None:
                     "blockers_recent": int(blockers[0]) if blockers else 0,
                 }
                 waiting = await one(
-                    "SELECT count(*) FROM cairn.approvals a WHERE a.state = 'pending' AND a.requested_by <> %s "
+                    "SELECT count(*) FROM cairn.approvals a WHERE a.state = 'pending' AND a.requested_by <> %s "  # noqa: E501
                     "AND (a.kind <> 'access' OR %s IN ('owner', 'admin')) AND NOT EXISTS "
-                    "(SELECT 1 FROM cairn.approval_votes v WHERE v.approval_id = a.approval_id AND v.voter_principal = %s)",
+                    "(SELECT 1 FROM cairn.approval_votes v WHERE v.approval_id = a.approval_id AND v.voter_principal = %s)",  # noqa: E501
                     ctx.principal_id,
                     ctx.role,
                     ctx.principal_id,
                 )
                 out["approvals_waiting"] = int(waiting[0]) if waiting else 0
             mine_pending = await one(
-                "SELECT count(*) FROM cairn.approvals WHERE requested_by = %s AND state = 'pending'",
+                "SELECT count(*) FROM cairn.approvals WHERE requested_by = %s AND state = 'pending'",  # noqa: E501
                 ctx.principal_id,
             )
             out["my_requests_pending"] = int(mine_pending[0]) if mine_pending else 0
             if writer:
                 to_attest = await one(
-                    "SELECT count(*) FROM cairn.policies p JOIN cairn.policy_versions v ON v.policy_id = p.policy_id "
-                    "AND v.state = 'published' WHERE NOT EXISTS (SELECT 1 FROM cairn.attestations a "
+                    "SELECT count(*) FROM cairn.policies p JOIN cairn.policy_versions v ON v.policy_id = p.policy_id "  # noqa: E501
+                    "AND v.state = 'published' WHERE NOT EXISTS (SELECT 1 FROM cairn.attestations a "  # noqa: E501
                     "WHERE a.version_id = v.version_id AND a.principal_id = %s)",
                     ctx.principal_id,
                 )
                 out["policies_to_attest"] = int(to_attest[0]) if to_attest else 0
             if ctx.role in ("owner", "admin", "manager", "auditor"):
                 reviews = await one(
-                    "SELECT count(*) FROM cairn.access_review_items i JOIN cairn.access_reviews r ON r.review_id = i.review_id "
-                    "WHERE r.state = 'open' AND i.decision = 'pending' AND i.reviewer_principal = %s",
+                    "SELECT count(*) FROM cairn.access_review_items i JOIN cairn.access_reviews r ON r.review_id = i.review_id "  # noqa: E501
+                    "WHERE r.state = 'open' AND i.decision = 'pending' AND i.reviewer_principal = %s",  # noqa: E501
                     ctx.principal_id,
                 )
                 out["review_items_mine"] = int(reviews[0]) if reviews else 0
                 risks = await one(
-                    "SELECT count(*) FILTER (WHERE state <> 'closed'), count(*) FILTER (WHERE state <> 'closed' AND score >= 15) FROM cairn.risks"
+                    "SELECT count(*) FILTER (WHERE state <> 'closed'), count(*) FILTER (WHERE state <> 'closed' AND score >= 15) FROM cairn.risks"  # noqa: E501
                 )
                 out["risks"] = {"open": int(risks[0]), "high": int(risks[1])} if risks else None
             if ctx.role in READERS:
@@ -101,7 +101,7 @@ def install(app: FastAPI, rt: Any) -> None:
                     "SELECT count(*) FROM cairn.audit_events WHERE at > now() - interval '24 hours'"
                 )
                 denied = await one(
-                    "SELECT count(*) FROM cairn.audit_events WHERE outcome = 'denied' AND at > now() - interval '7 days'"
+                    "SELECT count(*) FROM cairn.audit_events WHERE outcome = 'denied' AND at > now() - interval '7 days'"  # noqa: E501
                 )
                 out["audit"] = {
                     "chain_ok": bool(chain and chain[0]),
@@ -118,7 +118,7 @@ def install(app: FastAPI, rt: Any) -> None:
             out["members"] = int(members[0]) if members else 0
             recent = await (
                 await conn.execute(
-                    "SELECT e.org_seq, e.at, e.action, e.outcome, p.display_name FROM cairn.audit_events e "
+                    "SELECT e.org_seq, e.at, e.action, e.outcome, p.display_name FROM cairn.audit_events e "  # noqa: E501
                     "LEFT JOIN cairn.principals p ON p.principal_id = e.actor_principal "
                     "WHERE e.org_id = %s ORDER BY e.org_seq DESC LIMIT 8",
                     (ctx.org_id,),

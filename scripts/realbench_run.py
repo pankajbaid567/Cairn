@@ -77,7 +77,7 @@ def rank_metrics(ranked: list[int], gold: list[int]) -> dict[str, float]:
 
 
 def boot_ci(values: list[float], seed: int = 1, n: int = 2000) -> tuple[float, float, float]:
-    rng = random.Random(seed)
+    rng = random.Random(seed)  # noqa: S311
     m = sum(values) / len(values)
     means = sorted(sum(rng.choices(values, k=len(values))) / len(values) for _ in range(n))
     return m, means[int(0.025 * n)], means[int(0.975 * n)]
@@ -136,7 +136,7 @@ async def judge(
             d = json.loads(m.group(0)) if m else {}
             if d.get("correct") in ("yes", "partial", "no") and d.get("grounded") in ("yes", "no"):
                 return {"correct": d["correct"], "grounded": d["grounded"]}
-        except Exception:
+        except Exception:  # noqa: S112
             continue
     return {"correct": "error", "grounded": "error"}
 
@@ -174,9 +174,11 @@ async def main_async(args: argparse.Namespace) -> None:
             if bad:
                 raise RuntimeError(f"rejected: {bad[:3]}")
             with db.connect_owner() as owner:
-                results["chunks"] = owner.execute(
+                count_row = owner.execute(
                     "SELECT count(*) FROM cairn.chunks WHERE is_current"
-                ).fetchone()[0]
+                ).fetchone()
+                assert count_row is not None
+                results["chunks"] = count_row[0]
                 ids = {
                     str(r[0]).removeprefix("user:"): int(r[1])
                     for r in owner.execute(
@@ -283,7 +285,7 @@ async def main_async(args: argparse.Namespace) -> None:
             finally:
                 await pool.close()
     results["seconds"] = round(time.time() - started)
-    Path(args.out).write_text(json.dumps(results, indent=1) + "\n")
+    Path(args.out).write_text(json.dumps(results, indent=1) + "\n")  # noqa: ASYNC240
     print("wrote", args.out, flush=True)
 
 

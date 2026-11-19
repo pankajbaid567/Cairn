@@ -32,7 +32,7 @@ FIELD = re.compile(r"^([A-Za-z-]+):[ \t]*(.*)$")
 
 
 def get(url: str) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "cairn-realbench"})
+    req = urllib.request.Request(url, headers={"User-Agent": "cairn-realbench"})  # noqa: S310
     with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310
         return bytes(resp.read())
 
@@ -199,11 +199,13 @@ def main() -> int:
     )
     (out / "peps.json").write_text(json.dumps(meta, indent=2) + "\n")
     by_status: dict[str, int] = {}
-    for m in meta:
-        by_status[m["status"]] = by_status.get(m["status"], 0) + 1
-    acls = {a: sum(1 for m in meta if m["acl"] == a) for a in ("public", "core", "steering")}
+    for entry in meta:
+        by_status[entry["status"]] = by_status.get(entry["status"], 0) + 1
+    acls = {
+        a: sum(1 for entry in meta if entry["acl"] == a) for a in ("public", "core", "steering")
+    }
     print(
-        f"{len(meta)} PEPs, {sum(m['chars'] for m in meta) // 1000} k chars; statuses {by_status}; acl {acls}"
+        f"{len(meta)} PEPs, {sum(entry['chars'] for entry in meta) // 1000} k chars; statuses {by_status}; acl {acls}"
     )
     return 0
 

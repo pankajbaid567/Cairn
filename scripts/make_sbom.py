@@ -26,7 +26,7 @@ _KEY = re.compile(r"^(?P<name>@?[^@]+)@(?P<version>[^()@]+)")
 
 def web_components(lock: dict[str, object]) -> list[dict[str, object]]:
     packages = lock.get("packages", {})
-    assert isinstance(packages, dict)  # noqa: S101
+    assert isinstance(packages, dict)
     out = []
     for key in sorted(packages):
         m = _KEY.match(str(key))
@@ -38,7 +38,7 @@ def web_components(lock: dict[str, object]) -> list[dict[str, object]]:
             "type": "library",
             "name": name,
             "version": version,
-            "purl": f"pkg:npm/{name.replace('@', '%40', 1) if name.startswith('@') else name}@{version}",  # noqa: E501
+            "purl": f"pkg:npm/{name.replace('@', '%40', 1) if name.startswith('@') else name}@{version}",
         }
         integrity = res.get("integrity") if isinstance(res, dict) else None
         if isinstance(integrity, str) and integrity.startswith("sha512-"):

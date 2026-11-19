@@ -89,7 +89,7 @@ def main() -> int:
         r = c.post("/auth/dev-login", json={"persona": persona})
         if r.status_code != 204:
             print(
-                f"freetier-phase1: login as {persona} failed (HTTP {r.status_code}); is the corpus seeded and demo mode on?",  # noqa: E501
+                f"freetier-phase1: login as {persona} failed (HTTP {r.status_code}); is the corpus seeded and demo mode on?",
                 file=sys.stderr,
             )
             return 2
@@ -180,7 +180,7 @@ def main() -> int:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     report = (
         f"# Free-tier gate with the Phase 1 code loaded ({day})\n\n"
-        f"ft-app: 512 MB, no swap, 0.1 CPU, fake providers, corpus of {len(questions)} scripted questions.\n\n"  # noqa: E501
+        f"ft-app: 512 MB, no swap, 0.1 CPU, fake providers, corpus of {len(questions)} scripted questions.\n\n"
         f"- load: {args.load_s:g} s, 2 clients, search and answer as 4 personas\n"
         f"- requests: {stats['requests']}, failed: {stats['errors']}\n"
         f"- memory peak: {peak:.1f} MiB (budget {LOAD_PEAK_MIB:g}); samples: {len(samples)}\n"

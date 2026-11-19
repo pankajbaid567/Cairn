@@ -1,6 +1,6 @@
 # Cairn as a SaaS product: plan
 
-Status: accepted 2026-11-19. Decisions: Amazon Cognito for login; team productivity first, so the phase order is A, C, B, D, E; all phases in scope. Nothing here is built yet except where marked "exists".
+Status: built and live 2026-11-19 (all five phases; see section 9). Accepted 2026-11-19. Decisions: Amazon Cognito for login; team productivity first, so the phase order is A, C, B, D, E; all phases in scope. Nothing here is built yet except where marked "exists".
 
 ## 1. The pitch (what a recruiter or buyer hears)
 
@@ -114,3 +114,17 @@ Order is A, B, D, C, E if the pitch is governance-first, or A, C, B, D, E if it 
 1. Auth: Amazon Cognito (the user creates the app client and, later, the Google OAuth keys).
 2. Pitch angle: team productivity first. Order A (foundation), C (daily reports), B (decisions and governance core), D (audit and controls), E (polish). The audit chain is still built in A, because every later module writes to it.
 3. Scope: all phases.
+
+## 9. What was built (2026-11-19) and what was not
+
+| Phase | Built | Evidence |
+|---|---|---|
+| A. Foundation | Tenancy (migration 0013), accounts and Cognito sign-in, organisations, roles, invitations, teams, deactivation, hash-chained audit events (0014, 0015), routed web app with sign-in, onboarding, People, Audit trail, Settings | `test_tenancy.py`, `test_people_audit.py`, `test_saas_api.py`; live smoke with real Cognito |
+| C. Daily reports | Reports with team-based visibility and a 14-day window (0016), feed, comments, roll-up, AI digest that cites reports, CSV export | `test_work_reports.py`, `test_reports_api.py` |
+| B. Governance | Approvals with quorum and segregation of duties, decisions proposed in Cairn (visible to the existing Decisions page), policies with versions and attestations, risk register (0017) | `test_governance.py`, `test_governance_api.py` |
+| D. Audit and controls | Access reviews, fifteen control checks, S3 Object Lock anchors, signed evidence pack (0018) | `test_compliance.py`, `test_compliance_api.py` |
+| E. Polish | Home dashboard, navigation, demo organisation seeded through the real flows (`scripts/seed_demo_org.py`), demo script, ADR-0019 | `test_dashboard_api.py`, `AppNav.test.tsx` |
+
+Test counts at the end of the build: 2,116 unit, 227 integration, 128 web tests; lint, `mypy --strict` on the core and the web gate all clean.
+
+Not built, on purpose or for time: MFA in the API (the pool allows it), Google and SAML sign-in, email delivery of invitations and reminders, billing and usage metering per organisation, MCP agent tokens per organisation, a Playwright end-to-end suite (the API and component tests cover the flows), GitHub activity in reports (needs the GitHub App installed by the owner), and any compliance certification.

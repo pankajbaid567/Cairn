@@ -146,7 +146,7 @@ def test_the_evidence_pack_is_a_signed_zip_whose_hashes_match(saas: Saas) -> Non
 
 
 def test_anchors_catch_a_chain_that_was_rewritten_end_to_end(
-    saas: Saas,
+    saas: Saas,  # noqa: F811
     anchors: MemoryAnchorStore,
 ) -> None:
     w = Workspace(saas, ROLES)

@@ -13,7 +13,12 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from realbench_run import VARIANTS, boot_ci, paired_diff, rank_metrics
+from realbench_run import (  # type: ignore[import-not-found]
+    VARIANTS,
+    boot_ci,
+    paired_diff,
+    rank_metrics,
+)
 
 OUT = Path("var/realbench")
 DOCS = Path("docs/evidence/real-bench")
@@ -70,7 +75,7 @@ def main() -> int:
             cells = []
             for k in ("hit5", "hit10", "mrr10", "ndcg10"):
                 m, lo, hi = boot_ci(per[v["name"]][k])
-                cells.append(f"{m:.3f} ({lo:.3f}–{hi:.3f})")
+                cells.append(f"{m:.3f} ({lo:.3f}–{hi:.3f})")  # noqa: RUF001
             L.append(f"| {v['name']} | " + " | ".join(cells) + " |")
         L.append("")
         if split is None:
@@ -181,7 +186,7 @@ def main() -> int:
     L.append("")
     (DOCS / "README.md").write_text("\n".join(L) + "\n")
     # review sheet: 60 judged items, stratified, for a person to confirm
-    rng = random.Random(3)
+    rng = random.Random(3)  # noqa: S311
     pick = rng.sample(judged, min(60, len(judged)))
     with (DOCS / "judge_review_sheet.csv").open("w", newline="") as fh:
         w = csv.writer(fh)

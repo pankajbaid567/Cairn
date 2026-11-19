@@ -137,7 +137,7 @@ def main() -> None:
     for f in OUT.glob("*.json"):
         (WEB_COPY / f.name).write_bytes(f.read_bytes())
     print(
-        f"wrote {len(manifest)} fixtures to {OUT.relative_to(REPO_ROOT)} and {WEB_COPY.relative_to(REPO_ROOT)}"  # noqa: E501
+        f"wrote {len(manifest)} fixtures to {OUT.relative_to(REPO_ROOT)} and {WEB_COPY.relative_to(REPO_ROOT)}"
     )
 
 

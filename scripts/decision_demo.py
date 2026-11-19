@@ -26,7 +26,7 @@ def login(client: httpx.Client, persona: str) -> None:
     r = client.post("/auth/dev-login", json={"persona": persona})
     if r.status_code != 204:
         sys.exit(
-            f"login as {persona} failed (HTTP {r.status_code}); is dev login on and the corpus seeded?"  # noqa: E501
+            f"login as {persona} failed (HTTP {r.status_code}); is dev login on and the corpus seeded?"
         )
     value = next(
         (
