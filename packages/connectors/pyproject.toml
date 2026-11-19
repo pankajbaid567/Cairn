@@ -1,0 +1,27 @@
+[project]
+name = "cairn-connectors"
+version = "0.1.0"
+description = "Cairn connectors: importers for source content and ACLs (Phase 1)."
+requires-python = "==3.12.*"
+dependencies = [
+    "cairn-core",
+    "cairn-retrieval",
+    "click==8.5.0",
+    "cryptography==50.0.2",
+    "psycopg[binary]==3.3.6",
+    "pyyaml==6.0.3",
+]
+
+[project.scripts]
+cairn-import = "cairn_connectors.cli:main"
+
+[tool.uv.sources]
+cairn-core = { workspace = true }
+cairn-retrieval = { workspace = true }
+
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cairn_connectors"]

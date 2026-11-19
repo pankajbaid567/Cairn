@@ -1,0 +1,195 @@
+# Cairn CI (design §10, PD-17). Every run step calls a Makefile target, so a local
+# `make gates` run is the CI run. Checked locally with `make actionlint` and
+# tests/scripts/test_ci_workflow.py; the first remote run waits for user step U4.
+#
+# Rules this file keeps (Requirements 10.1 to 10.6, 21, 22):
+#   - every `uses:` is pinned by full commit SHA, with the release tag in a comment
+#     (Verify V9, docs/evidence/phase-0/verify/V9.md)
+#   - the token is read-only; there are no secrets in this file and no
+#     pull_request_target trigger
+#   - the web, audit and licenses gates run on the host toolchain (WEB_RUNNER=host)
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * *" # nightly, 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer run on the same ref replaces an older one.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WEB_RUNNER: host
+  HYPOTHESIS_PROFILE: ci
+
+jobs:
+  python:
+    name: python
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: "0.11.25"
+          enable-cache: true
+      # `make licenses` reads the web dependency licenses with the host toolchain.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: "10.8.1"
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+      - name: Format check
+        run: make fmt-check
+      - name: Lint
+        run: make lint
+      - name: Types
+        run: make types
+      - name: Unit tests
+        run: make test-unit
+      - name: Scenario validation
+        run: make scenario-validate
+      # licenses rewrites docs/licenses.md, so it runs before the docs check.
+      - name: Licenses
+        run: make licenses
+      - name: Docs check
+        run: make docs-check
+
+  web:
+    name: web
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: "10.8.1"
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+      - name: Web checks
+        run: make web-check
+
+  lint-config:
+    name: lint-config
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compose config
+        run: make compose-check
+      - name: Workflow lint
+        run: make actionlint
+
+  security:
+    name: security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # fetch-depth 0: the history scan needs every commit.
+      - name: Check out with full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: "0.11.25"
+          enable-cache: true
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: "10.8.1"
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+      - name: Dependency audit
+        run: make audit
+      - name: Secret scan (working tree)
+        run: make secrets
+      # `gitleaks git` over the whole history, with the same GITLEAKS_IMAGE as `make secrets`.
+      - name: Secret scan (full history)
+        run: make secrets-history
+
+  integration:
+    name: integration
+    needs: python
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: "0.11.25"
+          enable-cache: true
+      # Random secrets for this run only; .env is gitignored and never uploaded.
+      - name: Write .env
+        run: make env
+      - name: Start the database
+        run: make up-db
+      - name: Integration tests
+        run: make test-integration
+      - name: Permission matrix
+        run: make matrix
+      - name: Migrations check
+        run: make migrations-check
+      - name: Eval smoke
+        run: make eval-smoke
+      # `smoke` builds and starts the core profile, waits until healthy, then runs the smoke tests.
+      - name: Core profile smoke test
+        run: make smoke
+      # The core and freetier profiles never run together (3.83 GiB Docker VM on the laptop;
+      # the runner follows the same order as `make gates`). freetier-check builds ft-app,
+      # runs its smoke, the managed-mode matrix and the RAM check, then removes the profile.
+      - name: Stop the core profile
+        run: make down
+      - name: Free-tier gate
+        run: make freetier-check
+      - name: Collect compose logs
+        if: failure()
+        run: make logs LOG_TAIL=1000 > compose-logs.txt 2>&1
+      - name: Collect free-tier logs
+        if: failure()
+        run: make freetier-logs LOG_TAIL=1000 > freetier-logs.txt 2>&1
+      - name: Upload compose logs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: compose-logs
+          path: |
+            compose-logs.txt
+            freetier-logs.txt
+          if-no-files-found: ignore
+          retention-days: 7

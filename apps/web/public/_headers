@@ -1,0 +1,9 @@
+# Cloudflare Pages static-asset headers (the nginx values of apps/web/nginx.conf).
+# These apply to static files only; responses of the /api Function carry the API's headers.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

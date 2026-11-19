@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "generated_at": "2026-10-30T18:04:00Z",
+  "result": "pass",
+  "verdict": "PASS: total peak 0.22 GiB is within the 6.00 GiB ceiling",
+  "parameters": {
+    "project": "cairn",
+    "warmup_s": 60,
+    "duration_s": 60,
+    "interval_s": 5,
+    "samples": 12,
+    "readyz_calls": 20,
+    "readyz_ok": 20,
+    "worker_heartbeat_log_lines_in_warmup": 2
+  },
+  "host_memory_bytes": 8589934592,
+  "docker_vm_memory_bytes": 4109672448,
+  "docker_server_version": "28.5.1",
+  "totals": {
+    "mean_bytes": 240543160,
+    "peak_bytes": 240826451,
+    "anon_plus_shmem_peak_bytes": 175747072,
+    "sum_of_limits_bytes": 1946157056
+  },
+  "comparison": {
+    "estimate_bytes": 4294967296,
+    "ceiling_bytes": 6442450944,
+    "peak_over_estimate": 0.0561,
+    "exceeds_estimate": false,
+    "exceeds_ceiling": false
+  },
+  "containers": [
+    {
+      "name": "cairn-api-1",
+      "limit_bytes": 402653184,
+      "samples": 12,
+      "mean_bytes": 52582591,
+      "peak_bytes": 52774830,
+      "anon_mean_bytes": 50134357,
+      "file_mean_bytes": 0,
+      "shmem_mean_bytes": 0,
+      "anon_plus_shmem_mean_bytes": 50134357,
+      "anon_plus_shmem_peak_bytes": 50135040,
+      "cgroup_peak_since_start_bytes": 69664768
+    },
+    {
+      "name": "cairn-db-1",
+      "limit_bytes": 1073741824,
+      "samples": 12,
+      "mean_bytes": 120586240,
+      "peak_bytes": 120691098,
+      "anon_mean_bytes": 22799701,
+      "file_mean_bytes": 110516224,
+      "shmem_mean_bytes": 38686720,
+      "anon_plus_shmem_mean_bytes": 61486421,
+      "anon_plus_shmem_peak_bytes": 61562880,
+      "cgroup_peak_since_start_bytes": 150994944
+    },
+    {
+      "name": "cairn-web-1",
+      "limit_bytes": 67108864,
+      "samples": 12,
+      "mean_bytes": 2664956,
+      "peak_bytes": 2776629,
+      "anon_mean_bytes": 1977344,
+      "file_mean_bytes": 12288,
+      "shmem_mean_bytes": 8192,
+      "anon_plus_shmem_mean_bytes": 1985536,
+      "anon_plus_shmem_peak_bytes": 1986560,
+      "cgroup_peak_since_start_bytes": 5296128
+    },
+    {
+      "name": "cairn-worker-1",
+      "limit_bytes": 402653184,
+      "samples": 12,
+      "mean_bytes": 64709373,
+      "peak_bytes": 64948797,
+      "anon_mean_bytes": 62039723,
+      "file_mean_bytes": 0,
+      "shmem_mean_bytes": 0,
+      "anon_plus_shmem_mean_bytes": 62039723,
+      "anon_plus_shmem_peak_bytes": 62070784,
+      "cgroup_peak_since_start_bytes": 77467648
+    }
+  ],
+  "images": [
+    {
+      "container": "cairn-api-1",
+      "reference": "cairn-api:local",
+      "image_id": "sha256:9281139a3c8ab96ea055ae8055baaa475b480294e031541d4ecf2d120b2ea2e8",
+      "repo_digests": [
+        "cairn-api@sha256:9281139a3c8ab96ea055ae8055baaa475b480294e031541d4ecf2d120b2ea2e8"
+      ]
+    },
+    {
+      "container": "cairn-db-1",
+      "reference": "paradedb/paradedb:0.26.3-pg18@sha256:9b15fc383bcd771f1e32e222bd1603c4c29856c481f6bd06f1960e89608c02f0",
+      "image_id": "sha256:9b15fc383bcd771f1e32e222bd1603c4c29856c481f6bd06f1960e89608c02f0",
+      "repo_digests": [
+        "paradedb/paradedb@sha256:9b15fc383bcd771f1e32e222bd1603c4c29856c481f6bd06f1960e89608c02f0"
+      ]
+    },
+    {
+      "container": "cairn-web-1",
+      "reference": "cairn-web:local",
+      "image_id": "sha256:c99c6de137d9c6723ea3b5eef83f77c6baf2638a57b60caed029ea1a7a56d08f",
+      "repo_digests": [
+        "cairn-web@sha256:c99c6de137d9c6723ea3b5eef83f77c6baf2638a57b60caed029ea1a7a56d08f"
+      ]
+    },
+    {
+      "container": "cairn-worker-1",
+      "reference": "cairn-worker:local",
+      "image_id": "sha256:9d8d9f9369ea87c6bdf317456033058651e373b6816371fa53ac597a32c1541b",
+      "repo_digests": [
+        "cairn-worker@sha256:9d8d9f9369ea87c6bdf317456033058651e373b6816371fa53ac597a32c1541b"
+      ]
+    }
+  ],
+  "other_running_containers_not_counted": [
+    "openwa-api"
+  ]
+}

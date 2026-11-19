@@ -1,0 +1,54 @@
+# pre-commit hooks (design §2, Requirement 2.5). Every rev is an exact release tag.
+# `uv run pre-commit install` is a user step (U2) because it needs a git repository;
+# `uv run pre-commit validate-config .pre-commit-config.yaml` works without one.
+minimum_pre_commit_version: "4.7.0"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: detect-private-key
+      - id: check-merge-conflict
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3 # keep equal to ruff in the root dev group
+    hooks:
+      - id: ruff-check
+        args: ["--fix", "--exit-non-zero-on-fix"]
+      - id: ruff-format
+        # Python only: ruff 0.17 would otherwise also format Markdown code blocks.
+        types_or: [python, pyi]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks-docker
+        # The hook's default image is unpinned (zricethezav/gitleaks:latest);
+        # run the same release as the rev above, pinned by digest.
+        entry: ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --pre-commit --redact --staged --verbose
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (strict on packages/core, base elsewhere)
+        entry: make types
+        language: unsupported
+        types: [python]
+        pass_filenames: false
+      - id: web-check
+        name: web checks (eslint, prettier, tsc, vitest, build)
+        entry: make web-check
+        language: unsupported
+        # Runs only for web source, config and lock files under apps/web. The types
+        # filter skips .gitkeep, so the hook never fires while the folder is empty.
+        # The web-check target arrives with task 7.1.
+        files: ^apps/web/
+        types_or: [ts, tsx, javascript, jsx, json, css, html, yaml]
+        pass_filenames: false

@@ -1,0 +1,29 @@
+{
+  "answers": {
+    "abstention_correct": 12,
+    "answered": 16,
+    "answers": 16,
+    "dropped_claims": 0,
+    "gold_cited_recall": 0.7917,
+    "leaks": 0
+  },
+  "b0_fts_filled": 0,
+  "by_category": {
+    "agent_brief": 1.0,
+    "as_of": 1.0,
+    "permission": 1.0,
+    "when_who": 1.0,
+    "why": 1.0
+  },
+  "citation_failures": 0,
+  "degraded_rows": 0,
+  "eligible": 12,
+  "est_neurons_per_query": 14.62,
+  "hit_at_5": 1.0,
+  "latency_p50_ms": 4.8,
+  "latency_p95_ms": 6.79,
+  "leaks": 0,
+  "neurons_reserved": 0,
+  "questions": 16,
+  "recall_at_5": 1.0
+}

@@ -1,0 +1,21 @@
+{
+  "body": "{\"action\":\"privatized\",\"installation\":{\"id\":5003},\"organization\":{\"id\":7001,\"login\":\"kestrel-pay-demo\"},\"repository\":{\"full_name\":\"kestrel-pay-demo/eng-docs\",\"id\":9002}}",
+  "expected": {
+    "action": "privatized",
+    "class": "acl",
+    "delivery_id": "fixture-0003-repository_privatized",
+    "event": "repository",
+    "installation_id": 5003,
+    "object_number": null,
+    "org_id": 7001,
+    "repo_id": 9002,
+    "repo_name": "kestrel-pay-demo/eng-docs"
+  },
+  "headers": {
+    "content-type": "application/json",
+    "x-github-delivery": "fixture-0003-repository_privatized",
+    "x-github-event": "repository",
+    "x-hub-signature-256": "sha256=62d980bfcef691e7884bbf9a201ee21409f25bb010a38099105470aa11c73fad"
+  },
+  "name": "repository_privatized"
+}

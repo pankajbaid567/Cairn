@@ -1,0 +1,117 @@
+# Cairn uv workspace root.
+#
+# Virtual root: there is no [project] table, so the root itself is never built
+# or installed. The members below share one uv.lock and one .venv, and depend
+# on each other through `{ workspace = true }` sources.
+# Every direct third-party dependency is pinned with `==`; uv.lock pins the
+# rest with sha256 hashes.
+
+[tool.uv]
+required-version = "==0.11.25"
+# Use uv-managed CPython only, so an active conda or other system Python can
+# never become the interpreter of .venv. Container builds that use the image's
+# own Python must override this with UV_PYTHON_PREFERENCE=only-system.
+python-preference = "only-managed"
+
+[tool.uv.workspace]
+members = ["apps/api", "apps/worker", "apps/combined", "apps/mcp", "packages/*"]
+
+[dependency-groups]
+dev = [
+    "httpx==0.28.1",
+    "httpx2==2.16.0",
+    "hypothesis==6.170.12",
+    "mypy==2.4.0",
+    "pip-audit==2.10.1",
+    "pip-licenses==5.5.5",
+    "pre-commit==4.7.0",
+    "pyarrow-stubs==20.0.0.20260819",
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.1",
+    "ruff==0.17.3",
+    "types-jsonschema==4.26.0.20261006",
+    "types-pyyaml==6.0.12.20260906",
+]
+
+# ---------------------------------------------------------------------------
+# ruff: formatting and linting (design §2). `make fmt-check lint`.
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# First-party code: the repo root (scripts, tests) and every member's src dir.
+src = [".", "apps/*/src", "packages/*/src"]
+# Python sources only. Ruff 0.17 also formats code blocks in Markdown by
+# default; the docs keep their snippets as written.
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
+# The two source documents are never rewritten by any tool (Requirement 1.5).
+extend-exclude = ["brainstorm.md", "development_plan.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "PT", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# pytest asserts with plain `assert`; test credentials are fake by construction;
+# tests and dev scripts shell out to docker, uv and pnpm on purpose.
+"**/tests/**/*.py" = ["S101", "S105", "S106", "S603", "S607"]
+"scripts/**/*.py" = ["S603", "S607"]
+
+# ---------------------------------------------------------------------------
+# mypy (design §2, PD-03). `make types` runs it twice: `--strict` over
+# packages/core, then this base configuration over every other Python directory.
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+warn_unused_ignores = true
+disallow_untyped_defs = true
+# Test files share basenames across members (tests/unit/test_import.py), so
+# module names come from the path: each member's src dir is a package base, and
+# everything else is named from the repo root (apps.api.tests.unit.test_import).
+explicit_package_bases = true
+mypy_path = [
+    "apps/api/src",
+    "apps/worker/src",
+    "apps/combined/src",
+    "apps/mcp/src",
+    "packages/core/src",
+    "packages/connectors/src",
+    "packages/retrieval/src",
+    "packages/eval/src",
+]
+
+[[tool.mypy.overrides]]
+# Untyped single-file modules with no maintained stubs (task 1.1 notes).
+module = ["jsonpatch", "jsonpointer", "boto3", "boto3.*", "botocore", "botocore.*"]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# ---------------------------------------------------------------------------
+# pytest (design §2, §15). Unmarked tests are unit tests.
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "9.1"
+testpaths = ["apps", "packages", "tests"]
+# importlib mode: test files may share basenames across members.
+addopts = ["--strict-markers", "--strict-config", "--import-mode=importlib", "-ra"]
+# The repo root on sys.path, so tests/scripts can import scripts.<name>.
+pythonpath = ["."]
+markers = [
+    "unit: no I/O beyond temporary files; the default layer, marking is optional",
+    "integration: needs the compose db service (make up-db)",
+    "matrix: permission assertions (roles and default deny in Phase 0)",
+    "managed: runs against ft-db as cairn_admin when CAIRN_TEST_ADMIN_MODE=managed (make matrix-managed)",
+    "freetier: needs the freetier profile running (make freetier-up)",
+    "smoke: needs the full core profile running (make up)",
+    "obs: needs the core and obs profiles running with span export (make up-obs)",
+    "live: calls the real Workers AI API; runs only through make workers-ai-live-check (user-run, FU8)",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+asyncio_default_test_loop_scope = "function"
+strict_xfail = true
+filterwarnings = ["error"]

@@ -1,0 +1,344 @@
+{
+  "schema": 1,
+  "date": "2026-11-04",
+  "generated_at": "2026-11-04T16:58:12Z",
+  "result": "pass",
+  "verdict": "PASS: every budget rule holds",
+  "reasons": [],
+  "budget": {
+    "limit_mib": 512.0,
+    "idle_peak_mib": 300.0,
+    "load_peak_mib": 384.0,
+    "max_error_ratio": 0.02
+  },
+  "parameters": {
+    "idle_s": 60.0,
+    "load_s": 60.0,
+    "interval_s": 2.0,
+    "clients": 2,
+    "pause_s": 0.2,
+    "request_timeout_s": 60.0,
+    "figure": "docker stats --no-stream MemUsage (cgroup usage minus inactive file cache)"
+  },
+  "container": {
+    "name": "cairn-ft-app-1",
+    "image": "cairn-combined:local",
+    "image_id": "sha256:97c1f877786d5663e358af5aab5e639ee788b85bc76adb8f2c9064933ed75ae5",
+    "memory_limit_bytes": 536870912,
+    "nano_cpus": 100000000,
+    "state": "running",
+    "exit_code": 0,
+    "oom_killed": false,
+    "restart_count": 0
+  },
+  "docker": {
+    "vm_memory_bytes": 4109672448,
+    "server_version": "28.5.1"
+  },
+  "idle": {
+    "samples": [
+      {
+        "t_s": 0.0,
+        "mib": 85.71
+      },
+      {
+        "t_s": 2.0,
+        "mib": 85.8
+      },
+      {
+        "t_s": 4.6,
+        "mib": 85.52
+      },
+      {
+        "t_s": 6.6,
+        "mib": 85.51
+      },
+      {
+        "t_s": 8.7,
+        "mib": 85.54
+      },
+      {
+        "t_s": 10.7,
+        "mib": 85.51
+      },
+      {
+        "t_s": 12.7,
+        "mib": 85.53
+      },
+      {
+        "t_s": 14.8,
+        "mib": 85.55
+      },
+      {
+        "t_s": 16.8,
+        "mib": 85.54
+      },
+      {
+        "t_s": 18.8,
+        "mib": 85.54
+      },
+      {
+        "t_s": 20.9,
+        "mib": 85.54
+      },
+      {
+        "t_s": 22.9,
+        "mib": 85.55
+      },
+      {
+        "t_s": 24.9,
+        "mib": 85.54
+      },
+      {
+        "t_s": 27.0,
+        "mib": 85.55
+      },
+      {
+        "t_s": 29.0,
+        "mib": 92.54
+      },
+      {
+        "t_s": 31.0,
+        "mib": 94.31
+      },
+      {
+        "t_s": 33.0,
+        "mib": 96.5
+      },
+      {
+        "t_s": 35.1,
+        "mib": 85.57
+      },
+      {
+        "t_s": 37.1,
+        "mib": 85.57
+      },
+      {
+        "t_s": 39.2,
+        "mib": 85.57
+      },
+      {
+        "t_s": 41.2,
+        "mib": 85.57
+      },
+      {
+        "t_s": 43.2,
+        "mib": 85.57
+      },
+      {
+        "t_s": 45.2,
+        "mib": 85.57
+      },
+      {
+        "t_s": 47.3,
+        "mib": 85.56
+      },
+      {
+        "t_s": 49.3,
+        "mib": 85.57
+      },
+      {
+        "t_s": 51.3,
+        "mib": 85.57
+      },
+      {
+        "t_s": 53.4,
+        "mib": 85.57
+      },
+      {
+        "t_s": 55.4,
+        "mib": 85.57
+      },
+      {
+        "t_s": 57.5,
+        "mib": 85.82
+      },
+      {
+        "t_s": 59.5,
+        "mib": 85.58
+      }
+    ],
+    "sample_failures": 0,
+    "peak_mib": 96.5,
+    "mean_mib": 86.46
+  },
+  "load": {
+    "samples": [
+      {
+        "t_s": 0.0,
+        "mib": 85.69
+      },
+      {
+        "t_s": 2.0,
+        "mib": 85.72
+      },
+      {
+        "t_s": 4.1,
+        "mib": 87.02
+      },
+      {
+        "t_s": 6.1,
+        "mib": 92.65
+      },
+      {
+        "t_s": 8.1,
+        "mib": 95.13
+      },
+      {
+        "t_s": 10.1,
+        "mib": 95.25
+      },
+      {
+        "t_s": 12.2,
+        "mib": 96.98
+      },
+      {
+        "t_s": 14.2,
+        "mib": 96.76
+      },
+      {
+        "t_s": 16.3,
+        "mib": 97.28
+      },
+      {
+        "t_s": 18.3,
+        "mib": 97.75
+      },
+      {
+        "t_s": 20.3,
+        "mib": 101.0
+      },
+      {
+        "t_s": 22.3,
+        "mib": 100.8
+      },
+      {
+        "t_s": 24.4,
+        "mib": 101.3
+      },
+      {
+        "t_s": 26.4,
+        "mib": 86.58
+      },
+      {
+        "t_s": 28.4,
+        "mib": 85.87
+      },
+      {
+        "t_s": 30.5,
+        "mib": 86.42
+      },
+      {
+        "t_s": 32.6,
+        "mib": 85.94
+      },
+      {
+        "t_s": 34.6,
+        "mib": 85.94
+      },
+      {
+        "t_s": 36.7,
+        "mib": 86.19
+      },
+      {
+        "t_s": 38.7,
+        "mib": 86.2
+      },
+      {
+        "t_s": 40.7,
+        "mib": 85.94
+      },
+      {
+        "t_s": 42.7,
+        "mib": 86.42
+      },
+      {
+        "t_s": 44.8,
+        "mib": 86.68
+      },
+      {
+        "t_s": 46.8,
+        "mib": 86.18
+      },
+      {
+        "t_s": 48.8,
+        "mib": 86.42
+      },
+      {
+        "t_s": 50.8,
+        "mib": 85.95
+      },
+      {
+        "t_s": 52.9,
+        "mib": 85.94
+      },
+      {
+        "t_s": 54.9,
+        "mib": 86.71
+      },
+      {
+        "t_s": 56.9,
+        "mib": 88.64
+      },
+      {
+        "t_s": 59.0,
+        "mib": 93.29
+      }
+    ],
+    "sample_failures": 0,
+    "peak_mib": 101.3,
+    "mean_mib": 90.29,
+    "requests": 163,
+    "errors": 2,
+    "error_ratio": 0.0123,
+    "status_counts": {
+      "200": 107,
+      "404": 54,
+      "503": 2
+    },
+    "error_kinds": {},
+    "latency_ms": {
+      "p50": 164.2,
+      "p95": 2293.9,
+      "max": 10078.6
+    },
+    "by_path": {
+      "/readyz": {
+        "expected_status": 200,
+        "requests": 55,
+        "errors": 2,
+        "latency_ms": {
+          "p50": 496.1,
+          "p95": 5687.6,
+          "max": 10078.6
+        }
+      },
+      "/healthz": {
+        "expected_status": 200,
+        "requests": 54,
+        "errors": 0,
+        "latency_ms": {
+          "p50": 86.6,
+          "p95": 1197.7,
+          "max": 1297.5
+        }
+      },
+      "/cairn-ram-check-unknown": {
+        "expected_status": 404,
+        "requests": 54,
+        "errors": 0,
+        "latency_ms": {
+          "p50": 89.9,
+          "p95": 2293.9,
+          "max": 4795.0
+        }
+      }
+    }
+  },
+  "cgroup_at_end": {
+    "memory_peak_since_start_bytes": 107859968,
+    "anon_bytes": 97751040,
+    "file_bytes": 40960,
+    "shmem_bytes": 0
+  }
+}

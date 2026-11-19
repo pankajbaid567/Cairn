@@ -1,0 +1,1439 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Kestrel Pay scenario, schema version 1",
+  "$defs": {
+    "AccessGrant": {
+      "additionalProperties": false,
+      "properties": {
+        "team": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team"
+        },
+        "person": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Person"
+        },
+        "permission": {
+          "enum": [
+            "read",
+            "write",
+            "admin"
+          ],
+          "title": "Permission",
+          "type": "string"
+        }
+      },
+      "required": [
+        "permission"
+      ],
+      "title": "AccessGrant",
+      "type": "object"
+    },
+    "Anchors": {
+      "additionalProperties": false,
+      "properties": {
+        "repos": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Repos",
+          "type": "array"
+        },
+        "paths": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "prs": {
+          "default": [],
+          "items": {
+            "pattern": "^[a-z][a-z0-9-]*#\\d+$",
+            "type": "string"
+          },
+          "title": "Prs",
+          "type": "array"
+        }
+      },
+      "title": "Anchors",
+      "type": "object"
+    },
+    "AsOf": {
+      "additionalProperties": false,
+      "properties": {
+        "valid": {
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Valid",
+          "type": "string"
+        },
+        "recorded": {
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Recorded",
+          "type": "string"
+        }
+      },
+      "required": [
+        "valid",
+        "recorded"
+      ],
+      "title": "AsOf",
+      "type": "object"
+    },
+    "Canary": {
+      "additionalProperties": false,
+      "description": "A planted string. ``token`` canaries are generated (``canary_token``) and referenced\nas ``{{canary:ID}}``; ``phrase`` canaries are literal text.",
+      "properties": {
+        "id": {
+          "pattern": "^CAN-(HR|PARTNER|SEC|INC)-\\d{2}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "family": {
+          "enum": [
+            "hr",
+            "partner",
+            "security",
+            "incident"
+          ],
+          "title": "Family",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "token",
+            "phrase"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "phrase": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Phrase"
+        },
+        "allowed_scopes": {
+          "items": {
+            "pattern": "^(repo|channel|meeting):[a-z0-9][a-z0-9_.-]*$",
+            "type": "string"
+          },
+          "title": "Allowed Scopes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "family",
+        "kind",
+        "allowed_scopes"
+      ],
+      "title": "Canary",
+      "type": "object"
+    },
+    "Channel": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "private": {
+          "title": "Private",
+          "type": "boolean"
+        },
+        "members": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PrincipalRef"
+          },
+          "title": "Members",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "private"
+      ],
+      "title": "Channel",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^C\\d+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "T1",
+            "T2",
+            "T3",
+            "T4",
+            "T5"
+          ],
+          "title": "Tier",
+          "type": "string"
+        },
+        "support_sets": {
+          "items": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Support Sets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "tier",
+        "support_sets"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Conflict": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^K\\d+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "sides": {
+          "items": {
+            "$ref": "#/$defs/ConflictSide"
+          },
+          "title": "Sides",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "subject",
+        "sides"
+      ],
+      "title": "Conflict",
+      "type": "object"
+    },
+    "ConflictSide": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "T1",
+            "T2",
+            "T3",
+            "T4",
+            "T5"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "source",
+        "tier"
+      ],
+      "title": "ConflictSide",
+      "type": "object"
+    },
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^ADR-\\d{3}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcome"
+        },
+        "options": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DecisionOption"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "decision_makers": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Decision Makers",
+          "type": "array"
+        },
+        "approvers": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Approvers",
+          "type": "array"
+        },
+        "consulted": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PrincipalRef"
+          },
+          "title": "Consulted",
+          "type": "array"
+        },
+        "informed": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PrincipalRef"
+          },
+          "title": "Informed",
+          "type": "array"
+        },
+        "anchors": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Anchors"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "confirmation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmation"
+        },
+        "timeline": {
+          "items": {
+            "$ref": "#/$defs/TimelineEvent"
+          },
+          "title": "Timeline",
+          "type": "array"
+        },
+        "claims": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "title": "Claims",
+          "type": "array"
+        },
+        "conflicts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Conflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "supersedes": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Supersedes",
+          "type": "array"
+        },
+        "superseded_by": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Superseded By",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "timeline"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "DecisionOption": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "chosen",
+            "rejected",
+            "considered"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "verdict"
+      ],
+      "title": "DecisionOption",
+      "type": "object"
+    },
+    "Expected": {
+      "additionalProperties": false,
+      "properties": {
+        "decisions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Decisions",
+          "type": "array"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "lifecycle": {
+          "additionalProperties": {
+            "enum": [
+              "proposed",
+              "accepted",
+              "rejected",
+              "withdrawn",
+              "implemented",
+              "superseded",
+              "deprecated",
+              "reverted",
+              "absent"
+            ],
+            "type": "string"
+          },
+          "default": {},
+          "title": "Lifecycle",
+          "type": "object"
+        },
+        "abstain": {
+          "default": false,
+          "title": "Abstain",
+          "type": "boolean"
+        },
+        "must_not_contain": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Must Not Contain",
+          "type": "array"
+        },
+        "must_not_cite": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Must Not Cite",
+          "type": "array"
+        }
+      },
+      "title": "Expected",
+      "type": "object"
+    },
+    "Issue": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "state": {
+          "default": "open",
+          "enum": [
+            "open",
+            "closed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "labels": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "number"
+      ],
+      "title": "Issue",
+      "type": "object"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "description": "Where a source lives: a repo (with a path), a channel, or a meeting.",
+      "properties": {
+        "repo": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "meeting": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Meeting"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "Location",
+      "type": "object"
+    },
+    "Meeting": {
+      "additionalProperties": false,
+      "properties": {
+        "attendees": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Attendees",
+          "type": "array"
+        },
+        "share_with": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PrincipalRef"
+          },
+          "title": "Share With",
+          "type": "array"
+        }
+      },
+      "required": [
+        "attendees"
+      ],
+      "title": "Meeting",
+      "type": "object"
+    },
+    "Membership": {
+      "additionalProperties": false,
+      "description": "A person's membership of a team over ``[from, to)``; ``to`` absent means open.",
+      "properties": {
+        "person": {
+          "minLength": 1,
+          "title": "Person",
+          "type": "string"
+        },
+        "team": {
+          "minLength": 1,
+          "title": "Team",
+          "type": "string"
+        },
+        "from": {
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "To"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "person",
+        "team",
+        "from"
+      ],
+      "title": "Membership",
+      "type": "object"
+    },
+    "Message": {
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "minLength": 1,
+          "title": "Author",
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$",
+          "title": "At",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "at",
+        "text"
+      ],
+      "title": "Message",
+      "type": "object"
+    },
+    "Meta": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "reference_date": {
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Reference Date",
+          "type": "string"
+        },
+        "canary_seed": {
+          "minLength": 1,
+          "title": "Canary Seed",
+          "type": "string"
+        },
+        "github_org": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Github Org"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "reference_date",
+        "canary_seed"
+      ],
+      "title": "Meta",
+      "type": "object"
+    },
+    "Person": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "external": {
+          "default": false,
+          "title": "External",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "title"
+      ],
+      "title": "Person",
+      "type": "object"
+    },
+    "PrincipalRef": {
+      "additionalProperties": false,
+      "description": "Reference to exactly one team or one person: ``{team: payments}`` or ``{person: dev}``.",
+      "properties": {
+        "team": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team"
+        },
+        "person": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Person"
+        }
+      },
+      "title": "PrincipalRef",
+      "type": "object"
+    },
+    "PullRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "state": {
+          "enum": [
+            "open",
+            "merged",
+            "closed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "merged_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Merged At"
+        },
+        "labels": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "number",
+        "state"
+      ],
+      "title": "PullRequest",
+      "type": "object"
+    },
+    "Question": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^Q\\d{3}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "dev",
+            "test"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "why",
+            "when_who",
+            "as_of",
+            "conflict",
+            "supersession",
+            "not_found",
+            "permission",
+            "agent_brief"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "asker": {
+          "pattern": "^(agent:)?[a-z][a-z0-9_]*$",
+          "title": "Asker",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "as_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AsOf"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "twists": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Twists",
+          "type": "array"
+        },
+        "expected": {
+          "$ref": "#/$defs/Expected"
+        }
+      },
+      "required": [
+        "id",
+        "split",
+        "category",
+        "asker",
+        "text",
+        "expected"
+      ],
+      "title": "Question",
+      "type": "object"
+    },
+    "Repo": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "private",
+            "public"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "access": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AccessGrant"
+          },
+          "title": "Access",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "visibility"
+      ],
+      "title": "Repo",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "description": "One piece of evidence the renderers turn into a doc, thread, note, PR or issue.\n\nText fields (``title``, ``body``, ``messages[].text``) may hold ``{{canary:ID}}``\nplaceholders for token canaries.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "doc",
+            "adr_file",
+            "wiki",
+            "meeting_note",
+            "chat_thread",
+            "pull_request",
+            "issue"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date",
+          "type": "string"
+        },
+        "available": {
+          "anyOf": [
+            {
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Available"
+        },
+        "last_edited": {
+          "anyOf": [
+            {
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Edited"
+        },
+        "deleted": {
+          "anyOf": [
+            {
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deleted"
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Author"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "messages": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Message"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "pr": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PullRequest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "issue": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Issue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "date",
+        "location"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Team": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Team",
+      "type": "object"
+    },
+    "TimelineEvent": {
+      "additionalProperties": false,
+      "description": "One dated event: ``on`` is when it happened, ``effective`` when it holds in reality.",
+      "properties": {
+        "event": {
+          "anyOf": [
+            {
+              "enum": [
+                "proposed",
+                "accepted",
+                "rejected",
+                "withdrawn",
+                "implemented",
+                "superseded",
+                "deprecated",
+                "reverted",
+                "reopened"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "discussed",
+                "amended",
+                "partially_reverted"
+              ],
+              "type": "string"
+            }
+          ],
+          "title": "Event"
+        },
+        "on": {
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "On",
+          "type": "string"
+        },
+        "effective": {
+          "anyOf": [
+            {
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "by": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "By"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "event",
+        "on",
+        "source"
+      ],
+      "title": "TimelineEvent",
+      "type": "object"
+    },
+    "Twist": {
+      "additionalProperties": false,
+      "description": "A named hard case. Which of ``decisions``, ``people`` and ``sources`` must be filled\ndepends on ``kind`` (rule TW-2).",
+      "properties": {
+        "id": {
+          "pattern": "^TW-[A-Z0-9-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "cross_source_archaeology",
+            "private_rationale",
+            "partial_revert",
+            "split_rationale",
+            "supersession",
+            "deleted_source",
+            "backdated_valid_time",
+            "scheduled_change",
+            "conflicting_dates",
+            "drift",
+            "restricted_decision",
+            "temporary_access",
+            "stale_doc",
+            "hr_restricted",
+            "team_move",
+            "injected_instruction"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "decisions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Decisions",
+          "type": "array"
+        },
+        "people": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "People",
+          "type": "array"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ],
+      "title": "Twist",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "people": {
+      "items": {
+        "$ref": "#/$defs/Person"
+      },
+      "title": "People",
+      "type": "array"
+    },
+    "teams": {
+      "items": {
+        "$ref": "#/$defs/Team"
+      },
+      "title": "Teams",
+      "type": "array"
+    },
+    "memberships": {
+      "items": {
+        "$ref": "#/$defs/Membership"
+      },
+      "title": "Memberships",
+      "type": "array"
+    },
+    "repos": {
+      "items": {
+        "$ref": "#/$defs/Repo"
+      },
+      "title": "Repos",
+      "type": "array"
+    },
+    "channels": {
+      "items": {
+        "$ref": "#/$defs/Channel"
+      },
+      "title": "Channels",
+      "type": "array"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/Source"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/Decision"
+      },
+      "title": "Decisions",
+      "type": "array"
+    },
+    "twists": {
+      "items": {
+        "$ref": "#/$defs/Twist"
+      },
+      "title": "Twists",
+      "type": "array"
+    },
+    "canaries": {
+      "items": {
+        "$ref": "#/$defs/Canary"
+      },
+      "title": "Canaries",
+      "type": "array"
+    },
+    "questions": {
+      "items": {
+        "$ref": "#/$defs/Question"
+      },
+      "title": "Questions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "meta",
+    "people",
+    "teams",
+    "memberships",
+    "repos",
+    "channels",
+    "sources",
+    "decisions",
+    "twists",
+    "canaries",
+    "questions"
+  ],
+  "type": "object"
+}

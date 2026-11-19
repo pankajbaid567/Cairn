@@ -1,0 +1,21 @@
+# Build context for images built from the repo root.
+# Keep secrets, local environments, caches and build output out of every image.
+**/.git
+.env
+.env.*
+.venv
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+**/.hypothesis
+.coverage
+.coverage.*
+htmlcov
+**/node_modules
+.pnpm-store
+**/dist
+var
+**/.DS_Store

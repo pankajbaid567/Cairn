@@ -1,0 +1,21 @@
+{
+  "body": "{\"action\":\"removed\",\"installation\":{\"id\":5003},\"member\":{\"login\":\"rook\"},\"repository\":{\"full_name\":\"kestrel-pay-demo/eng-docs\",\"id\":9002}}",
+  "expected": {
+    "action": "removed",
+    "class": "acl",
+    "delivery_id": "fixture-0004-member_removed",
+    "event": "member",
+    "installation_id": 5003,
+    "object_number": null,
+    "org_id": null,
+    "repo_id": 9002,
+    "repo_name": "kestrel-pay-demo/eng-docs"
+  },
+  "headers": {
+    "content-type": "application/json",
+    "x-github-delivery": "fixture-0004-member_removed",
+    "x-github-event": "member",
+    "x-hub-signature-256": "sha256=538435401e0b555d4b170aaec9b533a3a023ce76ac534b95ac43e691b5de4f00"
+  },
+  "name": "member_removed"
+}

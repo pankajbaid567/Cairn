@@ -1,0 +1,10 @@
+# make matrix, 2026-11-04, build with Phase 5 code
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+apps/api/tests/integration/test_canary_matrix_v1.py ...                  [  5%]
+apps/api/tests/integration/test_canary_sync_states.py .                  [  7%]
+apps/api/tests/integration/test_mcp_agents.py .......                    [ 21%]
+apps/api/tests/integration/test_persona_script.py ..                     [ 25%]
+apps/api/tests/integration/test_query_registry.py ...................... [ 68%]
+packages/core/tests/integration/test_roles.py ..........s..              [100%]
+SKIPPED [1] packages/core/tests/integration/test_roles.py:175: needs CAIRN_TEST_ADMIN_MODE=managed and ft-db (make matrix-managed)
+========== 50 passed, 1 skipped, 2150 deselected in 83.62s (0:01:23) ===========

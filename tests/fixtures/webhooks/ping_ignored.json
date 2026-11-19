@@ -1,0 +1,11 @@
+{
+  "body": "{\"zen\":\"Keep it logically awesome.\"}",
+  "expected": null,
+  "headers": {
+    "content-type": "application/json",
+    "x-github-delivery": "fixture-0009-ping_ignored",
+    "x-github-event": "ping",
+    "x-hub-signature-256": "sha256=97a8b064e522f71fe546f33efd741c932cd0984e1e7eeacf156fa64dbbf80263"
+  },
+  "name": "ping_ignored"
+}

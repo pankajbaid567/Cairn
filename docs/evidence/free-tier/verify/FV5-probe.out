@@ -1,0 +1,55 @@
+throwaway database: cairn_test_dbos_fv5_eefe39a1; core db at 127.0.0.1:55432
+python 3.12.12, dbos 3.3.0
+== 1. Relaunch after a failed launch, same process
+threads before: 0
+  closed port: failed at launch after 0.0 s: OperationalError sqlstate=None
+  closed port: destroy took 0.00 s
+  threads after destroy: 0 []
+  wrong password: failed at launch after 0.0 s: OperationalError sqlstate=None
+  wrong password: destroy took 0.00 s
+  threads after destroy: 0 []
+  missing database: failed at launch after 0.0 s: OperationalError sqlstate=None
+  missing database: destroy took 0.00 s
+  threads after destroy: 0 []
+-- then a good attempt in the same process (3 failures happened before it)
+  good after 3 failures: heartbeat SUCCESS runs seen: 1
+  good after 3 failures: launched in 3.8 s
+  good after 3 failures: destroy took 0.04 s
+  RESULT relaunch works: True
+  threads after final destroy: 0 []
+-- failed launch WITHOUT destroy, then DBOS(config=good) and launch again
+  first launch failed: OperationalError sqlstate=None
+  second launch without destroy raised: OperationalError sqlstate=None
+-- and a good launch after that cleanup
+  good after no-destroy case: launched in 0.1 s
+  good after no-destroy case: destroy took 0.08 s
+  RESULT: True
+== 2. automatic_backfill default
+  without the key: [('cairn-heartbeat', False)]
+  with False:      [('cairn-heartbeat', False)]
+  with True:       [('cairn-heartbeat', True)]
+== 4. Launch from a non-main thread while uvicorn serves in the main thread
+  thread launch: heartbeat SUCCESS runs seen: 1
+  thread launch: launched in 0.6 s
+  result: {'launched': True, 'launch_s': 0.58510462497361, 'healthz_while_up': 200, 'destroy_s': 0.031724583997856826}
+== 3. Idle query rate (launched, cron 0 */5 * * * *, 60 s window)
+  transactions in 60 s: 570 (9.49/s)
+  tuples returned: 2000, fetched: 714
+  per 10 s: [100, 100, 104, 96, 90, 80]
+  connections to the DBOS database by state: [('idle', 5)]
+== 5. TLS parameters in the DBOS URL
+-- against the core db (ssl is off there)
+  sslmode=disable: connected
+  sslmode=prefer: connected
+  sslmode=require: OperationalError
+  verify-full + sslrootcert=server cert: launched in 0.4 s
+  verify-full + sslrootcert=server cert: destroy took 0.08 s
+  verify-full + missing sslrootcert file: failed at launch after 0.0 s: OperationalError sqlstate=None
+  verify-full + missing sslrootcert file: destroy took 0.00 s
+  verify-full + no sslrootcert (system roots): failed at launch after 0.0 s: OperationalError sqlstate=None
+  verify-full + no sslrootcert (system roots): destroy took 0.00 s
+  disable: launched in 0.1 s
+  disable: destroy took 0.08 s
+-- connections made by DBOS with verify-full: encrypted?
+  pg_stat_ssl for cairn_dbos sessions (ssl, count): [(True, 1)]
+throwaway database dropped

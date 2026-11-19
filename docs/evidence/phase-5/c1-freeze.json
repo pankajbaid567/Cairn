@@ -1,0 +1,24 @@
+{
+  "by_category": {
+    "agent_brief": 4,
+    "as_of": 9,
+    "conflict": 3,
+    "not_found": 2,
+    "permission": 12,
+    "supersession": 3,
+    "when_who": 6,
+    "why": 7
+  },
+  "by_split": {
+    "dev": 30,
+    "test": 16
+  },
+  "canaries": 8,
+  "corpus": "C1 (Kestrel Pay synthetic company)",
+  "corpus_sha256": "e7744a97a7f07b056e48606b4ea83cd5e4472b97d1cece37a9012f04027bde74",
+  "decisions": 14,
+  "note": "The plan's target is about 150 questions; the scenario currently holds 46. Metrics on this set carry wide confidence intervals; results.md reports them. Growing the set is a content task, not a code one.",
+  "questions": 46,
+  "scenario_sha256": "81ab3eb4ce38099e86ed646b81d0887b12ce6a0c89747c94832aa320857526e9",
+  "target_questions": 150
+}

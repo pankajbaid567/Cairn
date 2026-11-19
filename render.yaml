@@ -1,0 +1,92 @@
+# Render Blueprint for the free-tier demo (free-tier design §14, Requirements 6.2, 17.1, 17.2).
+#
+# One Docker web service runs the API and the DBOS worker in one process
+# (`cairn-combined`) on Render's free plan (512 MB, 0.1 CPU, sleeps after 15 minutes
+# without inbound traffic). Nothing secret is stored here: every key with
+# `sync: false` is a value the user types into the Render dashboard when the Blueprint
+# is created (FU4). The owner and admin credentials of Neon are not part of this file
+# and never reach Render (FT-13); the service connects only as `cairn_app` and
+# `cairn_dbos`.
+#
+# Notes from FV6 (docs/evidence/free-tier/verify/FV6.md):
+# - PORT is not set: Render's default is 10000, which is also the default of the process.
+# - Render turns the environment variables of a Docker service into build arguments. The
+#   shared Dockerfile declares only `ARG PACKAGE` (default `cairn-combined`), so no secret
+#   is copied into the image; do not add an environment variable named PACKAGE.
+# - Render sends SIGTERM and waits 30 s (default maxShutdownDelaySeconds) before SIGKILL;
+#   the process drains within 20 s (Requirement 8.7), so the default is kept.
+# - `sync: false` values are asked once, at the first Blueprint creation. A key added later
+#   has to be entered by hand in the dashboard.
+# - `region` cannot change after the service is created. `singapore` pairs with Neon
+#   aws-ap-southeast-1 (FV2, OQ-4).
+services:
+  - type: web
+    name: cairn-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./infra/docker/python-app.Dockerfile
+    dockerContext: .
+    dockerCommand: cairn-combined
+    # Process liveness only (FT-11): a database outage must not restart the service in a loop.
+    healthCheckPath: /healthz
+    # Deploys are triggered by hand (FU5).
+    autoDeployTrigger: "off"
+    envVars:
+      - key: CAIRN_ENV
+        value: demo
+      - key: CAIRN_LOG_LEVEL
+        value: INFO
+      # The Neon direct endpoint host (not the -pooler one), from .env.neon.
+      - key: CAIRN_DB_HOST
+        sync: false
+      - key: CAIRN_DB_PORT
+        value: "5432"
+      - key: CAIRN_DB_NAME
+        value: cairn
+      # verify-full against the image's Debian CA bundle. Not `system`: that loads no roots
+      # with psycopg-binary in python:3.12.16-slim (FV11).
+      - key: CAIRN_DB_SSLMODE
+        value: verify-full
+      - key: CAIRN_DB_SSLROOTCERT
+        value: /etc/ssl/certs/ca-certificates.crt
+      - key: CAIRN_DB_TIMEOUT_S
+        value: "5"
+      - key: CAIRN_APP_DB_PASSWORD
+        sync: false
+      - key: CAIRN_DBOS_DB_PASSWORD
+        sync: false
+      - key: CAIRN_INGEST_DB_PASSWORD
+        sync: false
+      - key: CAIRN_SESSION_SECRET
+        sync: false
+      - key: CAIRN_AUDIT_HASH_KEY
+        sync: false
+      - key: CAIRN_DEMO_PERSONAS
+        value: "on"
+      - key: CAIRN_PROXY_TOKEN
+        sync: false
+      # Live sync (plan 3.3, 3.7): the sync runner starts only when CAIRN_GITHUB_ORG is set. The
+      # private key is the App's PEM with newlines written as \n. The webhook secret and the
+      # cairn_edge password are NOT here: the receiver is the Pages Function, which holds them.
+      - key: CAIRN_GITHUB_ORG
+        sync: false
+      - key: CAIRN_GITHUB_APP_ID
+        sync: false
+      - key: CAIRN_GITHUB_INSTALLATION_ID
+        sync: false
+      - key: CAIRN_GITHUB_PRIVATE_KEY
+        sync: false
+      - key: CAIRN_HEARTBEAT_CRON
+        value: "0 */5 * * * *"
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: CAIRN_WORKERS_AI_BUDGET_STORE
+        value: postgres
+      # The Render service gets 5,000 of the 9,000 neuron guard; laptop runs get 4,000 (PD1-27).
+      - key: CAIRN_WORKERS_AI_DAILY_NEURONS
+        value: "5000"

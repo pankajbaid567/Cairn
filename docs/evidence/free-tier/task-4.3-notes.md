@@ -1,0 +1,44 @@
+# Task 4.3: managed-mode bootstrap and the managed-admin emulation command
+Date: 2 Nov 2026. Requirements 5.1 to 5.9, 5.11, 5.12 and 7.1; decisions FT-06, FT-07, FT-08; plan items 0.5 and D11. OQ-1 (plaintext role passwords behind `--allow-plaintext-password`) and FV3 item 7 (pgvector is not trusted) are implemented as decided on 2 Nov 2026.
+## What changed
+| File | Change |
+|---|---|
+| `cairn_core/bootstrap.py` | `AdminFacts`, `read_admin_facts`, `resolve_mode`, `RoleRow`, `role_attribute_violations`, `admin_set_grants`, `plaintext_flag_problems`, `password_form`, `PlaintextRefused`; `role_statement` and `role_statements` take `mode` and `form`; `database_statements`, `extension_statements` take `mode`; new `admin_access_revoke_statements`, `emulate_managed_admin_statements`, `emulate_managed_admin`, `emulation_refusals`, `describe_emulation`; `bootstrap_database` and `bootstrap` are mode-aware (`bootstrap(…, allow_plaintext=…)`); `BootstrapResult` gains `mode` and `password_form` |
+| `cairn_core/config.py` | `AdminConnectionSettings` (admin user, password, database) as the base of `AdminSettings` and the new `EmulationSettings` (adds `CAIRN_MANAGED_ADMIN_PASSWORD`; none of the three role passwords) |
+| `cairn_core/cli.py` | `--allow-plaintext-password` on `bootstrap` and `init`; new `emulate-managed-admin`; `connect_as` takes any `CommonSettings` |
+| Tests | `test_bootstrap.py` (+89 tests, the fake cluster learned the admin facts, role attributes and a `fail` hook), `test_bootstrap_properties.py` (fake cluster and CLI harness follow the new signature), new `tests/integration/test_bootstrap_managed_path.py` |
+| Evidence | `verify/FV4.md`, `verify/FV4-probe.sql`, `verify/FV4-probe.out`, this file, README rows |
+## How managed mode works (as built)
+1. `bootstrap` reads the admin facts, resolves the mode from `CAIRN_DB_ADMIN_MODE` (`auto`: superuser if `rolsuper`), decides the password form, checks memberships and, in managed mode, the three forbidden role attributes. Every refusal happens before the first change.
+2. Roles: CREATE names every attribute. ALTER in managed mode is `LOGIN NOCREATEDB NOCREATEROLE [NO]INHERIT PASSWORD …`.
+3. `GRANT cairn_owner|cairn_dbos TO <admin> WITH INHERIT FALSE, SET TRUE` (every run, idempotent).
+4. Per database (content and DBOS): `CREATE DATABASE … OWNER` as the admin; then, between `SET ROLE <owner>` and `RESET ROLE`, the PUBLIC revoke, the role grants, `GRANT CONNECT … TO <admin>` and, for databases with extensions, `GRANT CREATE ON DATABASE … TO <admin>`; then `CREATE EXTENSION IF NOT EXISTS` as the admin in the database itself; then `SET ROLE <owner>; REVOKE CREATE ON SCHEMA public FROM PUBLIC; RESET ROLE`; finally the temporary CREATE grant is revoked (also when an extension statement fails). A failure inside a `SET ROLE` block resets the role before the error propagates.
+5. FV4 explains why each step is needed: a non-owner REVOKE/GRANT is a silent no-op, the admin needs CONNECT once PUBLIC lost it, and `btree_gist` needs CREATE on the database but not on `public`.
+## Decisions and small deviations from the design text
+- **The flag needs `CAIRN_DB_ADMIN_MODE=managed` itself.** `auto` cannot be resolved before connecting, and the requirement says exit 2 before connecting. `plaintext_flag_problems` (CLI, before any connection) refuses unless the requested mode is `managed` and `CAIRN_DB_SSLMODE` is `verify-full`; messages name the keys and the required values only. `password_form` (inside `bootstrap`) checks the resolved mode and sslmode again and raises `PlaintextRefused`, which the CLI also maps to exit 2. `.env.neon.example` already sets `CAIRN_DB_ADMIN_MODE=managed`, so task 9.3's `make remote-init` works unchanged.
+- **The admin keeps CONNECT; only the CREATE grant is temporary.** The design text says "revokes the CREATE grants after them" and is read the same way: the admin must connect again on every run, and the managed role test (task 4.7) connects as it. Neither CONNECT nor CREATE on schema `public` is needed beyond that (FV4 rows 8, 10e).
+- `role_statement(name, secret, …)`: the second parameter is called `secret` (verifier, or the plaintext password when `form="plaintext"`); `mode` and `form` default to `superuser` and `verifier`, so the Phase 0 callers and tests are unchanged. A plaintext form is refused in superuser mode, for an empty value and for a value that looks like a verifier.
+- `bootstrap_database(…, mode=None, facts=None)` detects the mode itself when called without them (spike and test databases), one extra catalog read.
+- `describe()` prints `admin mode: <mode>` as its first line and, with the plaintext form, a line saying so. No line carries a secret.
+- The log record `bootstrap.mode` uses the field `credential_form`: the telemetry redactor replaces any field whose name contains `password` with `[REDACTED]` (seen in the first end-to-end run).
+- `emulate-managed-admin` refuses in three steps: `CAIRN_ENV` not `local`/`ci` (exit 1, before connecting), a role named `neondb_owner` on the server, an admin that is not a superuser; each leaves the server unchanged. It uses `EmulationSettings`, so `ft-admin-init` needs only `POSTGRES_PASSWORD` and `CAIRN_MANAGED_ADMIN_PASSWORD`, as in design §9.
+- Server-side: the one statement that carries a plaintext password (CREATE/ALTER ROLE with `--allow-plaintext-password`) is visible to the server's own statement logging (`log_statement`, `pg_stat_statements`). Cairn never logs it. Neon's own handling is part of FU2.
+## FV4 scratch probe
+On the core `db`, every object `cairn_fv4_*`, a scratch template database so the core `template1` stayed as it was (`plpgsql` only, checked before and after), everything dropped (0 roles and 0 databases left). Results per step are in [verify/FV4.md](verify/FV4.md). A second check ran the real commands once on a throwaway container (`cairn-fv4-e2e`, port 55499, removed afterwards); it never touched the core `db`, `cairn`, `cairn_dbos` or their roles. The Docker volume list showed three more anonymous volumes than at task 1.1 after that run; the container was started with `--rm`, so they are not expected to be mine, and nothing was inspected or removed.
+## Unit and integration tests
+- Every builder in both modes (role CREATE/ALTER, grants, database statements, extension statements, the temporary CREATE grant and its revoke, emulation statements), exact SQL text for the managed forms.
+- `resolve_mode` (all combinations, missing-attribute messages), `role_attribute_violations`, `plaintext_flag_problems`, `password_form` over mode × sslmode.
+- `bootstrap()` on the fake cluster in managed mode: statement order, `SET ROLE`/`RESET ROLE` scoping, the temporary grant, a failing extension, ALTER without the three clauses, idempotency, refusals that leave the log empty, the plaintext run (the password appears in the three role statements and nowhere else), no plaintext in log records, results, `describe` output or errors.
+- Emulation guard (demo, `neondb_owner`, non-superuser admin), idempotency, no plaintext password in statements, logs or results.
+- CLI: the flag refused with exit 2 and no connection for six settings combinations on `bootstrap` and `init`; accepted flag reaches `bootstrap`; `emulate-managed-admin` output, refusals, missing keys (exit 2), database errors without details.
+- Integration (`test_bootstrap_managed_path.py`): the managed code path forced on the compose superuser builds a content database and a DBOS database, leaves the admin with CONNECT only, keeps PUBLIC without CREATE on `public`, is repeatable and leaves no `SET ROLE` behind. Only `cairn_test_*` databases, dropped afterwards.
+## Verify results
+- `uv run pytest packages/core/tests/unit/test_bootstrap.py`: 147 passed. `packages/core/tests/unit`: 381 passed.
+- `make types`: no issues (25 strict + 103 base source files).
+- `make up-db`: db healthy. `make test-integration`: 42 passed. `make matrix`: 12 passed.
+- `[ -z "$(docker compose exec -T db psql -U postgres -Atc "select rolname from pg_roles where rolname like 'cairn_fv4_%'")" ]`: true (also 0 databases).
+- `make fmt-check lint test-unit`: all passed (1155 passed, 1 xfailed: the known canary xfail, unchanged).
+## For later tasks
+- 4.7: managed fixtures can call `bootstrap_database(admin_conn, name)` unchanged (mode is detected); `drop_database` must use `SET ROLE <owner>` in managed mode (FV4 row 12); the managed role test needs `GRANT SELECT` for the admin on its probe table and sees it already has CONNECT (FV4 rows 8, 11).
+- 6.1: `ft-db-init` runs `cairn-db init` without the flag; `ft-admin-init` runs `cairn-db emulate-managed-admin` with `CAIRN_ENV=ci`, `POSTGRES_PASSWORD` and `CAIRN_MANAGED_ADMIN_PASSWORD`.
+- 9.3: `make remote-init` passes `--allow-plaintext-password`; `.env.neon` must keep `CAIRN_DB_ADMIN_MODE=managed` and `CAIRN_DB_SSLMODE=verify-full`.

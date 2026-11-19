@@ -1,0 +1,374 @@
+==> make freetier-up
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.71kB done
+#1 DONE 0.0s
+
+#2 [ft-db-init internal] load build definition from python-app.Dockerfile
+#2 transferring dockerfile: 3.26kB done
+#2 DONE 0.0s
+
+#3 [ft-app internal] load metadata for ghcr.io/astral-sh/uv:0.11.25@sha256:1e3808aa9023d0980e7c15b1fa7c1ac16ff35925780cf5c459858b2d693f01a9
+#3 DONE 1.7s
+
+#4 [ft-app internal] load metadata for docker.io/library/python:3.12.16-slim@sha256:962f801b08c870ac2a51b72bf02dae38c9a4162319e5e882ec244e198188d54e
+#4 DONE 2.5s
+
+#5 [ft-app internal] load .dockerignore
+#5 transferring context: 388B done
+#5 DONE 0.0s
+
+#6 [ft-admin-init uv 1/1] FROM ghcr.io/astral-sh/uv:0.11.25@sha256:1e3808aa9023d0980e7c15b1fa7c1ac16ff35925780cf5c459858b2d693f01a9
+#6 resolve ghcr.io/astral-sh/uv:0.11.25@sha256:1e3808aa9023d0980e7c15b1fa7c1ac16ff35925780cf5c459858b2d693f01a9 0.0s done
+#6 DONE 0.0s
+
+#7 [ft-admin-init builder  1/22] FROM docker.io/library/python:3.12.16-slim@sha256:962f801b08c870ac2a51b72bf02dae38c9a4162319e5e882ec244e198188d54e
+#7 resolve docker.io/library/python:3.12.16-slim@sha256:962f801b08c870ac2a51b72bf02dae38c9a4162319e5e882ec244e198188d54e 0.0s done
+#7 DONE 0.0s
+
+#8 [ft-app internal] load build context
+#8 transferring context: 25.40kB 0.0s done
+#8 DONE 0.0s
+
+#9 [ft-admin-init builder  6/22] COPY apps/combined/pyproject.toml apps/combined/pyproject.toml
+#9 CACHED
+
+#10 [ft-admin-init builder 12/22] COPY packages/retrieval/pyproject.toml packages/retrieval/pyproject.toml
+#10 CACHED
+
+#11 [ft-admin-init builder 11/22] COPY packages/eval/pyproject.toml packages/eval/pyproject.toml
+#11 CACHED
+
+#12 [ft-admin-init builder 14/22] COPY apps/api/src apps/api/src
+#12 CACHED
+
+#13 [ft-admin-init builder  5/22] COPY apps/api/pyproject.toml apps/api/pyproject.toml
+#13 CACHED
+
+#14 [ft-admin-init builder  3/22] WORKDIR /app
+#14 CACHED
+
+#15 [ft-admin-init builder  4/22] COPY pyproject.toml uv.lock ./
+#15 CACHED
+
+#16 [ft-admin-init builder 15/22] COPY apps/combined/src apps/combined/src
+#16 CACHED
+
+#17 [ft-admin-init builder  7/22] COPY apps/mcp/pyproject.toml apps/mcp/pyproject.toml
+#17 CACHED
+
+#18 [ft-admin-init builder 16/22] COPY apps/mcp/src apps/mcp/src
+#18 CACHED
+
+#19 [ft-admin-init builder 17/22] COPY apps/worker/src apps/worker/src
+#19 CACHED
+
+#20 [ft-admin-init builder  8/22] COPY apps/worker/pyproject.toml apps/worker/pyproject.toml
+#20 CACHED
+
+#21 [ft-admin-init builder  9/22] COPY packages/connectors/pyproject.toml packages/connectors/pyproject.toml
+#21 CACHED
+
+#22 [ft-admin-init builder 13/22] RUN --mount=type=cache,target=/root/.cache/uv     uv sync --locked --no-dev --no-install-workspace --package "cairn-core"
+#22 CACHED
+
+#23 [ft-admin-init builder 10/22] COPY packages/core/pyproject.toml packages/core/pyproject.toml
+#23 CACHED
+
+#24 [ft-admin-init builder  2/22] COPY --from=uv /uv /usr/local/bin/uv
+#24 CACHED
+
+#25 [ft-admin-init builder 18/22] COPY packages/connectors/src packages/connectors/src
+#25 CACHED
+
+#26 [ft-app builder 13/22] RUN --mount=type=cache,target=/root/.cache/uv     uv sync --locked --no-dev --no-install-workspace --package "cairn-combined"
+#26 CACHED
+
+#27 [ft-app builder 17/22] COPY apps/worker/src apps/worker/src
+#27 CACHED
+
+#28 [ft-app builder 16/22] COPY apps/mcp/src apps/mcp/src
+#28 CACHED
+
+#29 [ft-app builder 15/22] COPY apps/combined/src apps/combined/src
+#29 CACHED
+
+#30 [ft-app builder 14/22] COPY apps/api/src apps/api/src
+#30 CACHED
+
+#9 [ft-db-init builder  6/22] COPY apps/combined/pyproject.toml apps/combined/pyproject.toml
+#9 CACHED
+
+#11 [ft-db-init builder 11/22] COPY packages/eval/pyproject.toml packages/eval/pyproject.toml
+#11 CACHED
+
+#15 [ft-db-init builder  4/22] COPY pyproject.toml uv.lock ./
+#15 CACHED
+
+#19 [ft-db-init builder 17/22] COPY apps/worker/src apps/worker/src
+#19 CACHED
+
+#12 [ft-db-init builder 14/22] COPY apps/api/src apps/api/src
+#12 CACHED
+
+#16 [ft-db-init builder 15/22] COPY apps/combined/src apps/combined/src
+#16 CACHED
+
+#14 [ft-db-init builder  3/22] WORKDIR /app
+#14 CACHED
+
+#21 [ft-db-init builder  9/22] COPY packages/connectors/pyproject.toml packages/connectors/pyproject.toml
+#21 CACHED
+
+#10 [ft-db-init builder 12/22] COPY packages/retrieval/pyproject.toml packages/retrieval/pyproject.toml
+#10 CACHED
+
+#20 [ft-db-init builder  8/22] COPY apps/worker/pyproject.toml apps/worker/pyproject.toml
+#20 CACHED
+
+#13 [ft-db-init builder  5/22] COPY apps/api/pyproject.toml apps/api/pyproject.toml
+#13 CACHED
+
+#22 [ft-db-init builder 13/22] RUN --mount=type=cache,target=/root/.cache/uv     uv sync --locked --no-dev --no-install-workspace --package "cairn-core"
+#22 CACHED
+
+#18 [ft-db-init builder 16/22] COPY apps/mcp/src apps/mcp/src
+#18 CACHED
+
+#23 [ft-db-init builder 10/22] COPY packages/core/pyproject.toml packages/core/pyproject.toml
+#23 CACHED
+
+#24 [ft-db-init builder  2/22] COPY --from=uv /uv /usr/local/bin/uv
+#24 CACHED
+
+#17 [ft-db-init builder  7/22] COPY apps/mcp/pyproject.toml apps/mcp/pyproject.toml
+#17 CACHED
+
+#31 [ft-app builder 18/22] COPY packages/connectors/src packages/connectors/src
+#31 CACHED
+
+#32 [ft-app builder 19/22] COPY packages/core/src packages/core/src
+#32 DONE 0.1s
+
+#33 [ft-admin-init builder 19/22] COPY packages/core/src packages/core/src
+#33 DONE 0.1s
+
+#34 [ft-db-init builder 20/22] COPY packages/eval/src packages/eval/src
+#34 DONE 0.1s
+
+#35 [ft-app builder 20/22] COPY packages/eval/src packages/eval/src
+#35 DONE 0.1s
+
+#36 [ft-app builder 21/22] COPY packages/retrieval/src packages/retrieval/src
+#36 DONE 0.1s
+
+#37 [ft-db-init builder 21/22] COPY packages/retrieval/src packages/retrieval/src
+#37 DONE 0.1s
+
+#38 [ft-admin-init builder 22/22] RUN --mount=type=cache,target=/root/.cache/uv     uv sync --locked --no-dev --no-editable --package "cairn-core"
+#38 1.591 Resolved 120 packages in 76ms
+#38 1.731    Building cairn-core @ file:///app/packages/core
+#38 3.292       Built cairn-core @ file:///app/packages/core
+#38 3.311 Prepared 1 package in 1.61s
+#38 3.363 Installed 1 package in 50ms
+#38 4.208 Bytecode compiled 814 files in 845ms
+#38 4.208  + cairn-core==0.1.0 (from file:///app/packages/core)
+#38 DONE 4.4s
+
+#39 [ft-app builder 22/22] RUN --mount=type=cache,target=/root/.cache/uv     uv sync --locked --no-dev --no-editable --package "cairn-combined"
+#39 1.592 Resolved 120 packages in 76ms
+#39 1.761    Building cairn-retrieval @ file:///app/packages/retrieval
+#39 3.295    Building cairn-core @ file:///app/packages/core
+#39 3.295       Built cairn-retrieval @ file:///app/packages/retrieval
+#39 3.879       Built cairn-core @ file:///app/packages/core
+#39 3.888 Prepared 2 packages in 2.14s
+#39 4.036 Installed 6 packages in 147ms
+#39 5.048 Bytecode compiled 1563 files in 1.01s
+#39 5.049  + cairn-api==0.1.0 (from file:///app/apps/api)
+#39 5.049  + cairn-combined==0.1.0 (from file:///app/apps/combined)
+#39 5.049  + cairn-connectors==0.1.0 (from file:///app/packages/connectors)
+#39 5.049  + cairn-core==0.1.0 (from file:///app/packages/core)
+#39 5.049  + cairn-retrieval==0.1.0 (from file:///app/packages/retrieval)
+#39 5.049  + cairn-worker==0.1.0 (from file:///app/apps/worker)
+#39 DONE 5.1s
+
+#40 [ft-db-init runtime 2/4] RUN groupadd --system --gid 10001 cairn     && useradd --system --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent         --shell /usr/sbin/nologin cairn
+#40 CACHED
+
+#41 [ft-admin-init runtime 3/4] COPY --from=builder /app/.venv /app/.venv
+#41 DONE 1.0s
+
+#42 [ft-db-init runtime 4/4] WORKDIR /app
+#42 DONE 0.1s
+
+#43 [ft-db-init] exporting to image
+#43 exporting layers
+#43 exporting layers 2.0s done
+#43 exporting manifest sha256:3ee67d11ea5402cbc7fbddc2ae7181102d2fc32d597756810463264dddfc3467 0.0s done
+#43 exporting config sha256:c3a459b9d04e80bf642826f605ae199ca6a370bac9b0f937580e9dd2dac65779 0.0s done
+#43 exporting attestation manifest sha256:79721174f291d9161cc1efdd98c5819dfcb699a3ee8358fcd84144c0c2bdef73 0.0s done
+#43 exporting manifest list sha256:06e6cc02e192fcb14083f994588e8c213946cc8085c5460bb38f540e967537af done
+#43 naming to docker.io/library/cairn-python:local done
+#43 unpacking to docker.io/library/cairn-python:local
+#43 ...
+
+#44 [ft-app runtime 3/4] COPY --from=builder /app/.venv /app/.venv
+#44 DONE 2.8s
+
+#45 [ft-app runtime 4/4] WORKDIR /app
+#45 DONE 0.2s
+
+#46 [ft-admin-init] exporting to image
+#46 exporting layers 2.0s done
+#46 exporting manifest sha256:282d1087042555e0f3715a110ddf42b7c8d636572d0f56b8d06603569d754ac9 0.0s done
+#46 exporting config sha256:5724e5b583e22675b487f62a2e1a0f7a691ecf80e56fc4935a1bb4559bbcb91f 0.0s done
+#46 exporting attestation manifest sha256:6d10bae3132723325639b4be8ce0f9f6d3d894ca5df8657da6c5a71269bb4d7b 0.0s done
+#46 exporting manifest list sha256:1d9204d8569b4a8f0606014dcb08e089b248833494b01d496ec2abf4f559a4aa done
+#46 naming to docker.io/library/cairn-python:local done
+#46 unpacking to docker.io/library/cairn-python:local 1.9s done
+#46 DONE 4.1s
+
+#43 [ft-db-init] exporting to image
+#43 unpacking to docker.io/library/cairn-python:local 1.9s done
+#43 DONE 4.2s
+
+#47 [ft-app] exporting to image
+#47 ...
+
+#48 [ft-admin-init] resolving provenance for metadata file
+#48 DONE 0.1s
+
+#49 [ft-db-init] resolving provenance for metadata file
+#49 DONE 0.1s
+
+#47 [ft-app] exporting to image
+#47 exporting layers 3.4s done
+#47 exporting manifest sha256:f8fbbfb79c4cf0353a5174961dd4951c09e48252fd7b79fcfc714c4572f290d8 done
+#47 exporting config sha256:7ae01a4c7ea1dbe8f48f8d1bdf49ef085124fe5052259b1f33ef7adeaa8aa9a2 done
+#47 exporting attestation manifest sha256:b44970629da0bea5b3a06ad8d44f1fe293111982d2031f024ce18e470f943725 done
+#47 exporting manifest list sha256:aec6db27fcd6e213509e17b54823f3126e03a9ee0f1fd7311d1cd8654fabc4b3 done
+#47 naming to docker.io/library/cairn-combined:local done
+#47 unpacking to docker.io/library/cairn-combined:local
+#47 unpacking to docker.io/library/cairn-combined:local 3.1s done
+#47 DONE 6.7s
+
+#50 [ft-app] resolving provenance for metadata file
+#50 DONE 0.0s
+ cairn-python:local  Built
+ cairn-python:local  Built
+ cairn-combined:local  Built
+ Network cairn_default  Creating
+ Network cairn_default  Created
+ Container cairn-ft-db-1  Creating
+ Container cairn-ft-db-1  Created
+ Container cairn-ft-admin-init-1  Creating
+ Container cairn-ft-admin-init-1  Created
+ Container cairn-ft-db-init-1  Creating
+ Container cairn-ft-db-init-1  Created
+ Container cairn-ft-app-1  Creating
+ Container cairn-ft-app-1  Created
+ Container cairn-ft-db-1  Starting
+ Container cairn-ft-db-1  Started
+ Container cairn-ft-db-1  Waiting
+ Container cairn-ft-db-1  Healthy
+ Container cairn-ft-admin-init-1  Starting
+ Container cairn-ft-admin-init-1  Started
+ Container cairn-ft-admin-init-1  Waiting
+ Container cairn-ft-admin-init-1  Exited
+ Container cairn-ft-db-init-1  Starting
+ Container cairn-ft-db-init-1  Started
+ Container cairn-ft-db-init-1  Waiting
+ Container cairn-ft-db-init-1  Exited
+ Container cairn-ft-app-1  Starting
+ Container cairn-ft-app-1  Started
+ Container cairn-ft-db-1  Waiting
+ Container cairn-ft-admin-init-1  Waiting
+ Container cairn-ft-db-init-1  Waiting
+ Container cairn-ft-app-1  Waiting
+ Container cairn-ft-admin-init-1  Exited
+ Container cairn-ft-db-init-1  Exited
+ Container cairn-ft-db-1  Healthy
+ Container cairn-ft-app-1  Healthy
+==> make freetier-seed
+uv run --locked --all-packages cairn-scenario render --out var/corpus/kestrel_pay --overwrite
+rendered 33 of 45 sources, corpus_sha256=e7744a97a7f07b056e48606b4ea83cd5e4472b97d1cece37a9012f04027bde74
+CAIRN_DB_HOST=127.0.0.1 CAIRN_DB_PORT=55433 CAIRN_EMBEDDER=fake uv run --locked --all-packages cairn-import all var/corpus/kestrel_pay --embed-inline
+{"chat": {"acl_changed": 0, "chunks": 10, "documents": 10, "inserted": 10, "older": 0, "rejected": [], "unchanged": 0}, "chat_groups": {"memberships_added": 8, "memberships_removed": 0, "principals_added": 3, "principals_updated": 0}, "directory": {"memberships_added": 43, "memberships_removed": 0, "principals_added": 24, "principals_updated": 0}, "docs": {"acl_changed": 0, "chunks": 19, "documents": 19, "inserted": 19, "older": 0, "rejected": [], "unchanged": 0}, "embedded": {"revisions": 33, "vectors": 33}, "meetings": {"acl_changed": 0, "chunks": 4, "documents": 4, "inserted": 4, "older": 0, "rejected": [], "unchanged": 0}}
+==> make freetier-phase1
+uv run --locked --all-packages python scripts/freetier_phase1.py 
+# Free-tier gate with the Phase 1 code loaded (2026-11-04)
+
+ft-app: 512 MB, no swap, 0.1 CPU, fake providers, corpus of 5 scripted questions.
+
+- load: 45 s, 2 clients, search and answer as 4 personas
+- requests: 40, failed: 0
+- memory peak: 100.8 MiB (budget 384); samples: 13
+- OOM killed: False; restarts: 0
+- result: PASS
+
+==> make freetier-smoke
+uv run --locked --all-packages pytest -m freetier tests/freetier
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.1.1, pluggy-1.7.0
+rootdir: /Users/pankajbaid/projects/company_brain
+configfile: pyproject.toml
+plugins: asyncio-1.4.1, platformdirs-4.13.6, hypothesis-6.170.12, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 12 items
+
+tests/freetier/test_freetier_profile.py ............                     [100%]
+
+============================= 12 passed in 16.01s ==============================
+==> make matrix-managed
+CAIRN_TEST_ADMIN_MODE=managed uv run --locked --all-packages pytest -m "matrix or managed"
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.1.1, pluggy-1.7.0
+rootdir: /Users/pankajbaid/projects/company_brain
+configfile: pyproject.toml
+testpaths: apps, packages, tests
+plugins: asyncio-1.4.1, platformdirs-4.13.6, hypothesis-6.170.12, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 2050 items / 2003 deselected / 47 selected
+
+apps/api/tests/integration/test_canary_matrix_v1.py ...                  [  6%]
+apps/api/tests/integration/test_persona_script.py ..                     [ 10%]
+apps/api/tests/integration/test_query_registry.py ....................   [ 53%]
+packages/core/tests/integration/test_bootstrap_integration.py .          [ 55%]
+packages/core/tests/integration/test_roles.py .........s...              [ 82%]
+packages/retrieval/tests/integration/test_budget_integration.py .......  [ 97%]
+packages/retrieval/tests/integration/test_budget_store_properties.py .   [100%]
+
+=========================== short test summary info ============================
+SKIPPED [1] packages/core/tests/integration/test_roles.py:163: superuser mode only; managed mode runs test_admin_bypasses_rls_...
+================ 46 passed, 1 skipped, 2003 deselected in 5.97s ================
+==> make freetier-ram
+uv run --locked --all-packages python scripts/freetier_ram.py 
+freetier-ram: docker compose --profile freetier up --wait (about 2.5 minutes at 0.1 CPU)
+freetier-ram: waiting for cairn-ft-app-1 to be healthy
+freetier-ram: idle phase: 60 s, a sample every 2 s
+freetier-ram: load phase: 60 s, 2 clients, 0.2 s between requests
+freetier-ram: idle peak 99.89 MiB (budget 300), load peak 100.50 MiB (budget 384), 2 of 251 requests failed
+freetier-ram: PASS: every budget rule holds
+freetier-ram: wrote docs/evidence/free-tier/freetier-ram-2026-11-04.md
+freetier-ram: wrote docs/evidence/free-tier/freetier-ram-2026-11-04.json
+==> make freetier-down
+docker compose --profile freetier down
+ Container cairn-ft-app-1  Stopping
+ Container cairn-ft-app-1  Stopped
+ Container cairn-ft-app-1  Removing
+ Container cairn-ft-app-1  Removed
+ Container cairn-ft-db-init-1  Stopping
+ Container cairn-ft-db-init-1  Stopped
+ Container cairn-ft-db-init-1  Removing
+ Container cairn-ft-db-init-1  Removed
+ Container cairn-ft-admin-init-1  Stopping
+ Container cairn-ft-admin-init-1  Stopped
+ Container cairn-ft-admin-init-1  Removing
+ Container cairn-ft-admin-init-1  Removed
+ Container cairn-ft-db-1  Stopping
+ Container cairn-ft-db-1  Stopped
+ Container cairn-ft-db-1  Removing
+ Container cairn-ft-db-1  Removed
+ Network cairn_default  Removing
+ Network cairn_default  Removed
+==> freetier-check passed: freetier-up freetier-seed freetier-phase1 freetier-smoke matrix-managed freetier-ram freetier-down
+exit 0

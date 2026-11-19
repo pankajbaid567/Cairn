@@ -1,0 +1,215 @@
+### 0 setup (superuser): scratch admin role and scratch template database
+     rolname     | rolsuper | rolcreaterole | rolcreatedb | rolbypassrls | rolreplication 
+-----------------+----------+---------------+-------------+--------------+----------------
+ cairn_fv4_admin | f        | t             | t           | t            | f
+(1 row)
+
+### 1 as the admin: create the three roles (CREATE with every attribute)
+  current_user   | current_database 
+-----------------+------------------
+ cairn_fv4_admin | postgres
+(1 row)
+
+-- memberships after create (creator gets ADMIN only, createrole_self_grant is empty)
+     member      |     granted     | admin_option | inherit_option | set_option 
+-----------------+-----------------+--------------+----------------+------------
+ cairn_fv4_admin | cairn_fv4_app   | t            | f              | f
+ cairn_fv4_admin | cairn_fv4_dbos  | t            | f              | f
+ cairn_fv4_admin | cairn_fv4_owner | t            | f              | f
+(3 rows)
+
+### 2 as the admin: each ALTER ROLE attribute clause on a role it created
+psql:<stdin>:30: ERROR:  42501: permission denied to alter role
+DETAIL:  Only roles with the SUPERUSER attribute may change the SUPERUSER attribute.
+LOCATION:  AlterRole, user.c:763
+psql:<stdin>:31: ERROR:  42501: permission denied to alter role
+DETAIL:  Only roles with the REPLICATION attribute may change the REPLICATION attribute.
+LOCATION:  AlterRole, user.c:807
+-- the managed ALTER form (LOGIN NOCREATEDB NOCREATEROLE [NO]INHERIT PASSWORD) on all three
+-- full superuser-mode ALTER form by the non-superuser (expected to fail)
+psql:<stdin>:39: ERROR:  42501: permission denied to alter role
+DETAIL:  Only roles with the SUPERUSER attribute may change the SUPERUSER attribute.
+LOCATION:  AlterRole, user.c:763
+-- plaintext password statement (what OQ-1 sends), and a SCRAM verifier literal
+### 3 CREATE DATABASE ... OWNER before the SET grant (expected to fail)
+### 4 the SET grants (WITH INHERIT FALSE, SET TRUE), twice (idempotent)
+psql:<stdin>:44: ERROR:  42501: must be able to SET ROLE "cairn_fv4_owner"
+LOCATION:  check_can_set_role, acl.c:5345
+psql:<stdin>:49: NOTICE:  00000: role "cairn_fv4_admin" has already been granted membership in role "cairn_fv4_owner" by role "cairn_fv4_admin"
+LOCATION:  AddRoleMems, user.c:1889
+psql:<stdin>:50: NOTICE:  00000: role "cairn_fv4_admin" has already been granted membership in role "cairn_fv4_dbos" by role "cairn_fv4_admin"
+LOCATION:  AddRoleMems, user.c:1889
+     member      |     granted     | admin_option | inherit_option | set_option 
+-----------------+-----------------+--------------+----------------+------------
+ cairn_fv4_admin | cairn_fv4_app   | t            | f              | f
+ cairn_fv4_admin | cairn_fv4_dbos  | t            | f              | f
+ cairn_fv4_admin | cairn_fv4_dbos  | f            | f              | t
+ cairn_fv4_admin | cairn_fv4_owner | t            | f              | f
+ cairn_fv4_admin | cairn_fv4_owner | f            | f              | t
+(5 rows)
+
+### 5 CREATE DATABASE ... OWNER after the SET grant (from template1 and from the scratch template)
+      datname       |      owner      | datacl 
+--------------------+-----------------+--------
+ cairn_fv4_core     | cairn_fv4_owner | 
+ cairn_fv4_dbosdb   | cairn_fv4_dbos  | 
+ cairn_fv4_fromtmpl | cairn_fv4_owner | 
+ cairn_fv4_tmpl     | postgres        | 
+(4 rows)
+
+### 6 database privilege statements run directly by the admin (not owner, INHERIT FALSE)
+psql:<stdin>:60: WARNING:  01006: no privileges could be revoked for "cairn_fv4_core"
+LOCATION:  restrict_and_check_grant, aclchk.c:365
+psql:<stdin>:61: WARNING:  01007: no privileges were granted for "cairn_fv4_core"
+LOCATION:  restrict_and_check_grant, aclchk.c:336
+psql:<stdin>:62: WARNING:  01007: no privileges were granted for "cairn_fv4_core"
+LOCATION:  restrict_and_check_grant, aclchk.c:336
+psql:<stdin>:63: WARNING:  01006: no privileges could be revoked for "cairn_fv4_core"
+LOCATION:  restrict_and_check_grant, aclchk.c:365
+### 7 the same statements under SET ROLE <owner>
+  current_user   |  session_user   
+-----------------+-----------------
+ cairn_fv4_owner | cairn_fv4_admin
+(1 row)
+
+      datname       |                                datacl                                 
+--------------------+-----------------------------------------------------------------------
+ cairn_fv4_core     | {cairn_fv4_owner=CTc/cairn_fv4_owner,cairn_fv4_app=c/cairn_fv4_owner}
+ cairn_fv4_dbosdb   | {cairn_fv4_dbos=CTc/cairn_fv4_dbos}
+ cairn_fv4_fromtmpl | 
+ cairn_fv4_tmpl     | 
+(4 rows)
+
+### 8 can the admin connect to cairn_fv4_core after CONNECT was revoked from PUBLIC? (no CONNECT grant for the admin)
+ admin_can_connect 
+-------------------
+ f
+(1 row)
+
+-- grant the admin CONNECT under SET ROLE owner, then check
+ admin_can_connect 
+-------------------
+ t
+(1 row)
+
+  current_user   | current_database 
+-----------------+------------------
+ cairn_fv4_admin | cairn_fv4_core
+(1 row)
+
+-- revoke it again (under SET ROLE owner) from the maintenance database
+                                datacl                                 
+-----------------------------------------------------------------------
+ {cairn_fv4_owner=CTc/cairn_fv4_owner,cairn_fv4_app=c/cairn_fv4_owner}
+(1 row)
+
+### 9 database created from the scratch template: revoke CONNECT from PUBLIC, grant the admin CONNECT (under SET ROLE owner), connect
+  current_user   |  current_database  
+-----------------+--------------------
+ cairn_fv4_admin | cairn_fv4_fromtmpl
+(1 row)
+
+  extname   | extversion 
+------------+------------
+ btree_gist | 1.8
+ plpgsql    | 1.0
+ vector     | 0.8.6
+(3 rows)
+
+-- IF NOT EXISTS on extensions that the template already carries
+psql:<stdin>:107: NOTICE:  42710: extension "vector" already exists, skipping
+LOCATION:  CreateExtension, extension.c:2117
+psql:<stdin>:108: NOTICE:  42710: extension "btree_gist" already exists, skipping
+LOCATION:  CreateExtension, extension.c:2117
+-- without IF NOT EXISTS (expected: already exists)
+psql:<stdin>:110: ERROR:  42710: extension "vector" already exists
+LOCATION:  CreateExtension, extension.c:2124
+-- public schema revoke under SET ROLE owner
+ nspname |       owner       |                            nspacl                             
+---------+-------------------+---------------------------------------------------------------
+ public  | pg_database_owner | {pg_database_owner=UC/pg_database_owner,=U/pg_database_owner}
+(1 row)
+
+-- the same revoke directly as the admin
+psql:<stdin>:117: WARNING:  01006: no privileges could be revoked for "public"
+LOCATION:  restrict_and_check_grant, aclchk.c:365
+### 10 extensions in a database created from template1 (cairn_fv4_noext): connect needs CONNECT
+  current_user   | current_database 
+-----------------+------------------
+ cairn_fv4_admin | cairn_fv4_noext
+(1 row)
+
+-- 10a vector as the admin (not trusted: expected to fail)
+psql:<stdin>:130: ERROR:  42501: permission denied to create extension "vector"
+HINT:  Must be superuser to create this extension.
+LOCATION:  execute_extension_script, extension.c:1221
+-- 10b vector under SET ROLE owner (expected to fail)
+psql:<stdin>:133: ERROR:  42501: permission denied to create extension "vector"
+HINT:  Must be superuser to create this extension.
+LOCATION:  execute_extension_script, extension.c:1221
+-- 10c btree_gist as the admin with no extra grant
+-- 10d btree_gist under SET ROLE owner (database owner holds CREATE on the database; public schema CREATE after PG15 only for the owner)
+psql:<stdin>:136: ERROR:  42501: permission denied to create extension "btree_gist"
+HINT:  Must have CREATE privilege on current database to create this extension.
+LOCATION:  execute_extension_script, extension.c:1221
+  extname   |    ext_owner    
+------------+-----------------
+ btree_gist | cairn_fv4_owner
+(1 row)
+
+-- 10e grant the admin CREATE on the database (under SET ROLE owner), retry as the admin
+-- 10f additionally grant CREATE on schema public to the admin, retry
+psql:<stdin>:152: NOTICE:  42710: extension "btree_gist" already exists, skipping
+LOCATION:  CreateExtension, extension.c:2117
+  extname   |    ext_owner    | schema 
+------------+-----------------+--------
+ btree_gist | cairn_fv4_admin | public
+(1 row)
+
+-- 10g revoke the temporary CREATE grants again (under SET ROLE owner)
+                                 datacl                                  
+-------------------------------------------------------------------------
+ {cairn_fv4_owner=CTc/cairn_fv4_owner,cairn_fv4_admin=c/cairn_fv4_owner}
+(1 row)
+
+                            nspacl                             
+---------------------------------------------------------------
+ {pg_database_owner=UC/pg_database_owner,=U/pg_database_owner}
+(1 row)
+
+-- 10h the extension is still there, and a second IF NOT EXISTS as the admin is a no-op
+psql:<stdin>:163: NOTICE:  42710: extension "btree_gist" already exists, skipping
+LOCATION:  CreateExtension, extension.c:2117
+  extname   
+------------
+ btree_gist
+ plpgsql
+(2 rows)
+
+### 11 admin (BYPASSRLS, not owner) reads a forced-RLS table with no policy
+ owner_sees 
+------------
+          0
+(1 row)
+
+ admin_sees 
+------------
+          2
+(1 row)
+
+### 12 drop databases
+-- 12a as the admin directly (expected to fail: not the owner)
+psql:<stdin>:183: ERROR:  42501: must be owner of database cairn_fv4_noext
+LOCATION:  aclcheck_error, aclchk.c:2931
+-- 12b under SET ROLE owner
+    datname     
+----------------
+ cairn_fv4_tmpl
+(1 row)
+
+### 13 drop the roles as the admin (it holds ADMIN on the roles it created)
+     rolname     
+-----------------
+ cairn_fv4_admin
+(1 row)
+

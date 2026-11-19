@@ -1,0 +1,12 @@
+# Build context of apps/web/Dockerfile. Only the sources and manifests are needed;
+# dependencies are installed inside the image.
+node_modules
+dist
+.vite
+coverage
+*.log
+.DS_Store
+.env
+.env.*
+Dockerfile
+.dockerignore

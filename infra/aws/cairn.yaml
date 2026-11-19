@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Cairn on AWS (ap-south-1): the permissions the app's host role needs (Amazon Bedrock models in this
+  Region, its own SSM parameters, its log group, its artifact bucket), the artifact bucket, and the
+  container log group. The database is Neon (outside AWS). Compute is the existing EC2 host.
+
+Parameters:
+  InstanceRoleName:
+    Type: String
+    Default: reliable-agent-ec2
+    Description: IAM role of the EC2 instance that runs the Cairn container.
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Sub cairn-artifacts-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-build-artifacts
+            Status: Enabled
+            ExpirationInDays: 14
+      Tags:
+        - { Key: project, Value: cairn }
+
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /cairn/app
+      RetentionInDays: 14
+      Tags:
+        - { Key: project, Value: cairn }
+
+  RuntimePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: cairn-runtime
+      Roles:
+        - !Ref InstanceRoleName
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: InvokeCairnModels
+            Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+            Resource:
+              - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0
+              - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/openai.gpt-oss-120b-1:0
+              - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/openai.gpt-oss-20b-1:0
+              - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/qwen.qwen3-32b-v1:0
+          - Sid: ReadCairnParameters
+            Effect: Allow
+            Action:
+              - ssm:GetParametersByPath
+              - ssm:GetParameters
+              - ssm:GetParameter
+            Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cairn/*
+          - Sid: WriteContainerLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - logs:DescribeLogStreams
+            Resource: !Sub ${AppLogGroup.Arn}:*
+          - Sid: ReadBuildArtifacts
+            Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource: !Sub ${ArtifactBucket.Arn}/*
+
+Outputs:
+  ArtifactBucketName:
+    Value: !Ref ArtifactBucket
+  AppLogGroupName:
+    Value: !Ref AppLogGroup

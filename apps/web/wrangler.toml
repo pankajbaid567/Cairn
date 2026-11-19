@@ -1,0 +1,12 @@
+# Cloudflare Pages project configuration (free-tier design §14, FV7).
+#
+# Run wrangler from apps/web so it finds this file and the functions/ folder. The file is the
+# source of truth for the project's variables. It holds no secret: CAIRN_PROXY_TOKEN is set with
+# `wrangler pages secret put` (docs/deploy.md).
+name = "cairn"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-11-03"
+
+[vars]
+# Placeholder: the user replaces it with the Render service URL after the first deploy (FU6).
+API_ORIGIN = "https://cairn-api.onrender.com"

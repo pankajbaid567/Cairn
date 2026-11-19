@@ -1,0 +1,31 @@
+# Secrets: only the placeholder template is tracked
+.env
+.env.*
+!.env.example
+!.env.neon.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+
+# Node and build output
+node_modules/
+.pnpm-store/
+dist/
+
+# Local scratch (S1 Parquet, reports in progress)
+var/
+
+# OS files
+.DS_Store

@@ -1,0 +1,558 @@
+# Cairn compose stack (design §4).
+#
+#   core         db, db-init, api, worker, web (this file)
+#   obs          OpenTelemetry Collector, Prometheus, Grafana (`make up-obs`)
+#   experiments  empty in Phase 0 (see the comment at the end of the services)
+#   freetier     ft-db, ft-admin-init, ft-db-init, ft-app (free-tier emulation, below)
+#
+# Values come from .env (`make env` writes it). Secrets use ${VAR:?} so a missing
+# one stops compose before anything starts. Every host port binds to 127.0.0.1:
+# nothing in Phase 0 has authentication.
+#
+# Memory limits of the long-running core services must sum to at most 4 GB
+# (Requirement 4.5): db 1024m + api 384m + worker 384m + web 64m = 1856m (db-init is a
+# one-shot and is not counted).
+#
+# Profile freetier (design §9, FT-08, FT-17; Requirement 10) emulates Render free and Neon's
+# owner role on the laptop and in CI. Its limits and rules:
+#   ft-app         the combined image (cairn-combined), mem_limit 512m, memswap_limit 512m
+#                  (no swap), cpus 0.1, PORT=10000, read-only root, user 10001, proxy token
+#                  required, host port 127.0.0.1:${CAIRN_FREETIER_APP_PORT:-8010}
+#   ft-db          the same image as db, data on tmpfs (fresh on every start), mem_limit 512m,
+#                  host port 127.0.0.1:${CAIRN_FREETIER_DB_PORT:-55433}
+#   ft-admin-init  the only step that holds the superuser password (with ft-db): creates the
+#                  role cairn_admin (NOSUPERUSER, CREATEDB, CREATEROLE, BYPASSRLS, like
+#                  neondb_owner) and vector and btree_gist in template1
+#   ft-db-init     cairn-db init as cairn_admin in managed mode; no superuser password
+#   ft-app holds the cairn_app and cairn_dbos passwords and the proxy token, never an
+#   admin, owner or superuser password. Never run it together with the core profile on an
+#   8 GB host (Docker VM 3.8 GiB): `make down` first. `make freetier-down` (task 6.2) or
+#   `docker compose --profile freetier down` removes it and leaves the core containers and
+#   every volume alone.
+
+name: cairn
+
+# PostgreSQL 18 with pgvector (design §1, FT-01; Requirements 1.1, 1.2). The tag is the
+# pgvector version Neon lists for PostgreSQL 18, and the digest is the multi-arch index
+# digest, so the same reference works on arm64 laptops and amd64 CI runners. Resolved on
+# 2 Nov 2026 (docs/evidence/free-tier/verify/FV1.md); bump tag and digest together.
+x-pg-image: &pg-image pgvector/pgvector:0.8.6-pg18@sha256:2ba9ca5f2e7daa0f0e7723cba1ee9167bab54efd3640516a44ac1a928dd67e7a
+
+# Shared by every Python service built from infra/docker/python-app.Dockerfile.
+x-python-app: &python-app
+  user: "10001:10001"
+  read_only: true
+  tmpfs: ["/tmp"]
+  cap_drop: ["ALL"]
+  security_opt: ["no-new-privileges:true"]
+
+services:
+  # Plain PostgreSQL 18 with pgvector (the x-pg-image anchor above). The image is the
+  # official postgres entrypoint plus the pgvector build: it has no init script that
+  # creates extensions in template1 and no auto-tuning, so the server runs with the
+  # stock defaults (shared_buffers 128MB), close to a small Neon compute, and db-init
+  # creates `vector` and `btree_gist` in each database itself. Nothing here overrides
+  # `command` or mounts into /docker-entrypoint-initdb.d. log_statement stays at its
+  # default (none): the ALTER ROLE statements that db-init sends carry SCRAM verifiers.
+  #
+  # The PG18 image stores data under /var/lib/postgresql/18/docker, so the volume
+  # is mounted one level up. The volume is pgdata-pgvector (Docker name
+  # cairn_pgdata-pgvector, design FT-02). The old volume cairn_pgdata (from the previous
+  # image) is not mounted, reused or deleted by anything here; the user removes it (FU7).
+  db:
+    profiles: [core]
+    image: *pg-image
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run make env}
+    volumes:
+      - pgdata-pgvector:/var/lib/postgresql
+    mem_limit: ${CAIRN_DB_MEM_LIMIT:-1024m}
+    shm_size: 256m
+    stop_grace_period: 30s
+    ports:
+      - "127.0.0.1:${CAIRN_DB_PORT:-5432}:5432"
+    healthcheck:
+      # TCP on 127.0.0.1, not the unix socket: during first-boot initialization the
+      # entrypoint runs a temporary server that listens on the socket only, and
+      # this check must not pass until the real server is up (Requirement 4.4).
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+  # One-shot: bootstrap (roles, databases, extensions) as the superuser, then
+  # migrate as cairn_owner. api and worker depend on its successful exit.
+  db-init:
+    <<: *python-app
+    profiles: [core]
+    image: cairn-python:local
+    build:
+      context: .
+      dockerfile: infra/docker/python-app.Dockerfile
+      args:
+        PACKAGE: cairn-core
+    command: ["cairn-db", "init"]
+    environment:
+      CAIRN_ENV: ${CAIRN_ENV:-local}
+      CAIRN_LOG_LEVEL: ${CAIRN_LOG_LEVEL:-INFO}
+      CAIRN_DB_HOST: db
+      CAIRN_DB_PORT: "5432"
+      CAIRN_DB_NAME: ${CAIRN_DB_NAME:-cairn}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run make env}
+      CAIRN_OWNER_DB_PASSWORD: ${CAIRN_OWNER_DB_PASSWORD:?run make env}
+      CAIRN_APP_DB_PASSWORD: ${CAIRN_APP_DB_PASSWORD:?run make env}
+      CAIRN_DBOS_DB_PASSWORD: ${CAIRN_DBOS_DB_PASSWORD:?run make env}
+      CAIRN_INGEST_DB_PASSWORD: ${CAIRN_INGEST_DB_PASSWORD:?run make env-update}
+      CAIRN_EDGE_DB_PASSWORD: ${CAIRN_EDGE_DB_PASSWORD:?run make env-update}
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 256m
+    restart: "no"
+
+  # The API (design §4, §7). Holds only the cairn_app password: no superuser, owner or
+  # DBOS secret reaches this container. The root filesystem is read-only with /tmp as
+  # tmpfs (from the anchor).
+  #
+  # Deviation from design §7: the command is `cairn-api --host 0.0.0.0`, not
+  # `uvicorn ... --log-config none`. uvicorn 0.54 takes a file path for --log-config, so
+  # "none" fails; `cairn_api.__main__` passes log_config=None and access_log=False to
+  # uvicorn.run instead (same effect: uvicorn installs no logging config of its own).
+  #
+  # The bind is all interfaces inside the container, which nothing outside the compose
+  # network and the 127.0.0.1 publish can reach. The healthcheck has no curl or wget to
+  # use: it runs the stdlib client in cairn_api.healthcheck (GET /readyz, 200 expected).
+  api:
+    <<: *python-app
+    profiles: [core]
+    image: cairn-api:local
+    build:
+      context: .
+      dockerfile: infra/docker/python-app.Dockerfile
+      args:
+        PACKAGE: cairn-api
+    command: ["cairn-api", "--host", "0.0.0.0"]
+    environment:
+      CAIRN_ENV: ${CAIRN_ENV:-local}
+      CAIRN_LOG_LEVEL: ${CAIRN_LOG_LEVEL:-INFO}
+      CAIRN_DB_HOST: db
+      CAIRN_DB_PORT: "5432"
+      CAIRN_DB_NAME: ${CAIRN_DB_NAME:-cairn}
+      CAIRN_DB_TIMEOUT_S: ${CAIRN_DB_TIMEOUT_S:-3}
+      CAIRN_APP_DB_PASSWORD: ${CAIRN_APP_DB_PASSWORD:?run make env}
+      # Phase 1 search (the routes exist only when CAIRN_SESSION_SECRET is set).
+      CAIRN_SESSION_SECRET: ${CAIRN_SESSION_SECRET:?run make env-update}
+      CAIRN_AUDIT_HASH_KEY: ${CAIRN_AUDIT_HASH_KEY:?run make env-update}
+      CAIRN_EMBEDDER: ${CAIRN_EMBEDDER:-fake}
+      CAIRN_RERANKER: ${CAIRN_RERANKER:-fake}
+      CAIRN_ANSWER_PROVIDER: ${CAIRN_ANSWER_PROVIDER:-fake}
+      CAIRN_JUDGE_PROVIDER: ${CAIRN_JUDGE_PROVIDER:-fake}
+      CAIRN_RERANK_MIN_SCORE: ${CAIRN_RERANK_MIN_SCORE:-0.0}
+      # `none` by default: nothing is exported. `make up-obs` runs compose with
+      # OTEL_TRACES_EXPORTER=otlp, which sends spans to the collector below. The endpoint is
+      # fixed to the compose service name (not read from .env, whose 127.0.0.1 value is for
+      # tools on the host) and is unused while the exporter is none.
+      OTEL_TRACES_EXPORTER: ${OTEL_TRACES_EXPORTER:-none}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    mem_limit: 384m
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-m", "cairn_api.healthcheck"]
+      interval: 10s
+      timeout: 6s
+      retries: 6
+      start_period: 10s
+    restart: unless-stopped
+
+  # The DBOS worker (design §4, §8). Holds only the cairn_dbos password: no superuser, owner or
+  # app secret reaches this container, and it connects to the database cairn_dbos only (the
+  # name is fixed by bootstrap, so CAIRN_DBOS_DB_NAME is left at its default). No host port.
+  #
+  # Liveness is a file, /tmp/cairn-worker/alive, which the worker touches every 10 s while a
+  # probe of its database succeeds; the healthcheck fails once it is older than 30 s. /tmp is
+  # the tmpfs from the anchor, so the read-only root stays read-only.
+  #
+  # stop_grace_period: Requirement 8.7 gives the worker 10 s to stop on SIGTERM, and the
+  # compose default (10 s) is the same number, so a slow stop would be SIGKILLed at exactly
+  # the limit with no margin. 20 s lets the worker finish and makes an overrun visible: the
+  # measured `docker compose stop worker` time is in docs/evidence/phase-0/task-6.3-notes.md.
+  worker:
+    <<: *python-app
+    profiles: [core]
+    image: cairn-worker:local
+    build:
+      context: .
+      dockerfile: infra/docker/python-app.Dockerfile
+      args:
+        PACKAGE: cairn-worker
+    command: ["python", "-m", "cairn_worker"]
+    environment:
+      CAIRN_ENV: ${CAIRN_ENV:-local}
+      CAIRN_LOG_LEVEL: ${CAIRN_LOG_LEVEL:-INFO}
+      CAIRN_DB_HOST: db
+      CAIRN_DB_PORT: "5432"
+      CAIRN_DB_TIMEOUT_S: ${CAIRN_DB_TIMEOUT_S:-3}
+      CAIRN_DBOS_DB_PASSWORD: ${CAIRN_DBOS_DB_PASSWORD:?run make env}
+      # Phase 1: the outbox drainer and the embedding workflow write as cairn_ingest.
+      CAIRN_DB_NAME: ${CAIRN_DB_NAME:-cairn}
+      CAIRN_INGEST_DB_PASSWORD: ${CAIRN_INGEST_DB_PASSWORD:?run make env-update}
+      CAIRN_EMBEDDER: ${CAIRN_EMBEDDER:-fake}
+      CAIRN_RERANKER: ${CAIRN_RERANKER:-fake}
+      CAIRN_ANSWER_PROVIDER: ${CAIRN_ANSWER_PROVIDER:-fake}
+      CAIRN_JUDGE_PROVIDER: ${CAIRN_JUDGE_PROVIDER:-fake}
+      CAIRN_RERANK_MIN_SCORE: ${CAIRN_RERANK_MIN_SCORE:-0.0}
+      # Six fields, seconds first (Verify V2). The default matches .env.example.
+      CAIRN_HEARTBEAT_CRON: ${CAIRN_HEARTBEAT_CRON:-*/30 * * * * *}
+      # As for the api: `none` unless `make up-obs` sets otlp; the endpoint is the collector.
+      OTEL_TRACES_EXPORTER: ${OTEL_TRACES_EXPORTER:-none}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    mem_limit: 384m
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD", "python", "-m", "cairn_worker.healthcheck"]
+      interval: 10s
+      timeout: 6s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
+
+  # The web app (design §3, §4; PD-08): static files from the Vite build, served by
+  # unprivileged nginx on 8080. /api/ is proxied to http://api:8000/ with the prefix
+  # stripped, so the page reaches the API on its own origin (no CORS) and only this port
+  # needs publishing for a browser.
+  #
+  # Hardened like the Python services, with a different user: the image runs as nginx
+  # (uid 101). The root filesystem is read-only; nginx writes only its pid file and temp
+  # files, which nginx.conf puts under /tmp (tmpfs, 16 MB, counted inside the 64m limit).
+  # It starts after the api is healthy, because nginx resolves the api name on use and a
+  # page whose /api/readyz fails would only confuse a first look at the stack.
+  #
+  # The healthcheck uses the busybox wget in the nginx image (no curl) and asks for the
+  # page on 127.0.0.1: nginx listens on IPv4 only, and "localhost" may resolve to ::1.
+  web:
+    profiles: [core]
+    image: cairn-web:local
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+    user: "101:101"
+    read_only: true
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 64m
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    restart: unless-stopped
+
+  # ---- obs profile (design §4 and §9, PD-11; Requirements 4.6, 9.8, 9.9) ----------------------
+  #
+  # Started by `make up-obs` together with core. Limits 256m + 384m + 256m = 896m. Measured use
+  # is in docs/evidence/phase-0/task-10.1-notes.md. Host ports bind 127.0.0.1 only; each can
+  # be moved with CAIRN_OTLP_PORT (4318), CAIRN_PROMETHEUS_PORT (9090), CAIRN_GRAFANA_PORT (3000).
+  # Container logs are rotated (json-file, 2 x 5 MB): the collector's debug exporter prints
+  # every span.
+
+  # The upstream collector image has no shell or wget, so this is a two-line derived image
+  # (infra/otel/Dockerfile) that adds a static busybox for the healthcheck. The config is
+  # mounted, not baked in. Receives OTLP/HTTP from api and worker, logs spans (debug exporter)
+  # and turns them into RED metrics that Prometheus scrapes on 8889.
+  otel-collector:
+    profiles: [obs]
+    image: cairn-otel-collector:local
+    build:
+      context: infra/otel
+      dockerfile: Dockerfile
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    user: "10001:10001"
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./infra/otel/collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    mem_limit: 256m
+    ports:
+      - "127.0.0.1:${CAIRN_OTLP_PORT:-4318}:4318"
+    healthcheck:
+      test: ["CMD", "/busybox", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:13133/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+    restart: unless-stopped
+
+  # Scrapes the collector (spanmetrics) and itself. Short retention: this is a dev tool, and
+  # the tsdb stays far below the volume's room. Runs as nobody (image default).
+  prometheus:
+    profiles: [obs]
+    image: prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=3d
+      - --storage.tsdb.retention.size=512MB
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      otel-collector:
+        condition: service_healthy
+    mem_limit: 384m
+    ports:
+      - "127.0.0.1:${CAIRN_PROMETHEUS_PORT:-9090}:9090"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+    restart: unless-stopped
+
+  # Grafana OSS (AGPL-3.0, separate unmodified container). The image is grafana/grafana, not
+  # grafana/grafana-oss named in design §4: grafana-oss stopped at 13.0.2 (June 2026) while
+  # grafana/grafana carries the current 13.2 line, and both are the same OSS edition. The data
+  # source and the dashboard are provisioned from infra/grafana/provisioning (read-only).
+  # Anonymous access and sign-up are off; the admin password is GRAFANA_ADMIN_PASSWORD.
+  # State (the sqlite db) lives in the grafana-data volume; the root filesystem is read-only.
+  grafana:
+    profiles: [obs]
+    image: grafana/grafana:13.2.5@sha256:9f7aa1e1e3246aade5792d35a738049f7f32f89cd51d1956cf426a4e86268a84
+    user: "472:0"
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?run make env}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      # Grafana 13 downloads a few "preinstall" plugins from grafana.com on first start
+      # (seen: grafana-lokiexplore-app). The stack needs none of them, and an obs profile
+      # should not fetch code at runtime, so this is off.
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      GF_PLUGINS_PLUGIN_ADMIN_ENABLED: "false"
+      # Grafana 13 starts one backend process per bundled data source (about 14, 8 to 10 MB
+      # each) and needed about 220 MB of the 256m limit, with startup CPU to match. Only
+      # Prometheus is used, so the other bundled data sources are switched off.
+      GF_PLUGINS_DISABLE_PLUGINS: "elasticsearch,grafana-postgresql-datasource,grafana-pyroscope-datasource,influxdb,jaeger,loki,mssql,mysql,opentsdb,stackdriver,tempo,zipkin,cloudwatch,grafana-azure-monitor-datasource,parca,graphite,grafana-testdata-datasource"
+      GF_LOG_MODE: console
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infra/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./infra/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    mem_limit: 256m
+    ports:
+      - "127.0.0.1:${CAIRN_GRAFANA_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      # A first start on an empty volume runs about 700 sqlite migrations and registers the
+      # bundled plugins: roughly 25 s on an idle laptop, over 2 minutes on a loaded one
+      # (measured, docs/evidence/phase-0/task-10.1-notes.md). Failures inside the start
+      # period do not count.
+      start_period: 180s
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+    restart: unless-stopped
+
+  # experiments profile: no services in Phase 0. Reserved for Qdrant and Neo4j
+  # (Phase 5), which would otherwise cost RAM and prove nothing.
+
+  # ---- freetier profile (design §9, FT-08, FT-17; Requirement 10) ------------------------------
+
+  # Its own PostgreSQL, the same image as db. The data directory is tmpfs, so every start
+  # is a fresh cluster (nothing to reset, no volume). The PG18 image keeps data under
+  # /var/lib/postgresql/18/docker, so the tmpfs is the parent; uid/gid 999 is the postgres
+  # user of the image and mode 0700 is what initdb wants (FV13). The host port is for the
+  # managed-mode test matrix (make matrix-managed). No restart policy: a crash should show.
+  ft-db:
+    profiles: [freetier]
+    image: *pg-image
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run make env}
+    tmpfs:
+      - /var/lib/postgresql:size=256m,mode=0700,uid=999,gid=999
+    mem_limit: 512m
+    stop_grace_period: 30s
+    ports:
+      - "127.0.0.1:${CAIRN_FREETIER_DB_PORT:-55433}:5432"
+    healthcheck:
+      # TCP on 127.0.0.1, as for db: the first-boot temporary server listens on the socket only.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  # One-shot, the only step besides ft-db that uses the superuser password. It creates
+  # cairn_admin (the shape of Neon's neondb_owner) and, as the superuser, vector and
+  # btree_gist in template1, which emulates Neon's extension privilege (design §2). It
+  # refuses unless CAIRN_ENV is local or ci. Receives POSTGRES_PASSWORD and
+  # CAIRN_MANAGED_ADMIN_PASSWORD only.
+  ft-admin-init:
+    <<: *python-app
+    profiles: [freetier]
+    image: cairn-python:local
+    build:
+      context: .
+      dockerfile: infra/docker/python-app.Dockerfile
+      args:
+        PACKAGE: cairn-core
+    command: ["cairn-db", "emulate-managed-admin"]
+    environment:
+      CAIRN_ENV: ci
+      CAIRN_DB_HOST: ft-db
+      CAIRN_DB_PORT: "5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run make env}
+      CAIRN_MANAGED_ADMIN_PASSWORD: ${CAIRN_MANAGED_ADMIN_PASSWORD:?run make env-update}
+    depends_on:
+      ft-db:
+        condition: service_healthy
+    mem_limit: 256m
+    restart: "no"
+
+  # One-shot: the same command as make remote-init runs against Neon, as cairn_admin in
+  # managed mode. No POSTGRES_PASSWORD. No --allow-plaintext-password: the server accepts
+  # SCRAM verifiers and the compose network has no TLS (that flag needs verify-full).
+  ft-db-init:
+    <<: *python-app
+    profiles: [freetier]
+    image: cairn-python:local
+    build:
+      context: .
+      dockerfile: infra/docker/python-app.Dockerfile
+      args:
+        PACKAGE: cairn-core
+    command: ["cairn-db", "init"]
+    environment:
+      CAIRN_ENV: ${CAIRN_ENV:-local}
+      CAIRN_LOG_LEVEL: ${CAIRN_LOG_LEVEL:-INFO}
+      CAIRN_DB_HOST: ft-db
+      CAIRN_DB_PORT: "5432"
+      CAIRN_DB_NAME: ${CAIRN_DB_NAME:-cairn}
+      CAIRN_DB_ADMIN_USER: cairn_admin
+      CAIRN_DB_ADMIN_PASSWORD: ${CAIRN_MANAGED_ADMIN_PASSWORD:?run make env-update}
+      CAIRN_DB_ADMIN_MODE: managed
+      CAIRN_OWNER_DB_PASSWORD: ${CAIRN_OWNER_DB_PASSWORD:?run make env}
+      CAIRN_APP_DB_PASSWORD: ${CAIRN_APP_DB_PASSWORD:?run make env}
+      CAIRN_DBOS_DB_PASSWORD: ${CAIRN_DBOS_DB_PASSWORD:?run make env}
+      CAIRN_INGEST_DB_PASSWORD: ${CAIRN_INGEST_DB_PASSWORD:?run make env-update}
+      CAIRN_EDGE_DB_PASSWORD: ${CAIRN_EDGE_DB_PASSWORD:?run make env-update}
+    depends_on:
+      ft-admin-init:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    restart: "no"
+
+  # Render free emulation: the combined process (uvicorn plus the DBOS jobs runner) under
+  # 512 MiB with no swap and a tenth of a CPU, listening on $PORT like Render. Holds the
+  # cairn_app and cairn_dbos passwords and the proxy token only. The healthcheck is the
+  # stdlib client of cairn_api.healthcheck: it asks /readyz and sends the proxy header from
+  # CAIRN_PROXY_TOKEN, so the container turns healthy once DBOS has launched (the start
+  # period is long because 0.1 CPU makes the first launch slow). No restart policy, so an
+  # OOM kill or a crash stays visible to the RAM check.
+  ft-app:
+    <<: *python-app
+    profiles: [freetier]
+    image: cairn-combined:local
+    build:
+      context: .
+      dockerfile: infra/docker/python-app.Dockerfile
+      args:
+        PACKAGE: cairn-combined
+    command: ["cairn-combined"]
+    environment:
+      CAIRN_ENV: demo
+      CAIRN_LOG_LEVEL: ${CAIRN_LOG_LEVEL:-INFO}
+      PORT: "10000"
+      CAIRN_DB_HOST: ft-db
+      CAIRN_DB_PORT: "5432"
+      CAIRN_DB_NAME: ${CAIRN_DB_NAME:-cairn}
+      CAIRN_DB_TIMEOUT_S: "5"
+      CAIRN_APP_DB_PASSWORD: ${CAIRN_APP_DB_PASSWORD:?run make env}
+      CAIRN_DBOS_DB_PASSWORD: ${CAIRN_DBOS_DB_PASSWORD:?run make env}
+      CAIRN_PROXY_TOKEN: ${CAIRN_PROXY_TOKEN:?run make env-update}
+      # Phase 1 (PD1-28, DV-10): the combined process holds the cairn_app, cairn_ingest and
+      # cairn_dbos passwords, never owner or admin. Demo persona mode needs the proxy token.
+      CAIRN_INGEST_DB_PASSWORD: ${CAIRN_INGEST_DB_PASSWORD:?run make env-update}
+      CAIRN_SESSION_SECRET: ${CAIRN_SESSION_SECRET:?run make env-update}
+      CAIRN_AUDIT_HASH_KEY: ${CAIRN_AUDIT_HASH_KEY:?run make env-update}
+      CAIRN_DEMO_PERSONAS: "on"
+      CAIRN_WORKERS_AI_BUDGET_STORE: postgres
+      # The memory gate sends a burst from a few clients; the public limits are tested elsewhere.
+      CAIRN_DEMO_LOGIN_PER_MIN: "100"
+      CAIRN_DEMO_SEARCH_PER_10MIN: "600"
+      CAIRN_DEMO_ANSWER_PER_10MIN: "200"
+      CAIRN_DEMO_ANSWERS_PER_DAY: "1000"
+      CAIRN_EMBEDDER: ${CAIRN_EMBEDDER:-fake}
+      CAIRN_RERANKER: ${CAIRN_RERANKER:-fake}
+      CAIRN_ANSWER_PROVIDER: ${CAIRN_ANSWER_PROVIDER:-fake}
+      CAIRN_JUDGE_PROVIDER: ${CAIRN_JUDGE_PROVIDER:-fake}
+      CAIRN_RERANK_MIN_SCORE: ${CAIRN_RERANK_MIN_SCORE:-0.0}
+      CAIRN_HEARTBEAT_CRON: "*/10 * * * * *"
+      OTEL_TRACES_EXPORTER: none
+      CAIRN_API_HEALTHCHECK_URL: http://127.0.0.1:10000/readyz
+    depends_on:
+      ft-db-init:
+        condition: service_completed_successfully
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: 0.1
+    ports:
+      - "127.0.0.1:${CAIRN_FREETIER_APP_PORT:-8010}:10000"
+    healthcheck:
+      # Measured (FV13): at 0.1 CPU the cgroup is throttled in about 89% of its periods, and
+      # `docker exec python -m cairn_api.healthcheck` shares that quota with the app, so one
+      # check takes about 16 s. The design's 10 s interval and 8 s timeout failed every
+      # time; these values leave room for a check to finish and for a few slow ones.
+      test: ["CMD", "python", "-m", "cairn_api.healthcheck"]
+      interval: 30s
+      timeout: 60s
+      retries: 6
+      start_period: 180s
+    stop_grace_period: 30s
+
+# pgdata (cairn_pgdata, initialized by the previous image) is no longer declared. Compose
+# never deletes a volume it does not declare, so that data stays until the user removes
+# it (FU7). Do not declare it again: `make db-reset` and `down --volumes` would reach it.
+volumes:
+  pgdata-pgvector: {}
+  prometheus-data: {}
+  grafana-data: {}

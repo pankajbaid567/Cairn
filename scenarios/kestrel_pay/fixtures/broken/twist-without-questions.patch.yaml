@@ -1,0 +1,14 @@
+# Broken fixture: an RFC 6902 patch applied to scenario.yaml after it is loaded.
+# The leading test op pins the target, so a reordered scenario fails loudly.
+description: A partial_revert twist on ADR-009 that no gold question references.
+expect_rules: [TW-1]
+allow_rules: []
+patch:
+  - {op: test, path: /decisions/3/id, value: ADR-009}
+  - op: add
+    path: /twists/-
+    value:
+      id: TW-FIXTURE-ORPHAN
+      kind: partial_revert
+      decisions: [ADR-009]
+      description: Fixture twist with no gold question

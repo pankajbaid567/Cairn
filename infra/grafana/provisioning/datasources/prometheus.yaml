@@ -1,0 +1,15 @@
+apiVersion: 1
+
+# Read-only data source, provisioned from file (Requirement 9.9). The uid is fixed so the
+# dashboards in ../dashboards can refer to it.
+datasources:
+  - name: Prometheus
+    uid: cairn-prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s

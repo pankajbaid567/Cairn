@@ -1,0 +1,21 @@
+{
+  "body": "{\"action\":\"edited\",\"installation\":{\"id\":5003},\"number\":123,\"organization\":{\"id\":7001,\"login\":\"kestrel-pay-demo\"},\"pull_request\":{\"number\":123,\"title\":\"Use PostgreSQL\"},\"repository\":{\"full_name\":\"kestrel-pay-demo/payment-service\",\"id\":9003}}",
+  "expected": {
+    "action": "edited",
+    "class": "content",
+    "delivery_id": "fixture-0005-pull_request_edited",
+    "event": "pull_request",
+    "installation_id": 5003,
+    "object_number": 123,
+    "org_id": 7001,
+    "repo_id": 9003,
+    "repo_name": "kestrel-pay-demo/payment-service"
+  },
+  "headers": {
+    "content-type": "application/json",
+    "x-github-delivery": "fixture-0005-pull_request_edited",
+    "x-github-event": "pull_request",
+    "x-hub-signature-256": "sha256=eca9d54ef143d81bcdde98c3e6b3ed447f46f7646b0cbb67eb37b086abc7c071"
+  },
+  "name": "pull_request_edited"
+}

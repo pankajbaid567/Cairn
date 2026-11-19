@@ -1,0 +1,21 @@
+{
+  "body": "{\"action\":\"member_removed\",\"installation\":{\"id\":5003},\"membership\":{\"user\":{\"login\":\"ben\"}},\"organization\":{\"id\":7001,\"login\":\"kestrel-pay-demo\"}}",
+  "expected": {
+    "action": "member_removed",
+    "class": "acl",
+    "delivery_id": "fixture-0002-organization_member_removed",
+    "event": "organization",
+    "installation_id": 5003,
+    "object_number": null,
+    "org_id": 7001,
+    "repo_id": null,
+    "repo_name": null
+  },
+  "headers": {
+    "content-type": "application/json",
+    "x-github-delivery": "fixture-0002-organization_member_removed",
+    "x-github-event": "organization",
+    "x-hub-signature-256": "sha256=883dd8f8468c6dcdc3d79a2d49e20dda710ca8c0b921cff1dc57ca3541045679"
+  },
+  "name": "organization_member_removed"
+}

@@ -1,0 +1,45 @@
+{
+  "secret": "kestrel-test-webhook-secret",
+  "fixtures": [
+    {
+      "name": "membership_removed",
+      "file": "membership_removed.json"
+    },
+    {
+      "name": "organization_member_removed",
+      "file": "organization_member_removed.json"
+    },
+    {
+      "name": "repository_privatized",
+      "file": "repository_privatized.json"
+    },
+    {
+      "name": "member_removed",
+      "file": "member_removed.json"
+    },
+    {
+      "name": "pull_request_edited",
+      "file": "pull_request_edited.json"
+    },
+    {
+      "name": "issue_comment_created",
+      "file": "issue_comment_created.json"
+    },
+    {
+      "name": "push_large",
+      "file": "push_large.json"
+    },
+    {
+      "name": "star_ignored",
+      "file": "star_ignored.json"
+    },
+    {
+      "name": "ping_ignored",
+      "file": "ping_ignored.json"
+    },
+    {
+      "name": "hostile_repo_name",
+      "file": "hostile_repo_name.json"
+    }
+  ]
+}

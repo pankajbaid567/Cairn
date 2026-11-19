@@ -1,0 +1,14 @@
+{
+  "corpus_sha256": "e7744a97a7f07b056e48606b4ea83cd5e4472b97d1cece37a9012f04027bde74",
+  "date": "2026-11-04",
+  "embedder": "fake-embed-v1",
+  "label": "fake",
+  "model_mode": "fake",
+  "questions": 30,
+  "reranker": "fake-rerank-v1",
+  "run_id": "20261104T180415-d4301a",
+  "scenario_sha256": "81ab3eb4ce38099e86ed646b81d0887b12ce6a0c89747c94832aa320857526e9",
+  "seed": 0,
+  "uv_lock_sha256": "ef0b209d9b49c9a28a62782826bc779e8c66c755caed1549d91aecf1a563a0a8",
+  "variant": "b2"
+}

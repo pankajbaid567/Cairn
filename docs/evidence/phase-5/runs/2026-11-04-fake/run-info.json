@@ -1,0 +1,4 @@
+{
+  "mode": "fake",
+  "note": "Deterministic fake models. This checks the pipeline, the metrics and the deterministic suites, and gives regression baselines. It says nothing about retrieval or answer quality with real models."
+}

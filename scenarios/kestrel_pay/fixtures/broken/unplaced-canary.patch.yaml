@@ -1,0 +1,14 @@
+# Broken fixture: an RFC 6902 patch applied to scenario.yaml after it is loaded.
+# The leading test op pins the target, so a reordered scenario fails loudly.
+description: Canary CAN-SEC-09 is declared but no source carries it.
+expect_rules: [CAN-1]
+allow_rules: []
+patch:
+  - {op: test, path: /meta/id, value: kestrel_pay}
+  - op: add
+    path: /canaries/-
+    value:
+      id: CAN-SEC-09
+      family: security
+      kind: token
+      allowed_scopes: ["repo:security-policies"]

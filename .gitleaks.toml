@@ -1,0 +1,37 @@
+# gitleaks configuration for `make secrets` (design §10, Requirement 22.4).
+#
+# `make secrets` runs the pinned gitleaks image in `dir` mode over the working
+# tree with --redact, so findings never print the matched value. The pre-commit
+# hook (git mode, staged files) reads this file too.
+#
+# Keep this file small. An allowlist entry needs a reason next to it, and a
+# path entry may only name generated or third-party files that git ignores.
+# Never allowlist a rule, a secret value or `.env.example`: the template holds
+# only the placeholder `change-me`, which the default rules do not flag, and a
+# real secret pasted there should fail the scan.
+title = "Cairn gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated, cached or third-party directories that .gitignore already excludes from version control. Scanning them only finds vendored test keys and cache noise."
+paths = [
+  '''(^|/)\.git/''',
+  '''(^|/)\.venv/''',
+  '''(^|/)node_modules/''',
+  '''(^|/)\.pnpm-store/''',
+  '''(^|/)__pycache__/''',
+  '''(^|/)\.mypy_cache/''',
+  '''(^|/)\.ruff_cache/''',
+  '''(^|/)\.pytest_cache/''',
+  '''(^|/)\.hypothesis/''',
+  '''(^|/)dist/''',
+  '''(^|/)var/''',
+]
+
+[[allowlists]]
+description = "The local .env written by `make env`. It holds random local-only secrets on purpose, is gitignored, and is never committed or built into an image (.dockerignore). Without this entry `make secrets` would fail on every machine after `make env`. CI has no .env, and tracked secrets are still caught everywhere else, including a pasted real secret in .env.example."
+paths = [
+  '''(^|/)\.env$''',
+]

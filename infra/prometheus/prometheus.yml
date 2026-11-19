@@ -1,0 +1,18 @@
+# Prometheus for the obs profile (design §9). Scrapes itself and the collector's
+# spanmetrics endpoint. Nothing is pushed to it and no rule or alert is defined in Phase 0.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # RED metrics derived from spans by the spanmetrics connector (infra/otel/collector.yaml):
+  # traces_span_metrics_calls_total and traces_span_metrics_duration_milliseconds_{bucket,sum,
+  # count}, labelled by service_name, span_name, span_kind and status_code.
+  - job_name: otel-collector
+    static_configs:
+      - targets: ["otel-collector:8889"]

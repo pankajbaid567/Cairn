@@ -1,0 +1,12 @@
+# Broken fixture: an RFC 6902 patch applied to scenario.yaml after it is loaded.
+# The leading test ops pin the target, so a reordered scenario fails loudly.
+description: ADR-007 implemented on 2 Mar, before its 3 Mar proposal.
+# Q-3 follows from the date change: the Q042 and Q043 lifecycle labels no longer match
+# the as-of oracle.
+expect_rules: [TL-1, TL-3, TL-4, Q-3]
+allow_rules: [TL-1, TL-3, TL-4, Q-3]
+patch:
+  - {op: test, path: /decisions/1/id, value: ADR-007}
+  - {op: test, path: /decisions/1/timeline/3/event, value: implemented}
+  - {op: test, path: /decisions/1/timeline/3/on, value: "2026-03-12"}
+  - {op: replace, path: /decisions/1/timeline/3/on, value: "2026-03-02"}

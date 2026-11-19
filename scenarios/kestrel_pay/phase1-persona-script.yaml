@@ -1,0 +1,21 @@
+# The five scripted questions of the Phase 1 exit gate (design §19): switching persona must change the
+# results. `gold` are scenario source ids. For each persona the runner computes who may read them from
+# the scenario oracle (scenario.yaml): a reader must get a gold source in the top 5 and in the answer
+# citations; a non-reader must get no restricted gold source, no canary and no restricted id anywhere.
+version: 1
+questions:
+  - id: token-rotation
+    text: How often do service tokens rotate?
+    gold: [doc-token-rotation-policy, adr-file-019]
+  - id: double-refunds
+    text: Second double refund this month incident
+    gold: [thread-incidents-payments-2026-02-18]
+  - id: hr-compensation
+    text: payroll letters performance plan compensation band review
+    gold: [thread-hr-private-2026-04-02, thread-hr-private-2026-08-19]
+  - id: postgres-migration
+    text: Why did payment-service move from MongoDB to PostgreSQL?
+    gold: [doc-payment-db, adr-file-007]
+  - id: partner-limits
+    text: Larkspur Freight rate limit before peak season
+    gold: [thread-partners-limits-2026-08-05, mtg-partner-limits-2026-08-12]

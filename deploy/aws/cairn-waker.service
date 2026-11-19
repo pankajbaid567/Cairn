@@ -1,0 +1,20 @@
+[Unit]
+Description=Cairn waker: front door that starts the Cairn container on demand and stops it when idle
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/opt/cairn-src/deploy/aws/cairn-run.sh create
+EnvironmentFile=-/run/cairn/waker.env
+Environment=CAIRN_WAKER_WEB_ROOT=/opt/cairn/web
+Environment=CAIRN_WAKER_IDLE_S=900
+ExecStart=/usr/bin/python3 /opt/cairn-src/deploy/aws/cairn_waker.py
+Restart=on-failure
+RestartSec=10
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

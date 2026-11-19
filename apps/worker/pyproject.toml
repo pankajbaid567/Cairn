@@ -1,0 +1,23 @@
+[project]
+name = "cairn-worker"
+version = "0.1.0"
+description = "Cairn worker: DBOS durable workflows, starting with the heartbeat schedule."
+requires-python = "==3.12.*"
+dependencies = [
+    "cairn-core",
+    "cairn-retrieval",
+    "cairn-connectors",
+    "dbos==3.3.0",
+]
+
+[tool.uv.sources]
+cairn-core = { workspace = true }
+cairn-retrieval = { workspace = true }
+cairn-connectors = { workspace = true }
+
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cairn_worker"]

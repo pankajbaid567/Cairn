@@ -1,0 +1,14 @@
+apiVersion: 1
+
+# Loads every JSON file in this directory (mounted read-only at
+# /etc/grafana/provisioning/dashboards) into the folder "Cairn".
+providers:
+  - name: cairn
+    orgId: 1
+    folder: Cairn
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 60
+    options:
+      path: /etc/grafana/provisioning/dashboards
