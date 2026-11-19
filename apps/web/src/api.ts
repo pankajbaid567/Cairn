@@ -82,6 +82,7 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     readonly retryAfter: number | null,
+    readonly reason: string | null = null,
   ) {
     super(`${status} ${code}`);
     this.name = 'ApiError';
@@ -101,14 +102,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (!response.ok) {
     let code = 'error';
+    let reason: string | null = null;
     try {
-      const body = (await response.json()) as { error?: unknown };
+      const body = (await response.json()) as { error?: unknown; reason?: unknown };
       if (typeof body.error === 'string') code = body.error;
+      if (typeof body.reason === 'string') reason = body.reason;
     } catch {
       // not JSON: keep the generic code
     }
     const retry = Number.parseInt(response.headers.get('retry-after') ?? '', 10);
-    throw new ApiError(response.status, code, Number.isFinite(retry) ? retry : null);
+    throw new ApiError(response.status, code, Number.isFinite(retry) ? retry : null, reason);
   }
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
@@ -193,8 +196,27 @@ export const getSyncSources = () => request<SyncSources>('/sync/sources');
 export const getMyAudit = () => request<{ entries: AuditEntry[] }>('/audit/mine');
 
 /** The text a user sees for an API failure. Never shows a status color alone. */
+const CODE_TEXT: Record<string, string> = {
+  invalid_credentials: 'The email or password is not right.',
+  not_confirmed: 'Confirm your email address first: enter the code we sent you.',
+  reset_required: 'This account needs a password reset.',
+  weak_password:
+    'Use at least 10 characters with an upper-case letter, a lower-case letter and a number.',
+  bad_code: 'That code is wrong or has expired.',
+  invalid_request: 'Some of what you entered is not valid.',
+  invalid_invite: 'This invitation is not valid for your account. Sign in with the invited email.',
+  not_a_member: 'You are not a member of that workspace.',
+  no_organisation: 'Create or join a workspace first.',
+  forbidden: 'Your role does not allow this.',
+  team_exists: 'A team with that name already exists.',
+  slug_taken: 'That workspace name is taken. Try another.',
+};
+
 export function describeError(error: unknown): string {
   if (!(error instanceof ApiError)) return 'Something went wrong. Try again.';
+  if (error.reason && (error.status === 403 || error.status === 409)) return error.reason;
+  const byCode = CODE_TEXT[error.code];
+  if (byCode) return byCode;
   if (error.status === 401) return 'Choose a persona first.';
   if (error.code === 'permissions_syncing')
     return 'Access rules are being updated. Try again in a few seconds.';
@@ -213,3 +235,170 @@ export function describeError(error: unknown): string {
   if (error.status === 422) return 'That question could not be used. Keep it under 500 characters.';
   return 'Something went wrong. Try again.';
 }
+
+// ---- accounts, organisations and people ----
+
+export interface OrgSummary {
+  org_id: number;
+  slug: string;
+  name: string;
+  role: string;
+  is_demo: boolean;
+}
+
+export interface Session {
+  authenticated: boolean;
+  account: { id: string; email: string; name: string } | null;
+  persona: string | null;
+  org: OrgSummary | null;
+  role: string | null;
+  orgs: OrgSummary[];
+  demo: boolean;
+  principal_id: number | null;
+}
+
+export interface AuthConfig {
+  password_login: boolean;
+  demo_login: boolean;
+  auto_confirm: boolean;
+}
+
+/** The signed-in session, or null when nobody is signed in. */
+export async function getSession(): Promise<Session | null> {
+  try {
+    return await request<Session>('/session');
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return null;
+    throw error;
+  }
+}
+
+export const getAuthConfig = () => request<AuthConfig>('/auth/config');
+export const signUp = (b: { email: string; password: string; name: string }) =>
+  request<{ status?: string; org_id?: number | null }>('/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify(b),
+  });
+export const confirmEmail = (b: { email: string; code: string }) =>
+  request<{ status: string }>('/auth/confirm', { method: 'POST', body: JSON.stringify(b) });
+export const signIn = (b: { email: string; password: string }) =>
+  request<{ org_id: number | null }>('/auth/login', { method: 'POST', body: JSON.stringify(b) });
+export const forgotPassword = (email: string) =>
+  request<{ status: string }>('/auth/forgot', { method: 'POST', body: JSON.stringify({ email }) });
+export const resetPassword = (b: { email: string; code: string; password: string }) =>
+  request<{ status: string }>('/auth/reset', { method: 'POST', body: JSON.stringify(b) });
+export const signOut = () => request<{ status: string }>('/auth/signout', { method: 'POST' });
+export const createOrg = (name: string) =>
+  request<{ org_id: number }>('/orgs', { method: 'POST', body: JSON.stringify({ name }) });
+export const switchOrg = (org_id: number) =>
+  request<{ org_id: number }>('/session/org', { method: 'POST', body: JSON.stringify({ org_id }) });
+
+export interface OrgInfo {
+  org_id: number;
+  slug: string;
+  name: string;
+  plan: string;
+  is_demo: boolean;
+  created_at: string;
+  active_members: number;
+  deactivated_members: number;
+  role: string;
+}
+export const getOrg = () => request<OrgInfo>('/org');
+export const renameOrg = (name: string) =>
+  request<{ name: string }>('/org', { method: 'PATCH', body: JSON.stringify({ name }) });
+
+export interface Member {
+  account_id: string;
+  principal_id: number;
+  email: string;
+  name: string;
+  role: string;
+  state: string;
+  title: string | null;
+  joined_at: string;
+  team_ids: number[];
+  you: boolean;
+}
+export const getMembers = () => request<{ members: Member[] }>('/org/members');
+export const patchMember = (
+  id: string,
+  body: { role?: string; active?: boolean; title?: string },
+) =>
+  request<{ status: string }>(`/org/members/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+
+export interface InviteRow {
+  invite_id: string;
+  email: string;
+  role: string;
+  state: string;
+  created_at: string;
+  expires_at: string;
+}
+export interface InviteCreated {
+  invite_id: string;
+  email: string;
+  role: string;
+  token: string;
+  path: string;
+  expires_in_hours: number;
+}
+export const getInvites = () => request<{ invites: InviteRow[] }>('/org/invites');
+export const createInvite = (b: { email: string; role: string }) =>
+  request<InviteCreated>('/org/invites', { method: 'POST', body: JSON.stringify(b) });
+export const revokeInvite = (id: string) =>
+  request<{ status: string }>(`/org/invites/${id}`, { method: 'DELETE' });
+export const previewInvite = (token: string) =>
+  request<{ org: string; role: string; email: string }>(
+    `/invites/preview?token=${encodeURIComponent(token)}`,
+  );
+export const acceptInvite = (token: string) =>
+  request<{ org_id: number }>('/invites/accept', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+
+export interface Team {
+  principal_id: number;
+  slug: string;
+  name: string;
+  member_count: number;
+}
+export const getTeams = () => request<{ teams: Team[] }>('/org/teams');
+export const createTeam = (name: string) =>
+  request<Team>('/org/teams', { method: 'POST', body: JSON.stringify({ name }) });
+export const setTeamMember = (team: number, principal_id: number, on: boolean) =>
+  request<{ status: string }>(`/org/teams/${team}/members`, {
+    method: 'POST',
+    body: JSON.stringify({ principal_id, on }),
+  });
+
+export interface AuditEvent {
+  seq: number;
+  at: string;
+  action: string;
+  target_type: string | null;
+  target_id: string | null;
+  outcome: string;
+  actor_role: string | null;
+  actor: string | null;
+  detail: Record<string, unknown>;
+}
+export const getAuditEvents = (action?: string, before?: number) => {
+  const q = new URLSearchParams({ limit: '50' });
+  if (action) q.set('action', action);
+  if (before) q.set('before_seq', String(before));
+  return request<{ all: boolean; events: AuditEvent[] }>(`/org/audit?${q.toString()}`);
+};
+export interface ChainCheck {
+  ok: boolean;
+  checked: number;
+  first_bad_seq: number | null;
+  head_seq: number | null;
+  head_hash: string | null;
+}
+export const verifyAudit = () => request<ChainCheck>('/org/audit/verify');
+export const AUDIT_EXPORT_URL = '/api/org/audit/export';
