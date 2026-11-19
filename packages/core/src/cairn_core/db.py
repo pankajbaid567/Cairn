@@ -27,6 +27,7 @@ ALLOWED_SETTINGS: Final = frozenset(
     {
         "cairn.org_id",
         "cairn.account_id",
+        "cairn.role",
         "cairn.principal_id",
         "cairn.principal_groups",
         "cairn.principal_set_hash",

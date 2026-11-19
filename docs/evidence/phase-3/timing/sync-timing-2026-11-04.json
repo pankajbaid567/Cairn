@@ -1,44 +1,44 @@
 {
   "freshness.all": {
-    "max_s": 0.789,
+    "max_s": 0.768,
     "n": 20,
-    "p50_s": 0.166,
-    "p95_s": 0.769,
+    "p50_s": 0.158,
+    "p95_s": 0.767,
     "unsettled": 0
   },
   "freshness.asleep": {
-    "max_s": 0.789,
+    "max_s": 0.768,
     "n": 10,
-    "p50_s": 0.59,
-    "p95_s": 0.789,
+    "p50_s": 0.594,
+    "p95_s": 0.768,
     "unsettled": 0
   },
   "freshness.warm": {
-    "max_s": 0.166,
+    "max_s": 0.158,
     "n": 10,
-    "p50_s": 0.139,
-    "p95_s": 0.166,
+    "p50_s": 0.142,
+    "p95_s": 0.158,
     "unsettled": 0
   },
   "revocation.all": {
-    "max_s": 0.019,
+    "max_s": 0.015,
     "n": 20,
     "p50_s": 0.011,
-    "p95_s": 0.016,
+    "p95_s": 0.014,
     "unsettled": 0
   },
   "revocation.asleep": {
-    "max_s": 0.016,
+    "max_s": 0.014,
     "n": 10,
-    "p50_s": 0.01,
-    "p95_s": 0.016,
+    "p50_s": 0.011,
+    "p95_s": 0.014,
     "unsettled": 0
   },
   "revocation.warm": {
-    "max_s": 0.019,
+    "max_s": 0.015,
     "n": 10,
     "p50_s": 0.011,
-    "p95_s": 0.019,
+    "p95_s": 0.015,
     "unsettled": 0
   }
 }

@@ -51,3 +51,54 @@ def verify(token: str | None, secret: bytes, *, now: float | None = None) -> str
     if not isinstance(exp, int) or exp < (now if now is not None else time.time()):
         return None
     return payload["p"]
+
+
+# --- account sessions (SaaS): who signed in and which organisation they are acting in -------
+
+SESSION_COOKIE = "cairn_sess"
+_ACCOUNT_LABEL = b"cairn-account-session-v1"
+
+
+def _account_key(secret: bytes) -> bytes:
+    return hmac.new(secret, _ACCOUNT_LABEL, hashlib.sha256).digest()
+
+
+def sign_session(
+    account_id: str, org_id: int | None, secret: bytes, ttl_s: int, *, now: float | None = None
+) -> str:
+    """A cookie value for a signed-in account. A different key from the demo persona cookie, so
+    neither kind is ever accepted as the other."""
+    payload = {
+        "a": account_id,
+        "o": org_id,
+        "exp": int((now if now is not None else time.time()) + ttl_s),
+    }
+    body = _b64(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode())
+    return f"{body}.{_mac(_account_key(secret), body)}"
+
+
+def verify_session(
+    token: str | None, secret: bytes, *, now: float | None = None
+) -> tuple[str, int | None] | None:
+    """``(account_id, org_id)`` for a valid unexpired token, else ``None``. Never raises."""
+    if not token or token.count(".") != 1 or len(token) > 512:
+        return None
+    body, _, mac = token.partition(".")
+    try:
+        if not hmac.compare_digest(
+            mac.encode("ascii"), _mac(_account_key(secret), body).encode("ascii")
+        ):
+            return None
+        payload = json.loads(_unb64(body))
+    except (ValueError, UnicodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    account, org, exp = payload.get("a"), payload.get("o"), payload.get("exp")
+    if not isinstance(account, str) or not isinstance(exp, int):
+        return None
+    if exp < (now if now is not None else time.time()):
+        return None
+    if org is not None and not isinstance(org, int):
+        return None
+    return account, org

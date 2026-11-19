@@ -28,7 +28,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from cairn_api.agent_tokens import verify_token
 from cairn_api.answer_cache import AnswerCache, CachedAnswer
 from cairn_api.ratelimit import FixedWindowLimiter
-from cairn_api.sessions import COOKIE_NAME, sign, verify
+from cairn_api.sessions import COOKIE_NAME, SESSION_COOKIE, sign
 from cairn_api.sync import (
     InboxWriter,
     ingest_inbox_writer,
@@ -37,7 +37,8 @@ from cairn_api.sync import (
     sync_summary,
 )
 from cairn_core.config import ApiSettings, IngestSettings, SearchSettings, load_settings
-from cairn_core.db import RUNTIME_CONNECT_KWARGS, conninfo, make_async_pool
+from cairn_core.db import RUNTIME_CONNECT_KWARGS, aset_local, conninfo, make_async_pool
+from cairn_core.tenancy import set_request_scope
 from cairn_retrieval.access import principal_transaction
 from cairn_retrieval.answer import AnswerBody, citation_id, location_of, not_found
 from cairn_retrieval.audit import AuditRecord, build_audit_record, write_audit
@@ -53,7 +54,13 @@ from cairn_retrieval.workflow import WorkflowError, answer_workflow
 
 log = logging.getLogger("cairn.api.search")
 
-PERSONAS: Final = (("asha", "Asha"), ("ben", "Ben"), ("carla", "Carla"), ("priya", "Priya"))
+PERSONAS: Final = (
+    ("asha", "Asha"),
+    ("ben", "Ben"),
+    ("carla", "Carla"),
+    ("priya", "Priya"),
+    ("dev", "Dev"),
+)
 CONNECTORS: Final = ("chat_export", "meeting_notes", "docs_folder")
 SNIPPET_CHARS: Final = 300
 NO_STORE: Final = {"Cache-Control": "no-store"}
@@ -69,6 +76,8 @@ class SearchRuntime:
     agent_limiter: FixedWindowLimiter | None = None
     inbox_writer: InboxWriter | None = None  # the local webhook receiver's store, when configured
     answer_cache: AnswerCache | None = None
+    idp: Any = None  # the identity provider (Cognito or the fake); None disables password sign-in
+    auth_limiter: FixedWindowLimiter | None = None  # always on: sign-in endpoints are public
 
     @property
     def secret(self) -> bytes:
@@ -115,11 +124,26 @@ def build_runtime(
         providers,
         limiter,
         agent_limiter=FixedWindowLimiter(search.audit_hash_key.get_secret_value().encode()),
+        auth_limiter=FixedWindowLimiter(search.audit_hash_key.get_secret_value().encode()),
+        idp=_identity_provider(search),
         inbox_writer=_local_inbox_writer(search),
         answer_cache=AnswerCache(search.answer_cache_size, search.answer_cache_ttl_s)
         if search.answer_cache_size > 0
         else None,
     )
+
+
+def _identity_provider(search: SearchSettings) -> Any:
+    if search.cognito_pool_id and search.cognito_client_id:
+        from cairn_api.idp import CognitoIdentityProvider
+
+        return CognitoIdentityProvider(
+            search.cognito_pool_id,
+            search.cognito_client_id,
+            search.cognito_region,
+            auto_confirm=search.auth_auto_confirm,
+        )
+    return None
 
 
 def _local_inbox_writer(search: SearchSettings) -> InboxWriter | None:
@@ -241,14 +265,16 @@ def _limited(
 
 
 async def _principal_for(rt: SearchRuntime, persona: str) -> tuple[int, str] | None:
-    async with rt.pool.connection() as conn:
+    async with rt.pool.connection() as conn, conn.transaction():
+        await aset_local(
+            conn, "cairn.org_id", "1"
+        )  # the demo personas live in the demo organisation
         row = await (
             await conn.execute(
                 "SELECT principal_id, display_name FROM cairn.principals WHERE external_id = %s",
                 (f"user:{persona}",),
             )
         ).fetchone()
-        await conn.rollback()
     return (int(row[0]), str(row[1])) if row else None
 
 
@@ -273,7 +299,8 @@ async def _agent_actor(rt: SearchRuntime, request: Request) -> Actor | None:
     name = verify_token(header[7:].strip(), rt.secret)
     if name is None or not name.replace("-", "").replace("_", "").isalnum():
         return None
-    async with rt.pool.connection() as conn:
+    async with rt.pool.connection() as conn, conn.transaction():
+        await aset_local(conn, "cairn.org_id", "1")
         row = await (
             await conn.execute(
                 "SELECT principal_id, display_name, acting_for FROM cairn.principals "
@@ -292,15 +319,17 @@ async def _agent_actor(rt: SearchRuntime, request: Request) -> Actor | None:
 
 
 async def _current(rt: SearchRuntime, request: Request) -> Actor | None:
+    from cairn_api.tenant import resolve_ctx
+
     if request.headers.get("authorization"):
         # A bearer token is the only credential considered when one is sent: never fall back to a
         # cookie, so an agent's access cannot silently become a user's.
+        set_request_scope(1)  # agent tokens belong to the demo organisation until they carry one
         return await _agent_actor(rt, request)
-    persona = verify(request.cookies.get(COOKIE_NAME), rt.secret)
-    if persona is None or persona not in {p for p, _ in PERSONAS}:
+    ctx = await resolve_ctx(rt, request)  # binds the organisation for this request
+    if ctx is None or ctx.org_id is None or ctx.principal_id is None or ctx.handle is None:
         return None
-    found = await _principal_for(rt, persona)
-    return Actor(persona, found[0], found[1]) if found else None
+    return Actor(ctx.handle, ctx.principal_id, ctx.display_name)
 
 
 async def _untrusted_ids(rt: SearchRuntime, actor: Actor, ids: list[int]) -> set[int]:
@@ -372,6 +401,7 @@ def install(app: FastAPI, rt: SearchRuntime) -> None:
     async def logout() -> Response:
         response = Response(status_code=204, headers=NO_STORE)
         response.delete_cookie(COOKIE_NAME, path="/")
+        response.delete_cookie(SESSION_COOKIE, path="/")
         return response
 
     @router.get("/me")

@@ -100,6 +100,8 @@ def seed_database(
     )
     with psycopg.connect(ingest_dsn, prepare_threshold=None) as conn:
         outcomes = import_corpus(conn, corpus)
+        conn.execute("SELECT cairn_meta.seed_demo_members(1)")  # accounts and roles for the people
+        conn.commit()
     rejected = [o for o in outcomes if o.error]
     if rejected:
         raise RuntimeError(

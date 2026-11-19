@@ -407,6 +407,11 @@ class SearchSettings(ModelSettings, LlmSettings, WorkersAiSettings, BedrockSetti
     """Everything the search API needs besides its database login (PD1-02, PD1-11, PD1-15, PD1-16)."""  # noqa: E501
 
     env: Literal["local", "ci", "demo"] = Field("local", alias="CAIRN_ENV")
+    cognito_pool_id: str | None = Field(None, alias="CAIRN_COGNITO_POOL_ID")
+    cognito_client_id: str | None = Field(None, alias="CAIRN_COGNITO_CLIENT_ID")
+    cognito_region: str = Field("ap-south-1", alias="CAIRN_COGNITO_REGION")
+    auth_auto_confirm: bool = Field(False, alias="CAIRN_AUTH_AUTO_CONFIRM")
+    """Skip the email code at sign-up. For demos: anyone with an address can create a workspace."""
     session_secret: SecretStr = Field(alias="CAIRN_SESSION_SECRET", min_length=32)
     audit_hash_key: SecretStr = Field(alias="CAIRN_AUDIT_HASH_KEY", min_length=32)
     proxy_token: SecretStr | None = Field(None, alias="CAIRN_PROXY_TOKEN", min_length=32)

@@ -203,13 +203,13 @@ def test_decision_keys_are_unique_per_organisation_not_globally(fresh_db: FreshD
         cols = "(key, title, origin, org_id)"
         for org in (a, b):
             o.execute(
-                f"INSERT INTO cairn.decisions {cols} VALUES ('ADR-001', 't', 'manual', %s)",
-                (org,),  # noqa: S608
+                f"INSERT INTO cairn.decisions {cols} VALUES ('ADR-001', 't', 'manual', %s)",  # noqa: S608
+                (org,),
             )
         with pytest.raises(psycopg.errors.UniqueViolation):
             o.execute(
-                f"INSERT INTO cairn.decisions {cols} VALUES ('ADR-001', 't', 'manual', %s)",
-                (a,),  # noqa: S608
+                f"INSERT INTO cairn.decisions {cols} VALUES ('ADR-001', 't', 'manual', %s)",  # noqa: S608
+                (a,),
             )
 
 
