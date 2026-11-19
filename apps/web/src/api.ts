@@ -210,6 +210,9 @@ const CODE_TEXT: Record<string, string> = {
   forbidden: 'Your role does not allow this.',
   team_exists: 'A team with that name already exists.',
   slug_taken: 'That workspace name is taken. Try another.',
+  invalid_date: 'Reports can be written for today or the last 14 days.',
+  empty_report: 'Write what you did, or a blocker, before saving.',
+  digest_unavailable: 'The digest could not be produced right now. Try again in a moment.',
 };
 
 export function describeError(error: unknown): string {
@@ -402,3 +405,83 @@ export interface ChainCheck {
 }
 export const verifyAudit = () => request<ChainCheck>('/org/audit/verify');
 export const AUDIT_EXPORT_URL = '/api/org/audit/export';
+
+// ---- daily reports ----
+
+export interface ReportLink {
+  kind: 'decision' | 'pr' | 'doc' | 'url';
+  ref: string;
+  title?: string | undefined;
+}
+export interface Report {
+  report_id: number;
+  author_principal: number;
+  author: string;
+  date: string;
+  done: string;
+  next: string;
+  blockers: string;
+  links: ReportLink[];
+  updated_at: string;
+  comments: number;
+}
+export interface MyReport {
+  date: string;
+  report: Report | null;
+  editable: boolean;
+  window_days: number;
+}
+export interface ReportBodyIn {
+  done: string;
+  next: string;
+  blockers: string;
+  links: ReportLink[];
+}
+export const getMyReport = (date: string) => request<MyReport>(`/reports/mine?date=${date}`);
+export const putReport = (date: string, body: ReportBodyIn) =>
+  request<{ report_id: number; created: boolean }>(`/reports/${date}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+export const getReportFeed = (start: string, end: string) =>
+  request<{ start: string; end: string; scope: string; reports: Report[] }>(
+    `/reports?start=${start}&end=${end}`,
+  );
+export interface ReportDetail {
+  report: Report;
+  comments: { comment_id: number; author: string; body: string; at: string }[];
+}
+export const getReport = (id: number) => request<ReportDetail>(`/reports/${id}`);
+export const commentOnReport = (id: number, body: string) =>
+  request<{ comment_id: number }>(`/reports/${id}/comments`, {
+    method: 'POST',
+    body: JSON.stringify({ body }),
+  });
+export interface Rollup {
+  start: string;
+  end: string;
+  people: number;
+  days: { date: string; expected: number; submitted: number; missing: string[] }[];
+  reports: number;
+  with_blockers: number;
+  coverage: number | null;
+}
+export const getRollup = (start: string, end: string) =>
+  request<Rollup>(`/reports/rollup?start=${start}&end=${end}`);
+export interface DigestItem {
+  text: string;
+  reports: number[];
+}
+export interface Digest {
+  empty?: boolean;
+  summary: string;
+  highlights: DigestItem[];
+  blockers: DigestItem[];
+  model?: string;
+  cached?: boolean;
+  reports: { report_id: number; author: string; date: string }[];
+}
+export const makeDigest = (b: { start: string; end: string; scope: string }) =>
+  request<Digest>('/reports/digest', { method: 'POST', body: JSON.stringify(b) });
+export const reportsExportUrl = (start: string, end: string) =>
+  `/api/reports/export?start=${start}&end=${end}`;

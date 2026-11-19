@@ -52,6 +52,11 @@ CONFIG="$RUN_DIR/config.env"
 cat > "$CONFIG" <<CFG
 CAIRN_ENV=demo
 CAIRN_DEMO_PERSONAS=on
+CAIRN_COGNITO_POOL_ID=ap-south-1_6tj46t5dr
+CAIRN_COGNITO_CLIENT_ID=2fveh85r5r0j36n7h5dnsd4fp9
+CAIRN_COGNITO_REGION=${REGION}
+# demo: skip the email code at sign-up so a visitor can create a workspace at once
+CAIRN_AUTH_AUTO_CONFIRM=true
 CAIRN_LOG_LEVEL=INFO
 PORT=${APP_PORT}
 AWS_DEFAULT_REGION=${REGION}

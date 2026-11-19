@@ -28,6 +28,7 @@ from starlette.types import Lifespan
 from cairn_api import proxy_token
 from cairn_api.accounts import install as install_accounts
 from cairn_api.people import install as install_people
+from cairn_api.reports import install as install_reports
 from cairn_api.search import SearchRuntime, build_runtime, runtime_lifespan
 from cairn_api.search import install as install_search
 from cairn_core.config import ApiSettings, SearchSettings, load_settings
@@ -134,9 +135,11 @@ def build_app(
         )
 
     if search is not None:
+        app.state.runtime = search  # tests and tools reach the runtime here
         install_search(app, search)
         install_accounts(app, search)
         install_people(app, search)
+        install_reports(app, search)
 
     FastAPIInstrumentor.instrument_app(app, tracer_provider=tracer_provider)
     return app

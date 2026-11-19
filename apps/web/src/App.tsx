@@ -19,6 +19,7 @@ import { InvitePage } from './InvitePage';
 import { Onboarding } from './Onboarding';
 import { OrgAuditPage } from './OrgAuditPage';
 import { PeoplePage } from './PeoplePage';
+import { ReportsPage } from './ReportsPage';
 import { PersonaSwitcher } from './PersonaSwitcher';
 import { ReadinessStatus } from './ReadinessStatus';
 import { ReviewPage } from './ReviewPage';
@@ -27,14 +28,15 @@ import { SyncPage } from './SyncPage';
 import { initials } from './personas';
 import { Loading, RoleBadge } from './ui';
 
-type View = 'ask' | 'decisions' | 'review' | 'sources' | 'people' | 'audit' | 'settings';
+type View =
+  'reports' | 'ask' | 'decisions' | 'review' | 'sources' | 'people' | 'audit' | 'settings';
 
 interface NavItem {
   id: View;
   label: string;
   sub: string;
   icon: ReactNode;
-  group: 'Knowledge' | 'Workspace';
+  group: 'Work' | 'Knowledge' | 'Workspace';
 }
 
 const NAV: NavItem[] = [
@@ -93,7 +95,7 @@ function readRoute(): { view: View; invite: string | null; auth: string } {
   const raw = window.location.hash.replace(/^#\/?/, '');
   const [head, ...rest] = raw.split('/');
   if (head === 'invite' && rest[0]) return { view: 'ask', invite: rest.join('/'), auth: '' };
-  const view = NAV.some((n) => n.id === head) ? (head as View) : 'ask';
+  const view = NAV.some((n) => n.id === head) ? (head as View) : 'reports';
   return { view, invite: null, auth: head ?? '' };
 }
 
@@ -176,7 +178,7 @@ function UserMenu({ session }: { session: Session }) {
 function Shell({ session }: { session: Session }) {
   const { view, go } = useRoute();
   const current = NAV.find((n) => n.id === view) ?? NAV[0]!;
-  const groups = ['Knowledge', 'Workspace'] as const;
+  const groups = ['Work', 'Knowledge', 'Workspace'] as const;
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -222,6 +224,7 @@ function Shell({ session }: { session: Session }) {
           <UserMenu session={session} />
         </header>
         <main className="content">
+          {view === 'reports' ? <ReportsPage session={session} /> : null}
           {view === 'ask' ? <AskPage withPersona={false} /> : null}
           {view === 'decisions' ? <DecisionPage /> : null}
           {view === 'review' ? <ReviewPage /> : null}
