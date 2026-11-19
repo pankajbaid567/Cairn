@@ -1,0 +1,53 @@
+{
+  "as_of": {
+    "all": {
+      "accuracy": 0.8571,
+      "correct": 12,
+      "n": 14
+    },
+    "dev": {
+      "accuracy": 0.875,
+      "correct": 7,
+      "n": 8
+    },
+    "misses": [
+      {
+        "asker": "dev",
+        "decision": "ADR-004",
+        "expected": "implemented",
+        "got": "accepted",
+        "qid": "Q029",
+        "reason": "the asker cannot read pr-platform-infra-31, which carries the status change",
+        "split": "test"
+      },
+      {
+        "asker": "mira",
+        "decision": "ADR-007",
+        "expected": "implemented",
+        "got": "accepted",
+        "qid": "Q043",
+        "reason": "the asker cannot read pr-payment-service-123, which carries the status change",
+        "split": "dev"
+      }
+    ],
+    "test": {
+      "accuracy": 0.8333,
+      "correct": 5,
+      "n": 6
+    }
+  },
+  "must_not_cite": {
+    "n": 4,
+    "violations": []
+  },
+  "permissions": {
+    "leaks_by_variant": {
+      "b0": 0,
+      "b1": 0,
+      "b2": 0,
+      "b3": 0
+    },
+    "total_leaks": 0
+  },
+  "reference_date": "2026-11-19"
+}

@@ -190,6 +190,11 @@ def _on_fresh_db(
             import tempfile
 
             assert db.ingest_dsn is not None  # noqa: S101
+            if embedder.dim != 384:  # the migrations make vector(384); a 1024-d model needs more
+                from cairn_core.embed_dim import ensure_embedding_dimension
+
+                with db.connect_owner() as owner:
+                    ensure_embedding_dimension(owner, embedder.dim)
             with tempfile.TemporaryDirectory() as tmp:
                 corpus = seed_database(
                     db.ingest_dsn, Path(tmp), scenario_file=scenario_file, embedder=embedder

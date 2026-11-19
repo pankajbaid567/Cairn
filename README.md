@@ -54,6 +54,10 @@ Full tables, generated from Parquet with `make eval-tables`, with 95% bootstrap 
 
 Results are identified by the scenario and corpus hashes in [c1-freeze.json](docs/evidence/phase-5/c1-freeze.json); this tree is not a git repository, so there is no commit hash yet. C1 holds 46 questions (30 dev, 16 test), well under the planned ~150, so intervals are wide.
 
+## Live deployment (AWS + Neon)
+
+Running at https://cairn.3-109-36-90.sslip.io (demo personas, synthetic Kestrel Pay data): one container on an EC2 `t4g.small` that sleeps when idle (cold start 8 to 11 s), PostgreSQL on Neon, models on Amazon Bedrock in ap-south-1 (Titan v2 embeddings, `gpt-oss-120b` answers, an LLM reranker, `qwen3-32b` judge) with a daily dollar cap. Fixed cost about $1 to $3 a month plus Bedrock use (about half a cent for the whole verification session). See [docs/deploy-aws.md](docs/deploy-aws.md), [ADR-0018](docs/adr/ADR-0018-aws-deployment-neon-database-bedrock-models.md) and [the evidence](docs/evidence/aws/README.md). The real-model evaluation is in the same evidence file: retrieval is saturated on this small corpus, answers abstain correctly on 31 of 46 questions.
+
 ## Quick start (local, about 20 minutes plus image builds; not yet timed on a clean machine)
 
 Needs Docker, [uv](https://docs.astral.sh/uv/) and Make.

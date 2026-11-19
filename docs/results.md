@@ -119,6 +119,118 @@ Examples (first five question ids per class):
 - test B0 `not_retrieved`: Q044, Q049
 - test B0 `partially_retrieved`: Q055
 
+## Run `2026-11-19-live`
+
+Bedrock live: Titan v2 1024-d, gpt-oss-20b LLM reranker, gpt-oss-120b answers, qwen3-32b judge; local PostgreSQL 18 + pgvector
+
+### Models used
+
+| mode | embedder | reranker | runs |
+|---|---|---|---|
+| live | bedrock:amazon.titan-embed-text-v2:0:1024 | bedrock-llm-rerank:openai.gpt-oss-20b-1:0 | 8 |
+
+### Retrieval
+
+| split | variant | questions | eligible | Recall@5 (95% CI) | Hit@5 | leaks | citation failures | p50 ms | p95 ms |
+|---|---|---|---|---|---|---|---|---|---|
+| dev | B0 dense only | 30 | 18 | 0.981 [0.944, 1.000] | 1.000 | 0 | 0 | 144.0 | 264.2 |
+| dev | B1 hybrid + rerank | 30 | 18 | 1.000 [1.000, 1.000] | 1.000 | 0 | 0 | 479.4 | 845.0 |
+| dev | B2 B1 + decision index | 30 | 18 | 1.000 [1.000, 1.000] | 1.000 | 0 | 0 | 6.3 | 598.8 |
+| dev | B3 B2 + answer + verifier | 30 | 18 | 1.000 [1.000, 1.000] | 1.000 | 0 | 0 | 480.7 | 1636.4 |
+| test | B0 dense only | 16 | 12 | 1.000 [1.000, 1.000] | 1.000 | 0 | 0 | 127.6 | 269.1 |
+| test | B1 hybrid + rerank | 16 | 12 | 1.000 [1.000, 1.000] | 1.000 | 0 | 0 | 424.2 | 893.8 |
+| test | B2 B1 + decision index | 16 | 12 | 1.000 [1.000, 1.000] | 1.000 | 0 | 0 | 6.0 | 18.8 |
+| test | B3 B2 + answer + verifier | 16 | 12 | 1.000 [1.000, 1.000] | 1.000 | 0 | 0 | 424.8 | 1136.5 |
+
+### Paired differences
+
+| split | comparison | mean difference in Recall@5 (95% CI) | questions |
+|---|---|---|---|
+| dev | B1 minus B0 | 0.019 [0.000, 0.056] | 18 |
+| dev | B2 minus B1 | 0.000 [0.000, 0.000] | 18 |
+| dev | B3 minus B2 | 0.000 [0.000, 0.000] | 18 |
+| test | B1 minus B0 | 0.000 [0.000, 0.000] | 12 |
+| test | B2 minus B1 | 0.000 [0.000, 0.000] | 12 |
+| test | B3 minus B2 | 0.000 [0.000, 0.000] | 12 |
+
+### By category (Recall@5)
+
+| split | category | n | B0 | B1 | B2 | B3 |
+|---|---|---|---|---|---|---|
+| dev | agent_brief | 2 | 1.000 | 1.000 | 1.000 | 1.000 |
+| dev | as_of | 3 | 1.000 | 1.000 | 1.000 | 1.000 |
+| dev | conflict | 2 | 1.000 | 1.000 | 1.000 | 1.000 |
+| dev | permission | 2 | 1.000 | 1.000 | 1.000 | 1.000 |
+| dev | supersession | 3 | 1.000 | 1.000 | 1.000 | 1.000 |
+| dev | when_who | 1 | 1.000 | 1.000 | 1.000 | 1.000 |
+| dev | why | 5 | 0.933 | 1.000 | 1.000 | 1.000 |
+| test | agent_brief | 1 | 1.000 | 1.000 | 1.000 | 1.000 |
+| test | as_of | 4 | 1.000 | 1.000 | 1.000 | 1.000 |
+| test | permission | 2 | 1.000 | 1.000 | 1.000 | 1.000 |
+| test | when_who | 4 | 1.000 | 1.000 | 1.000 | 1.000 |
+| test | why | 1 | 1.000 | 1.000 | 1.000 | 1.000 |
+
+### Answers (B3)
+
+| split | answered | abstained | abstention correct | cited-gold recall (95% CI) | leaks | dropped claims | judged correctness |
+|---|---|---|---|---|---|---|---|
+| dev | 17 | 13 | 22/30 | 0.522 [0.326, 0.717] | 0 | 1 | not run (needs a live, calibrated judge) |
+| test | 7 | 9 | 9/16 | 0.292 [0.083, 0.542] | 0 | 0 | not run (needs a live, calibrated judge) |
+
+### Cost per query
+
+| split | variant | estimated neurons / query | estimated USD / 1,000 queries | neurons reserved in the run |
+|---|---|---|---|---|
+| dev | B0 dense only | 0.03 | 0.0004 | 0 |
+| dev | B1 hybrid + rerank | 0.56 | 0.0062 | 0 |
+| dev | B2 B1 + decision index | 0.56 | 0.0062 | 0 |
+| dev | B3 B2 + answer + verifier | 14.89 | 0.1637 | 0 |
+| test | B0 dense only | 0.03 | 0.0004 | 0 |
+| test | B1 hybrid + rerank | 0.51 | 0.0056 | 0 |
+| test | B2 B1 + decision index | 0.51 | 0.0056 | 0 |
+| test | B3 B2 + answer + verifier | 14.90 | 0.1639 | 0 |
+
+### Deterministic suites (reported separately from judged metrics)
+
+| suite | result |
+|---|---|
+| as-of status, all questions | 12/14 |
+| as-of status, dev | 7/8 |
+| as-of status, test | 5/6 |
+| must-not-cite violations | 0 of 4 |
+| permission leaks, all variants | 0 |
+
+As-of misses (each is a decision whose status, as the asker can see it, differs from the scenario's expected status):
+
+| question | asker | decision | expected | got | reason |
+|---|---|---|---|---|---|
+| Q029 | dev | ADR-004 | implemented | accepted | the asker cannot read pr-platform-infra-31, which carries the status change |
+| Q043 | mira | ADR-007 | implemented | accepted | the asker cannot read pr-payment-service-123, which carries the status change |
+
+### Judge calibration
+
+Not run: needs a labels file with at least 50 human labels. Until then no judged metric is reported.
+
+### Failures and error classes
+
+| split | variant | leak | citation_failure | degraded | not_retrieved | partially_retrieved |
+|---|---|---|---|---|---|---|
+| dev | B0 | 0 | 0 | 0 | 0 | 1 |
+| dev | B1 | 0 | 0 | 2 | 0 | 0 |
+| dev | B2 | 0 | 0 | 2 | 0 | 0 |
+| dev | B3 | 0 | 0 | 2 | 0 | 0 |
+| test | B0 | 0 | 0 | 0 | 0 | 0 |
+| test | B1 | 0 | 0 | 0 | 0 | 0 |
+| test | B2 | 0 | 0 | 0 | 0 | 0 |
+| test | B3 | 0 | 0 | 0 | 0 | 0 |
+
+Examples (first five question ids per class):
+
+- dev B0 `partially_retrieved`: Q017
+- dev B1 `degraded`: Q004, Q019
+- dev B2 `degraded`: Q004, Q019
+- dev B3 `degraded`: Q004, Q019
+
 ## ACL-filtered vector study
 
 | strategy | selectivity | recall_at_10 | p50_ms | p95_ms |

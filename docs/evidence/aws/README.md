@@ -47,10 +47,27 @@ Host: the shared `t4g.small` in ap-south-1 behind Caddy and the waker. Database:
 1. A macOS `tar` added AppleDouble `._*` files; one named `._0001_baseline.sql` made migration discovery fail and the container exit at start. `deploy/aws/package.sh` now sets `COPYFILE_DISABLE=1`, excludes `._*`, and refuses a tarball that has any.
 2. The listwise LLM reranker returned 25 scores for 26 passages (a counting slip), so the pipeline degraded to the fused order (`degraded: ["rerank"]`) on every search. The prompt now asks for scores keyed by passage number and the parser accepts that (or a list of exactly the right length), so a miscount cannot shift scores onto the wrong passage. After the change, two answers ran with `degraded: []`. A failed reply now logs `bedrock.rerank.bad_reply` with the stop reason and the first 160 characters. Also fixed: the importer and the outbox drainer assumed Workers AI budgets and model keys (`UnpricedModel` on the first embedding run); both are now provider-aware.
 
+## Phase 5 evaluation with the real models (2026-11-19, one run)
+
+Models: Titan v2 (1,024-d), `gpt-oss-20b` LLM reranker, `gpt-oss-120b` answers, `qwen3-32b` judge. Database: local PostgreSQL 18 with pgvector, the Kestrel Pay corpus (33 chunks), 30 dev and 16 test questions. Raw files: `docs/evidence/phase-5/runs/2026-11-19-live/`, tables in `docs/results.md`.
+
+| Result | Dev (30) | Test (16) |
+|---|---|---|
+| Recall@5, B0 (BM25 + vectors) / B1 (+ rerank) | 0.982 / 1.000 | 1.000 / 1.000 |
+| Permission leaks, all four variants | 0 | 0 |
+| p50 latency B0 / B1 | 144 / 479 ms | 128 / 424 ms |
+| Reranker degraded to the fused order (`bad_reply`) | 2 of 30 queries | 0 of 16 |
+| Answers (B3): abstention decided correctly | 22 of 30 | 9 of 16 |
+| Answers (B3): gold sources cited (recall) | 0.52 | 0.29 |
+| Dropped claims (verifier) | 1 | 0 |
+
+Deterministic suites: as-of status accuracy 12 of 14 (0.857); both misses are questions where the asker cannot read the PR that carries the status change, so the system correctly says "accepted" and not "implemented"; must-not-cite violations 0 of 4; permission leaks 0.
+
+How to read this. Retrieval is saturated: with 33 chunks Recall@5 is about 1.0 for every variant, so this corpus cannot show that the reranker or the vectors help, and it does not. The weak spots are in the answers: abstention was right on 31 of 46 questions (67%), and the answers cite the gold sources only 29% to 52% of the time (they often cite a different, valid source; this metric counts only the labelled ones). The reranker still returns a miscounted list on a few queries. Next steps: a larger real corpus (PEPs or KEPs), 150 or more questions, human-checked judge labels, and the reranker ablation on that corpus.
+
 ## Not yet verified
 
-- Idle stop after 15 minutes and the Neon compute hours over a week of use.
-- Retrieval and answer quality at scale: this is 2 hand-picked questions, not the Phase 5 evaluation with the real models.
+- Neon compute hours over a week of use. (Idle stop was seen working: about 20 minutes after the last request the waker reported `app_running: false`.)
 - The LLM reranker against no reranker (ablation), and Titan against Cohere embeddings.
 - Mumbai as the Neon region (a project can only be created in one region; Singapore adds latency to every database call).
 

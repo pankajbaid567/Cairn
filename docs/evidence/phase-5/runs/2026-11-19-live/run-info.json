@@ -1,0 +1,4 @@
+{
+  "mode": "live",
+  "note": "Bedrock live: Titan v2 1024-d, gpt-oss-20b LLM reranker, gpt-oss-120b answers, qwen3-32b judge; local PostgreSQL 18 + pgvector"
+}

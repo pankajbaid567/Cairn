@@ -1,0 +1,14 @@
+{
+  "corpus_sha256": "e7744a97a7f07b056e48606b4ea83cd5e4472b97d1cece37a9012f04027bde74",
+  "date": "2026-11-19",
+  "embedder": "bedrock:amazon.titan-embed-text-v2:0:1024",
+  "label": "live",
+  "model_mode": "live",
+  "questions": 16,
+  "reranker": "bedrock-llm-rerank:openai.gpt-oss-20b-1:0",
+  "run_id": "20261119T145834-60ff69",
+  "scenario_sha256": "81ab3eb4ce38099e86ed646b81d0887b12ce6a0c89747c94832aa320857526e9",
+  "seed": 0,
+  "uv_lock_sha256": "f54930e4f9f996cb8160c30008a5d782ce215f03690b0512cbd581ad0034831d",
+  "variant": "b2"
+}
