@@ -190,7 +190,8 @@ def test_remote_init_runs_cairn_db_init_with_the_plaintext_flag(sandbox: Sandbox
     assert runs == [
         f"run --rm --env-file {sandbox.env_neon} cairn-python:local cairn-db init {FLAG}"
     ]
-    assert [c for c in sandbox.docker_calls() if c.startswith("build ")] == []
+    # the image is always rebuilt (layer cache makes it instant): a stale one once ran an old init
+    assert len([c for c in sandbox.docker_calls() if c.startswith("build ")]) == 1
 
 
 def test_remote_status_runs_cairn_db_status_without_the_flag(sandbox: Sandbox) -> None:
@@ -202,16 +203,16 @@ def test_remote_status_runs_cairn_db_status_without_the_flag(sandbox: Sandbox) -
     assert runs == [f"run --rm --env-file {sandbox.env_neon} cairn-python:local cairn-db status"]
 
 
-def test_a_missing_image_is_built_before_the_run(sandbox: Sandbox) -> None:
+def test_the_image_is_built_before_the_run(sandbox: Sandbox) -> None:
     assert sandbox.make("env-neon").returncode == 0
     _fill(sandbox.env_neon)
     result = sandbox.make("remote-init", missing_image=True)
     assert result.returncode == 0, result.stderr
     calls = sandbox.docker_calls()
     kinds = [call.split()[0] for call in calls]
-    assert kinds == ["image", "build", "run"]
-    assert "--build-arg PACKAGE=cairn-core" in calls[1]
-    assert "-t cairn-python:local" in calls[1]
+    assert kinds == ["build", "run"]
+    assert "--build-arg PACKAGE=cairn-core" in calls[0]
+    assert "-t cairn-python:local" in calls[0]
 
 
 def test_dry_run_of_remote_init_shows_the_flag_and_calls_nothing(sandbox: Sandbox) -> None:

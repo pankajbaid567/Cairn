@@ -15,9 +15,9 @@ import psycopg
 
 from cairn_core.config import IngestSettings, load_settings
 from cairn_core.db import connect
-from cairn_retrieval.cloudflare.budget import estimate_neurons
 from cairn_retrieval.embed import embedding_text
 from cairn_retrieval.models.fake import FAKE_EMBED_KEY
+from cairn_retrieval.plan import estimate_units
 from cairn_worker import embedding
 from cairn_worker.outbox import OutboxDrainer
 
@@ -39,7 +39,11 @@ def ingest_configured() -> bool:
 
 
 def embedder_model_key(settings: IngestSettings) -> str:
-    return FAKE_EMBED_KEY if settings.embedder == "fake" else f"workers-ai:{settings.embed_model}"
+    if settings.embedder == "fake":
+        return FAKE_EMBED_KEY
+    if settings.embedder == "bedrock":
+        return f"bedrock:{settings.embed_model}:{settings.embed_dim}"  # BedrockEmbedder.model_key
+    return f"workers-ai:{settings.embed_model}"
 
 
 def make_budget_room(settings: IngestSettings):  # type: ignore[no-untyped-def]
@@ -54,14 +58,21 @@ def make_budget_room(settings: IngestSettings):  # type: ignore[no-untyped-def]
             (embedder_model_key(settings),),
         ).fetchall()
         tokens = sum(max(1, -(-len(embedding_text(str(t), str(x))) // 3)) for t, x in rows)
-        need = estimate_neurons(settings.embed_model, tokens)
+        need = estimate_units(settings.embed_model, tokens)
+        # the budget of the embedder's provider: neurons for Workers AI, micro-dollars for Bedrock
+        provider, cap = (
+            ("bedrock", settings.bedrock_daily_micro_usd)
+            if settings.embedder == "bedrock"
+            else ("workers_ai", settings.daily_neurons)
+        )
         used_row = conn.execute(
-            "SELECT neurons_reserved FROM cairn_meta.provider_usage WHERE day = %s AND provider = 'workers_ai'",  # noqa: E501
-            (datetime.now(UTC).date(),),
+            "SELECT neurons_reserved FROM cairn_meta.provider_usage "
+            "WHERE day = %s AND provider = %s",
+            (datetime.now(UTC).date(), provider),
         ).fetchone()
         conn.rollback()
         used = int(used_row[0]) if used_row else 0
-        return need <= settings.daily_neurons - used
+        return need <= cap - used
 
     return room
 

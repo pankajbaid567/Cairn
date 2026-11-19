@@ -31,7 +31,7 @@ from cairn_connectors.store import (
     apply_directory,
     import_document,
 )
-from cairn_core.config import IngestSettings, load_settings
+from cairn_core.config import IngestSettings, libpq_tls, load_settings
 from cairn_core.db import connect
 from cairn_core.hosts import require_local_or_allowed
 
@@ -250,6 +250,7 @@ async def _embed_all(settings: IngestSettings) -> dict[str, int]:
             password=settings.ingest_db_password.get_secret_value(),
             prepare_threshold=None,
             autocommit=True,
+            **libpq_tls(settings),
         ) as conn:
             todo = await missing_embedding_revisions(conn, embedder.model_key)
             if budget is not None:
@@ -267,7 +268,7 @@ async def _embed_all(settings: IngestSettings) -> dict[str, int]:
                     await require_budget(budget, estimate)
                 except InsufficientBudget as exc:
                     click.echo(
-                        f"refusing: {exc.estimate.neurons} neurons needed, {exc.remaining} left today",  # noqa: E501
+                        f"refusing: {exc.estimate.neurons} budget units needed (neurons, or micro-dollars for Bedrock), {exc.remaining} left today",  # noqa: E501
                         err=True,
                     )
                     raise SystemExit(EXIT_BUDGET) from None

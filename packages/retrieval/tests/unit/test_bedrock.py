@@ -459,3 +459,50 @@ def test_call_cost_prices_bedrock_responses_in_dollars() -> None:
     assert cost.neurons is None
     assert cost.usd == pytest.approx(0.89)
     assert call_cost(resp.model_copy(update={"model": "unknown.model"})).usd is None
+
+
+# --- the run planner and the drainer use the provider's own budget units -------------------
+
+
+def test_estimate_units_is_micro_dollars_for_bedrock_and_neurons_for_workers_ai() -> None:
+    from cairn_retrieval.cloudflare.budget import estimate_neurons
+    from cairn_retrieval.plan import estimate_embed, estimate_units
+
+    assert estimate_units(TITAN, 1_000_000) == estimate_micro_usd(TITAN, 1_000_000) == 20_000
+    assert estimate_units("@cf/baai/bge-small-en-v1.5", 1_000_000) == estimate_neurons(
+        "@cf/baai/bge-small-en-v1.5", 1_000_000
+    )
+    plan = estimate_embed(TITAN, ["some text to embed"] * 3, None)
+    assert plan.calls == 1
+    assert plan.uncached_inputs == 3
+    assert plan.neurons >= 1
+    with pytest.raises(Exception, match="no neuron rate"):
+        estimate_units("not.priced-model", 10)
+
+
+def test_the_drainer_looks_for_the_bedrock_model_key() -> None:
+    from cairn_core.config import IngestSettings
+    from cairn_worker.drainer_setup import embedder_model_key
+
+    s = IngestSettings.model_validate(
+        {
+            "CAIRN_DB_HOST": "h",
+            "CAIRN_INGEST_DB_PASSWORD": "x",
+            "CAIRN_EMBEDDER": "bedrock",
+            "CAIRN_EMBED_MODEL": TITAN,
+            "CAIRN_EMBED_DIM": "1024",
+        }
+    )
+    assert embedder_model_key(s) == f"bedrock:{TITAN}:1024"
+
+
+def test_parse_scores_accepts_an_index_keyed_object_and_rejects_gaps() -> None:
+    from cairn_retrieval.bedrock.adapters import parse_scores
+
+    assert parse_scores('{"scores":{"0":8,"1":0,"2":12.5}}', 3) == [8.0, 0.0, 10.0]
+    assert parse_scores('{"scores":{"2":1,"0":2,"1":3}}', 3) == [2.0, 3.0, 1.0]
+    assert parse_scores('{"scores":{"0":8,"2":5}}', 3) is None
+    assert parse_scores('{"scores":{"0":8,"1":0,"3":5}}', 3) is None
+    assert parse_scores('{"scores":{"a":8}}', 1) is None
+    assert parse_scores('{"scores":[1,2,3]}', 3) == [1.0, 2.0, 3.0]
+    assert parse_scores('{"scores":[1,2]}', 3) is None

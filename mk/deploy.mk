@@ -66,7 +66,8 @@ neon-env-check:
 	fi
 
 neon-image: neon-env-check
-	@docker image inspect $(NEON_IMAGE_REF) >/dev/null 2>&1 || docker build -f $(ROOT)/infra/docker/python-app.Dockerfile --build-arg PACKAGE=cairn-core -t $(NEON_IMAGE_REF) $(ROOT)
+	@# always build: the layer cache makes an unchanged tree instant, and a stale image once ran an old `cairn-db init`
+	docker build -f $(ROOT)/infra/docker/python-app.Dockerfile --build-arg PACKAGE=cairn-core -t $(NEON_IMAGE_REF) $(ROOT)
 
 remote-init: neon-image ## Neon, user-run: bootstrap roles, databases, extensions and migrations on Neon from .env.neon (FU2)
 	docker run --rm --env-file $(NEON_ENV_FILE) $(NEON_IMAGE_REF) cairn-db init --allow-plaintext-password
