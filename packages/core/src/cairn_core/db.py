@@ -25,6 +25,8 @@ RUNTIME_CONNECT_KWARGS: Final[dict[str, Any]] = {"prepare_threshold": None, "aut
 
 ALLOWED_SETTINGS: Final = frozenset(
     {
+        "cairn.org_id",
+        "cairn.account_id",
         "cairn.principal_id",
         "cairn.principal_groups",
         "cairn.principal_set_hash",
@@ -40,7 +42,9 @@ def conninfo(
     settings: CommonSettings, user: str, password: str, *, application_name: str, dbname: str | None
 ) -> str:
     """A libpq connection string for ``user``; the password is inside it, so never log it."""
+    options = f"-c cairn.org_id={settings.org_id}" if settings.org_id is not None else None
     return make_conninfo(
+        **({"options": options} if options else {}),
         host=settings.db_host,
         port=settings.db_port,
         dbname=dbname or settings.db_name,

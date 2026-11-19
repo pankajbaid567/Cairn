@@ -55,7 +55,7 @@ def create(user: str, name: str, days: int, allow_remote: bool) -> None:
             raise click.ClickException(f"no such user: {user}")
         conn.execute(
             "INSERT INTO cairn.principals (external_id, kind, display_name, acting_for) "
-            "VALUES (%s, 'agent', %s, %s) ON CONFLICT (external_id) DO NOTHING",
+            "VALUES (%s, 'agent', %s, %s) ON CONFLICT (org_id, external_id) DO NOTHING",
             (f"agent:{agent}", f"{name} for {user}", int(row[0])),
         )
         conn.commit()

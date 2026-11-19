@@ -67,6 +67,9 @@ class CommonSettings(BaseSettings):
 
     env: Literal["local", "ci", "demo"] = Field("local", alias="CAIRN_ENV")
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = Field("INFO", alias="CAIRN_LOG_LEVEL")
+    org_id: int | None = Field(None, alias="CAIRN_ORG_ID", ge=1)
+    """The organisation a non-API process (importer, evaluation, edge receiver) writes into. The
+    API leaves it unset and binds an organisation per request (``cairn_core.tenancy``)."""
     db_host: str = Field("127.0.0.1", alias="CAIRN_DB_HOST", min_length=1)
     db_port: int = Field(5432, alias="CAIRN_DB_PORT", ge=1, le=65535)
     db_name: str = Field("cairn", alias="CAIRN_DB_NAME", min_length=1)
@@ -451,6 +454,8 @@ class IngestSettings(  # type: ignore[no-redef]
 ):
     """``cairn-import`` and the embedding worker: connects as ``cairn_ingest`` (PD1-04)."""
 
+    org_id: int | None = Field(1, alias="CAIRN_ORG_ID", ge=1)
+    """The importer writes into the seeded demo organisation unless told otherwise."""
     ingest_db_user: str = Field("cairn_ingest", alias="CAIRN_INGEST_DB_USER", min_length=1)
     ingest_db_password: SecretStr = Field(alias="CAIRN_INGEST_DB_PASSWORD", min_length=1)
     size_guard_mb: int = Field(800, alias="CAIRN_DB_SIZE_GUARD_MB", ge=16, le=1024)

@@ -70,7 +70,7 @@ def ensure_decision(
 ) -> int:
     row = conn.execute(
         "INSERT INTO cairn.decisions (key, title, question, outcome, origin, verification) "
-        "VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (key) DO UPDATE SET title = EXCLUDED.title "
+        "VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (org_id, key) DO UPDATE SET title = EXCLUDED.title "  # noqa: E501
         "RETURNING decision_id",
         (key, title, question, outcome, origin, verification),
     ).fetchone()

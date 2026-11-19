@@ -535,9 +535,8 @@ def test_cohere_embedder_batches_documents_and_marks_queries() -> None:
             seen.extend(len(t) for t in texts)
             return [[0.0] * 1024 for _ in texts]
 
-    asyncio.run(
-        BedrockEmbedder(Spy(), "cohere.embed-english-v3", 1024).embed_documents(["z" * 5000])
-    )  # type: ignore[arg-type]
+    spy_embedder = BedrockEmbedder(Spy(), "cohere.embed-english-v3", 1024)  # type: ignore[arg-type]
+    asyncio.run(spy_embedder.embed_documents(["z" * 5000]))
     assert seen == [2048]
     asyncio.run(emb.embed_query("q"))
     assert calls == [(96, "search_document"), (4, "search_document"), (1, "search_query")]
@@ -562,4 +561,4 @@ def test_reranker_asks_again_once_and_scores_in_batches_of_ten() -> None:
 
     rt2 = BySize()
     out = run(BedrockLlmReranker(client(rt2), "openai.gpt-oss-20b-1:0").score("q", many))
-    assert out == [10.0] * RERANK_BATCH + [3.0] * 3 and len(rt2.calls) == 2
+    assert out == [10.0] * RERANK_BATCH + [3.0] * 3 and len(rt2.calls) == 2  # noqa: PT018

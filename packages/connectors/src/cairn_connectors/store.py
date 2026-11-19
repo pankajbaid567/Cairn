@@ -147,7 +147,7 @@ def import_document(
         row = conn.execute(
             "INSERT INTO cairn.items (connector, external_id, source_kind, title, acl, source_key) "
             "VALUES (%s, %s, %s, %s, %s::int[], %s) "
-            "ON CONFLICT (connector, external_id) DO UPDATE SET title = EXCLUDED.title "
+            "ON CONFLICT (org_id, connector, external_id) DO UPDATE SET title = EXCLUDED.title "
             "RETURNING item_id",
             (
                 doc.connector,

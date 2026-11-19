@@ -52,8 +52,8 @@ async def embed_revision(
         async with conn.transaction():
             for (chunk_id, _), vector in zip(part, vectors, strict=True):
                 cur = await conn.execute(
-                    "INSERT INTO cairn.embeddings (chunk_id, model_key, embedding, acl) "
-                    "SELECT chunk_id, %s, %s::vector, acl FROM cairn.chunks "
+                    "INSERT INTO cairn.embeddings (chunk_id, model_key, embedding, acl, org_id) "
+                    "SELECT chunk_id, %s, %s::vector, acl, org_id FROM cairn.chunks "
                     "WHERE chunk_id = %s AND is_current "
                     "ON CONFLICT (chunk_id, model_key) DO NOTHING",
                     (embedder.model_key, vector_literal(vector), chunk_id),

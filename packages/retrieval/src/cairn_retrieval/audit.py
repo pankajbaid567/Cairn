@@ -19,6 +19,7 @@ from psycopg import AsyncConnection
 from psycopg_pool import AsyncConnectionPool
 
 from cairn_core.db import aset_local
+from cairn_core.tenancy import current_org
 from cairn_retrieval.access import PrincipalSnapshot
 
 Endpoint = Literal["search", "answer", "decision"]
@@ -87,6 +88,9 @@ async def write_audit(pool: AsyncConnectionPool[AsyncConnection[Any]], rec: Audi
     """One short transaction. Raises on failure: no answer without an audit row."""
     effective = rec.acting_for if rec.acting_for is not None else rec.principal_id
     async with pool.connection() as conn, conn.transaction():
+        org = current_org()
+        if org is not None:
+            await aset_local(conn, "cairn.org_id", str(org))
         await aset_local(conn, "cairn.principal_id", str(effective))
         await conn.execute(
             "INSERT INTO cairn.audit_log (audit_id, endpoint, principal_id, acting_for, "

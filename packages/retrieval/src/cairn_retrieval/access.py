@@ -20,6 +20,7 @@ from psycopg import AsyncConnection, IsolationLevel
 from psycopg_pool import AsyncConnectionPool
 
 from cairn_core.db import aset_local
+from cairn_core.tenancy import current_org
 
 PUBLIC_GROUP = "group:public"
 
@@ -46,6 +47,9 @@ async def take_snapshot(
 ) -> PrincipalSnapshot:
     """Take the snapshot on ``conn``, which must be inside a transaction."""
     effective = acting_for if acting_for is not None else principal_id
+    org = current_org()
+    if org is not None:  # unset: no tenant row is visible (fail closed)
+        await aset_local(conn, "cairn.org_id", str(org))
     await aset_local(conn, "cairn.principal_id", str(effective))
     known = await (
         await conn.execute("SELECT 1 FROM cairn.principals WHERE principal_id = %s", (effective,))

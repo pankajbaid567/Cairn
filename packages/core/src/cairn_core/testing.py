@@ -225,8 +225,13 @@ class FreshDb:
     """Alias kept for the tests written before managed mode."""
 
 
+TEST_ORG_ID = 1
+"""Test databases run in the seeded organisation, as every test did before tenancy."""
+
+
 def _dsn(config: DbTestConfig, name: str, user: str, password: str) -> str:
     return make_conninfo(
+        options=f"-c cairn.org_id={TEST_ORG_ID}",
         host=config.target.host,
         port=config.target.port,
         dbname=name,

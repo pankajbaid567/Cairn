@@ -26,7 +26,7 @@ _STOP: Final = {"end_turn": "stop", "stop_sequence": "stop", "max_tokens": "leng
 
 COHERE_BATCH: Final = 96
 COHERE_MAX_CHARS: Final = 2048
-"""Cohere Embed v3 refuses a text over 2,048 characters; longer chunks are cut to their first 2,048."""
+"""Cohere Embed v3 refuses a text over 2,048 characters; longer chunks are cut to their first 2,048."""  # noqa: E501
 
 
 class BedrockEmbedder:

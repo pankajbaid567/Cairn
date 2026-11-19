@@ -151,7 +151,7 @@ def thin_row(headers: Mapping[str, str], payload: Mapping[str, Any]) -> ThinRow 
 
 
 INSERT_SQL: Final = (
-    "INSERT INTO cairn.inbox (delivery_id, event, action, class, priority, installation_id, org_id, "  # noqa: E501
+    "INSERT INTO cairn.inbox (delivery_id, event, action, class, priority, installation_id, github_org_id, "  # noqa: E501
     "repo_id, repo_name, object_number) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
     "ON CONFLICT DO NOTHING"
 )

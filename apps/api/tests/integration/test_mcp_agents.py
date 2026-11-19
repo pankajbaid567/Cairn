@@ -35,7 +35,7 @@ def world(
             assert row is not None
             c.execute(
                 "INSERT INTO cairn.principals (external_id, kind, display_name, acting_for) "
-                "VALUES (%s, 'agent', %s, %s) ON CONFLICT (external_id) DO NOTHING",
+                "VALUES (%s, 'agent', %s, %s) ON CONFLICT (org_id, external_id) DO NOTHING",
                 (f"agent:{user}-claude", f"claude for {user}", row[0]),
             )
     for client in make_app_client(db, CAIRN_ANSWER_CACHE_SIZE=0):
