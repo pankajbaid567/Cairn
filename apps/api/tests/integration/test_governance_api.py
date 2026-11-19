@@ -12,7 +12,7 @@ pytestmark = pytest.mark.integration
 ROLES = {"adm": "admin", "mgr": "manager", "mgr2": "manager", "mem": "member", "aud": "auditor"}
 
 
-def test_a_decision_goes_from_proposed_to_implemented_with_a_different_approver(saas: Saas) -> None:
+def test_a_decision_goes_from_proposed_to_implemented_with_a_different_approver(saas: Saas) -> None:  # noqa: F811
     w = Workspace(saas, ROLES)
     r = w["mem"].post(
         "/governance/decisions",
@@ -38,7 +38,7 @@ def test_a_decision_goes_from_proposed_to_implemented_with_a_different_approver(
         == 403
     )  # a member cannot vote
     waiting = w["mgr"].get("/governance/approvals").json()["approvals"][0]
-    assert waiting["can_vote"] is True and waiting["requested_by"] == "Mem"
+    assert waiting["can_vote"] is True and waiting["requested_by"] == "Mem"  # noqa: PT018
     assert w["mgr"].post(
         f"/governance/approvals/{approval}/vote", json={"vote": "approve", "comment": "agreed"}
     ).json() == {"state": "approved"}
@@ -60,12 +60,12 @@ def test_a_decision_goes_from_proposed_to_implemented_with_a_different_approver(
         == 200
     )
     detail = w["mgr"].get(f"/governance/approvals/{approval}").json()
-    assert detail["votes"][0]["voter"] == "Mgr" and detail["approval"]["state"] == "approved"
+    assert detail["votes"][0]["voter"] == "Mgr" and detail["approval"]["state"] == "approved"  # noqa: PT018
     actions = {e["action"] for e in w.owner.get("/org/audit").json()["events"]}
     assert {"decision.proposed", "approval.approved", "decision.implemented"} <= actions
 
 
-def test_nobody_approves_their_own_request_and_the_attempt_is_audited(saas: Saas) -> None:
+def test_nobody_approves_their_own_request_and_the_attempt_is_audited(saas: Saas) -> None:  # noqa: F811
     w = Workspace(saas, ROLES)
     a = (
         w["mgr"]
@@ -76,7 +76,7 @@ def test_nobody_approves_their_own_request_and_the_attempt_is_audited(saas: Saas
         .json()["approval_id"]
     )
     r = w["mgr"].post(f"/governance/approvals/{a}/vote", json={"vote": "approve"})
-    assert r.status_code == 403 and "segregation" in r.json()["reason"]
+    assert r.status_code == 403 and "segregation" in r.json()["reason"]  # noqa: PT018
     denied = [e for e in w.owner.get("/org/audit").json()["events"] if e["outcome"] == "denied"]
     assert any(e["action"] == "approval.vote" for e in denied)
     assert w["mgr2"].post(
@@ -88,16 +88,16 @@ def test_nobody_approves_their_own_request_and_the_attempt_is_audited(saas: Saas
     )  # already decided
 
 
-def test_a_request_needing_more_approvers_than_exist_is_refused(saas: Saas) -> None:
+def test_a_request_needing_more_approvers_than_exist_is_refused(saas: Saas) -> None:  # noqa: F811
     w = Workspace(saas, {"mem": "member"})  # only the owner can approve
     r = w["mem"].post(
         "/governance/decisions",
         json={"title": "Big change", "outcome": "Rebuild everything", "required": 3},
     )
-    assert r.status_code == 409 and "not enough approvers" in r.json()["reason"]
+    assert r.status_code == 409 and "not enough approvers" in r.json()["reason"]  # noqa: PT018
 
 
-def test_an_access_request_is_granted_only_by_an_admin(saas: Saas) -> None:
+def test_an_access_request_is_granted_only_by_an_admin(saas: Saas) -> None:  # noqa: F811
     w = Workspace(saas, ROLES)
     r = w["mem"].post(
         "/governance/approvals",
@@ -129,7 +129,7 @@ def test_an_access_request_is_granted_only_by_an_admin(saas: Saas) -> None:
     )
 
 
-def test_policy_lifecycle_with_attestations(saas: Saas) -> None:
+def test_policy_lifecycle_with_attestations(saas: Saas) -> None:  # noqa: F811
     w = Workspace(saas, ROLES)
     assert (
         w["mem"]
@@ -181,7 +181,7 @@ def test_policy_lifecycle_with_attestations(saas: Saas) -> None:
         "state": "approved"
     }
     mine = w["mem"].get("/governance/policies").json()["policies"][0]
-    assert (
+    assert (  # noqa: PT018
         mine["state"] == "active" and mine["version"] == 1 and mine["needs_my_attestation"] is True
     )
     assert w["mem"].post(f"/governance/policies/{pid}/attest").status_code == 200
@@ -189,7 +189,7 @@ def test_policy_lifecycle_with_attestations(saas: Saas) -> None:
         w["mem"].get("/governance/policies").json()["policies"][0]["needs_my_attestation"] is False
     )
     lead = w["mgr"].get(f"/governance/policies/{pid}").json()
-    assert (
+    assert (  # noqa: PT018
         lead["attested"][0]["name"] == "Mem"
         and "Aud" not in lead["missing"]
         and "Mgr" in lead["missing"]
@@ -217,7 +217,7 @@ def test_policy_lifecycle_with_attestations(saas: Saas) -> None:
     assert w["aud"].post(f"/governance/policies/{pid}/attest").status_code == 403
 
 
-def test_the_risk_register(saas: Saas) -> None:
+def test_the_risk_register(saas: Saas) -> None:  # noqa: F811
     w = Workspace(saas, ROLES)
     r = w["mgr"].post(
         "/governance/risks",
@@ -233,7 +233,7 @@ def test_the_risk_register(saas: Saas) -> None:
     rid = r.json()["risk_id"]
     assert w["mem"].get("/governance/risks").status_code == 403
     risks = w["aud"].get("/governance/risks").json()["risks"]
-    assert risks[0]["score"] == 16 and risks[0]["owner"] == "Mgr" and risks[0]["can_edit"] is False
+    assert risks[0]["score"] == 16 and risks[0]["owner"] == "Mgr" and risks[0]["can_edit"] is False  # noqa: PT018
     assert (
         w["mgr"].patch(f"/governance/risks/{rid}", json={"state": "mitigating"}).status_code == 200
     )
@@ -244,7 +244,7 @@ def test_the_risk_register(saas: Saas) -> None:
     assert w["adm"].get("/governance/summary").json()["high_risks"] == 1
 
 
-def test_governance_is_isolated_between_organisations(saas: Saas) -> None:
+def test_governance_is_isolated_between_organisations(saas: Saas) -> None:  # noqa: F811
     a = Workspace(saas, {"mem": "member", "mgr": "manager"})
     b = Workspace(saas, {"mem": "member", "mgr": "manager"})
     a["mem"].post(

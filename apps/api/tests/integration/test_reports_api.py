@@ -22,7 +22,7 @@ TODAY = dt.datetime.now(dt.UTC).date()
 class Org:
     """An owner plus a manager and a member in team Payments, and a member in team Mobile."""
 
-    def __init__(self, saas: Saas) -> None:
+    def __init__(self, saas: Saas) -> None:  # noqa: F811
         self.saas = saas
         self.owner, _ = saas.with_org("owner", "Reports Inc")
         self.members: dict[str, TestClient] = {}
@@ -63,29 +63,29 @@ def report(c: TestClient, day: dt.date = TODAY, **kw: Any) -> Any:
     return c.put(f"/reports/{day.isoformat()}", json=body)
 
 
-def test_submit_edit_and_read_back(saas: Saas) -> None:
+def test_submit_edit_and_read_back(saas: Saas) -> None:  # noqa: F811
     org = Org(saas)
     r = report(
         org.members["max"], links=[{"kind": "decision", "ref": "ADR-007", "title": "Postgres"}]
     )
-    assert r.status_code == 201 and r.json()["created"] is True
+    assert r.status_code == 201 and r.json()["created"] is True  # noqa: PT018
     again = report(
         org.members["max"],
         done="Shipped the refund fix and wrote tests",
         links=[{"kind": "decision", "ref": "ADR-007", "title": "Postgres"}],
     )
-    assert again.status_code == 200 and again.json()["created"] is False
+    assert again.status_code == 200 and again.json()["created"] is False  # noqa: PT018
     mine = org.members["max"].get("/reports/mine").json()
     assert mine["editable"] is True
-    assert (
+    assert (  # noqa: PT018
         mine["report"]["done"].endswith("wrote tests")
         and mine["report"]["links"][0]["ref"] == "ADR-007"
     )
     actions = [e["action"] for e in org.owner.get("/org/audit").json()["events"]]
-    assert "report.submitted" in actions and "report.updated" in actions
+    assert "report.submitted" in actions and "report.updated" in actions  # noqa: PT018
 
 
-def test_dates_and_content_are_validated(saas: Saas) -> None:
+def test_dates_and_content_are_validated(saas: Saas) -> None:  # noqa: F811
     c = Org(saas).members["max"]
     assert report(c, TODAY + dt.timedelta(days=1)).status_code == 422
     assert report(c, TODAY - dt.timedelta(days=15)).status_code == 422
@@ -94,7 +94,7 @@ def test_dates_and_content_are_validated(saas: Saas) -> None:
     assert report(c, TODAY - dt.timedelta(days=3)).status_code == 201  # inside the 14-day window
 
 
-def test_visibility_by_role_and_team(saas: Saas) -> None:
+def test_visibility_by_role_and_team(saas: Saas) -> None:  # noqa: F811
     org = Org(saas)
     for name in ("mia", "max", "zed"):
         report(org.members[name], done=f"{name} work")
@@ -110,7 +110,7 @@ def test_visibility_by_role_and_team(saas: Saas) -> None:
     assert org.owner.get(f"/reports/{zed_report['report_id']}").status_code == 200
 
 
-def test_comments_follow_report_visibility(saas: Saas) -> None:
+def test_comments_follow_report_visibility(saas: Saas) -> None:  # noqa: F811
     org = Org(saas)
     report(org.members["max"])
     rid = org.members["max"].get("/reports").json()["reports"][0]["report_id"]
@@ -125,7 +125,7 @@ def test_comments_follow_report_visibility(saas: Saas) -> None:
     )
 
 
-def test_rollup_is_for_leads_and_counts_who_is_missing(saas: Saas) -> None:
+def test_rollup_is_for_leads_and_counts_who_is_missing(saas: Saas) -> None:  # noqa: F811
     org = Org(saas)
     yesterday = TODAY - dt.timedelta(days=1)
     while yesterday.weekday() >= 5:
@@ -140,7 +140,7 @@ def test_rollup_is_for_leads_and_counts_who_is_missing(saas: Saas) -> None:
         .json()
     )
     day = r["days"][0]
-    assert (
+    assert (  # noqa: PT018
         r["people"] == 2
         and day["submitted"] == 1
         and day["missing"] == ["Mia"]
@@ -149,7 +149,7 @@ def test_rollup_is_for_leads_and_counts_who_is_missing(saas: Saas) -> None:
     owner_view = org.owner.get(
         "/reports/rollup", params={"start": yesterday.isoformat(), "end": yesterday.isoformat()}
     ).json()
-    assert owner_view["people"] == 4 and "Zed" in owner_view["days"][0]["missing"]
+    assert owner_view["people"] == 4 and "Zed" in owner_view["days"][0]["missing"]  # noqa: PT018
 
 
 class StubLlm:
@@ -170,7 +170,7 @@ class StubLlm:
         )
 
 
-def test_digest_cites_real_reports_only_and_is_cached(saas: Saas) -> None:
+def test_digest_cites_real_reports_only_and_is_cached(saas: Saas) -> None:  # noqa: F811
     org = Org(saas)
     report(org.members["max"], done="Fixed the refund event bug")
     report(org.members["mia"], done="Reviewed the ledger design", blockers="Needs an ADR approval")
@@ -199,13 +199,13 @@ def test_digest_cites_real_reports_only_and_is_cached(saas: Saas) -> None:
         r = org.members["mia"].post("/reports/digest", json=body)
         assert r.status_code == 200, r.text
         d = r.json()
-        assert len(d["highlights"]) == 1 and d["highlights"][0]["reports"] == [
+        assert len(d["highlights"]) == 1 and d["highlights"][0]["reports"] == [  # noqa: PT018
             ids[0]
         ]  # the invented item is dropped
-        assert d["blockers"][0]["reports"] == [ids[1]] and d["cached"] is False
+        assert d["blockers"][0]["reports"] == [ids[1]] and d["cached"] is False  # noqa: PT018
         assert "Fixed the refund event bug" in stub.prompts[0]
         again = org.members["mia"].post("/reports/digest", json=body).json()
-        assert again["cached"] is True and len(stub.prompts) == 1
+        assert again["cached"] is True and len(stub.prompts) == 1  # noqa: PT018
         assert (
             org.members["max"].post("/reports/digest", json={**body, "scope": "org"}).status_code
             == 403
@@ -218,16 +218,16 @@ def test_digest_cites_real_reports_only_and_is_cached(saas: Saas) -> None:
         object.__setattr__(providers, "answer", old)
 
 
-def test_export_is_csv_for_leads_only(saas: Saas) -> None:
+def test_export_is_csv_for_leads_only(saas: Saas) -> None:  # noqa: F811
     org = Org(saas)
     report(org.members["max"], done='Wrote, "quoted" text')
     assert org.members["max"].get("/reports/export").status_code == 403
     r = org.members["mia"].get("/reports/export")
-    assert r.status_code == 200 and r.headers["content-type"].startswith("text/csv")
-    assert "Wrote" in r.text and r.text.splitlines()[0].startswith("date,author")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/csv")  # noqa: PT018
+    assert "Wrote" in r.text and r.text.splitlines()[0].startswith("date,author")  # noqa: PT018
 
 
-def test_a_guest_and_an_auditor_cannot_write_or_read_reports(saas: Saas) -> None:
+def test_a_guest_and_an_auditor_cannot_write_or_read_reports(saas: Saas) -> None:  # noqa: F811
     org = Org(saas)
     report(org.members["max"])
     for role in ("auditor", "guest"):

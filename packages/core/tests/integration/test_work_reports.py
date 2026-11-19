@@ -32,7 +32,7 @@ def app(db: FreshDb, org: int, account: str, role: str, pid: int) -> psycopg.Con
 
 
 class World:
-    """An organisation with an owner, two teams and members: p1,p2 in team T1; p3 in T2; one auditor."""
+    """An organisation with an owner, two teams and members: p1,p2 in team T1; p3 in T2; one auditor."""  # noqa: E501
 
     def __init__(self, db: FreshDb) -> None:
         self.db = db
@@ -48,15 +48,12 @@ class World:
             ).fetchone()
             assert org
             self.org = int(org[0])
-            self.owner = (
-                str(acct[0]),
-                int(
-                    o.execute(
-                        "SELECT principal_id FROM cairn_meta.org_members WHERE org_id=%s AND account_id=%s",
-                        (self.org, acct[0]),
-                    ).fetchone()[0]
-                ),  # type: ignore[index]
-            )
+            owner_row = o.execute(
+                "SELECT principal_id FROM cairn_meta.org_members WHERE org_id=%s AND account_id=%s",  # noqa: E501
+                (self.org, acct[0]),
+            ).fetchone()
+            assert owner_row
+            self.owner = (str(acct[0]), int(owner_row[0]))
             self.people: dict[str, tuple[str, int]] = {}
             for name, role in (
                 ("p1", "member"),
@@ -85,7 +82,7 @@ class World:
         with app(db, self.org, *self.owner_ctx()) as c:
             t1 = c.execute("SELECT cairn_meta.create_team('t1', 'T1')").fetchone()
             t2 = c.execute("SELECT cairn_meta.create_team('t2', 'T2')").fetchone()
-            assert t1 and t2
+            assert t1 and t2  # noqa: PT018
             for name, team in (("p1", t1[0]), ("p2", t1[0]), ("p3", t2[0])):
                 c.execute(
                     "SELECT cairn_meta.team_set_member(%s, %s, true)", (team, self.people[name][1])
@@ -102,7 +99,7 @@ class World:
     def write(self, name: str, text: str = "shipped it", day: dt.date | None = None) -> None:
         with self.as_(name) as c:
             c.execute(
-                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, %s, %s)",
+                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, %s, %s)",  # noqa: E501
                 (self.people[name][1], day or dt.date.today(), text),
             )
             c.commit()
@@ -126,7 +123,7 @@ def test_visibility_follows_role_and_team(fresh_db: FreshDb) -> None:
         w.write(n)
     with app(fresh_db, w.org, *w.owner_ctx()) as c:
         c.execute(
-            "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'owner work')",
+            "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'owner work')",  # noqa: E501
             (w.owner[1],),
         )
         assert authors(w, c) == {"p1", "p2", "p3", "owner"}  # an owner reads everyone's
@@ -142,30 +139,30 @@ def test_a_report_is_written_only_by_its_author_for_a_recent_day(fresh_db: Fresh
     with w.as_("p1") as c:
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             c.execute(
-                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'x')",
+                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'x')",  # noqa: E501
                 (w.people["p3"][1],),
             )
         c.rollback()
         with pytest.raises(psycopg.errors.InvalidParameterValue):
             c.execute(
-                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date + 1, 'x')",
+                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date + 1, 'x')",  # noqa: E501
                 (w.people["p1"][1],),
             )
         c.rollback()
         with pytest.raises(psycopg.errors.InvalidParameterValue):
             c.execute(
-                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date - 15, 'x')",
+                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date - 15, 'x')",  # noqa: E501
                 (w.people["p1"][1],),
             )
         c.rollback()
         with pytest.raises(psycopg.errors.CheckViolation):
             c.execute(
-                "INSERT INTO cairn.work_reports (author_principal, report_date, done, blockers) VALUES (%s, current_date, ' ', '')",
+                "INSERT INTO cairn.work_reports (author_principal, report_date, done, blockers) VALUES (%s, current_date, ' ', '')",  # noqa: E501
                 (w.people["p1"][1],),
             )
     with w.as_("aud") as c, pytest.raises(psycopg.errors.InsufficientPrivilege):
         c.execute(
-            "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'x')",
+            "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'x')",  # noqa: E501
             (w.people["aud"][1],),
         )
 
@@ -178,7 +175,7 @@ def test_one_report_per_day_can_be_edited_by_its_author_but_not_deleted_or_reass
     with w.as_("p1") as c:
         with pytest.raises(psycopg.errors.UniqueViolation):
             c.execute(
-                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'again')",
+                "INSERT INTO cairn.work_reports (author_principal, report_date, done) VALUES (%s, current_date, 'again')",  # noqa: E501
                 (w.people["p1"][1],),
             )
         c.rollback()
@@ -205,7 +202,7 @@ def test_comments_are_visible_exactly_when_the_report_is(fresh_db: FreshDb) -> N
         rid = c.execute("SELECT report_id FROM cairn.work_reports").fetchone()
         assert rid
         c.execute(
-            "INSERT INTO cairn.report_comments (report_id, author_principal, body) VALUES (%s, %s, 'nice')",
+            "INSERT INTO cairn.report_comments (report_id, author_principal, body) VALUES (%s, %s, 'nice')",  # noqa: E501
             (rid[0], w.people["p2"][1]),
         )
         c.commit()
@@ -215,7 +212,7 @@ def test_comments_are_visible_exactly_when_the_report_is(fresh_db: FreshDb) -> N
         assert c.execute("SELECT count(*) FROM cairn.report_comments").fetchone() == (0,)
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             c.execute(
-                "INSERT INTO cairn.report_comments (report_id, author_principal, body) VALUES (%s, %s, 'hi')",
+                "INSERT INTO cairn.report_comments (report_id, author_principal, body) VALUES (%s, %s, 'hi')",  # noqa: E501
                 (rid[0], w.people["p3"][1]),
             )
 

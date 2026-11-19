@@ -73,7 +73,7 @@ class Org:
     def propose(self, who: str, required: int = 1) -> tuple[int, str, int]:
         with self.as_(who) as c:
             row = c.execute(
-                "SELECT * FROM cairn.propose_decision('Use Postgres', 'Which DB?', 'We use PostgreSQL', %s)",
+                "SELECT * FROM cairn.propose_decision('Use Postgres', 'Which DB?', 'We use PostgreSQL', %s)",  # noqa: E501
                 (required,),
             ).fetchone()
             c.commit()
@@ -83,7 +83,7 @@ class Org:
     def status(self, decision: int) -> str:
         with owner(self.db) as o:
             row = o.execute(
-                "SELECT status FROM cairn.decision_versions WHERE decision_id=%s AND upper_inf(valid_period) AND upper_inf(recorded_period)",
+                "SELECT status FROM cairn.decision_versions WHERE decision_id=%s AND upper_inf(valid_period) AND upper_inf(recorded_period)",  # noqa: E501
                 (decision,),
             ).fetchone()
             assert row
@@ -93,10 +93,10 @@ class Org:
 def test_a_decision_is_proposed_then_accepted_by_someone_else(fresh_db: FreshDb) -> None:
     org = Org(fresh_db)
     d, key, a = org.propose("mem")
-    assert key.startswith("DR-") and org.status(d) == "proposed"
+    assert key.startswith("DR-") and org.status(d) == "proposed"  # noqa: PT018
     with (
         org.as_("mem") as c,
-        pytest.raises(psycopg.errors.InsufficientPrivilege, match="segregation|role cannot"),
+        pytest.raises(psycopg.errors.InsufficientPrivilege, match="segregation|role cannot"),  # noqa: RUF043
     ):
         c.execute("SELECT cairn.cast_vote(%s, 'approve', 'mine')", (a,))
     with org.as_("mgr") as c:
@@ -188,12 +188,12 @@ def test_policy_versions_are_approved_published_and_never_edited(fresh_db: Fresh
     org = Org(fresh_db)
     with org.as_("adm") as c:
         p = c.execute(
-            "SELECT cairn.create_policy('access-control', 'Access Control', 'All access is least privilege.', 365, 14)"
+            "SELECT cairn.create_policy('access-control', 'Access Control', 'All access is least privilege.', 365, 14)"  # noqa: E501
         ).fetchone()
         assert p
         c.commit()
         assert c.execute(
-            "SELECT cairn.save_policy_draft(%s, 'Access Control', 'All access is least privilege and reviewed.', 'wording')",
+            "SELECT cairn.save_policy_draft(%s, 'Access Control', 'All access is least privilege and reviewed.', 'wording')",  # noqa: E501
             (p[0],),
         ).fetchone() == (1,)
         a = c.execute("SELECT cairn.submit_policy(%s)", (p[0],)).fetchone()
@@ -230,7 +230,7 @@ def test_policy_versions_are_approved_published_and_never_edited(fresh_db: Fresh
         "adm"
     ) as c:  # a change is a new version, approved again; the old one is superseded
         assert c.execute(
-            "SELECT cairn.save_policy_draft(%s, 'Access Control', 'Reviewed every quarter.', 'cadence')",
+            "SELECT cairn.save_policy_draft(%s, 'Access Control', 'Reviewed every quarter.', 'cadence')",  # noqa: E501
             (p[0],),
         ).fetchone() == (2,)
         a2 = c.execute("SELECT cairn.submit_policy(%s)", (p[0],)).fetchone()
@@ -249,13 +249,13 @@ def test_an_access_request_grants_the_role_only_after_an_admin_approves(fresh_db
     org = Org(fresh_db)
     with org.as_("mem") as c:
         a = c.execute(
-            "SELECT cairn.request_approval('access', 'Need manager access', '{\"role\": \"manager\"}', 1, NULL, NULL, NULL)"
+            "SELECT cairn.request_approval('access', 'Need manager access', '{\"role\": \"manager\"}', 1, NULL, NULL, NULL)"  # noqa: E501
         ).fetchone()
         assert a
         c.commit()
         with pytest.raises(psycopg.errors.RaiseException, match="manager, member or auditor"):
             c.execute(
-                "SELECT cairn.request_approval('access', 'Be owner', '{\"role\": \"owner\"}', 1, NULL, NULL, NULL)"
+                "SELECT cairn.request_approval('access', 'Be owner', '{\"role\": \"owner\"}', 1, NULL, NULL, NULL)"  # noqa: E501
             )
     with (
         org.as_("mgr") as c,
@@ -279,7 +279,7 @@ def test_the_risk_register_is_for_leads_and_auditors_to_read(fresh_db: FreshDb) 
     pid = org.people["mgr"][1]
     with org.as_("mgr") as c:
         c.execute(
-            "INSERT INTO cairn.risks (title, likelihood, impact, owner_principal, created_by) VALUES ('Vendor outage', 3, 4, %s, %s)",
+            "INSERT INTO cairn.risks (title, likelihood, impact, owner_principal, created_by) VALUES ('Vendor outage', 3, 4, %s, %s)",  # noqa: E501
             (pid, pid),
         )
         c.commit()
@@ -289,7 +289,7 @@ def test_the_risk_register_is_for_leads_and_auditors_to_read(fresh_db: FreshDb) 
         assert c.execute("SELECT count(*) FROM cairn.risks").fetchone() == (0,)
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             c.execute(
-                "INSERT INTO cairn.risks (title, likelihood, impact, owner_principal, created_by) VALUES ('x y z', 1, 1, 1, 1)"
+                "INSERT INTO cairn.risks (title, likelihood, impact, owner_principal, created_by) VALUES ('x y z', 1, 1, 1, 1)"  # noqa: E501
             )
     with org.as_("aud") as c:
         assert c.execute("SELECT count(*) FROM cairn.risks").fetchone() == (1,)

@@ -1,4 +1,4 @@
-"""Approvals, decisions proposed in Cairn, policies with attestations, and risks (SaaS plan, Phase B)."""
+"""Approvals, decisions proposed in Cairn, policies with attestations, and risks (SaaS plan, Phase B)."""  # noqa: E501
 
 from __future__ import annotations
 
@@ -114,9 +114,9 @@ def approval_row(r: Any, ctx: Ctx) -> dict[str, Any]:
 
 APPROVAL_SQL = (
     "SELECT a.approval_id, a.kind, a.title, a.detail, a.requested_by, a.required, a.state, "
-    "(SELECT count(*) FROM cairn.approval_votes v WHERE v.approval_id = a.approval_id AND v.vote = 'approve'), "
+    "(SELECT count(*) FROM cairn.approval_votes v WHERE v.approval_id = a.approval_id AND v.vote = 'approve'), "  # noqa: E501
     "a.created_at, a.decided_at, p.display_name, "
-    "EXISTS (SELECT 1 FROM cairn.approval_votes v WHERE v.approval_id = a.approval_id AND v.voter_principal = %s) "
+    "EXISTS (SELECT 1 FROM cairn.approval_votes v WHERE v.approval_id = a.approval_id AND v.voter_principal = %s) "  # noqa: E501
     "FROM cairn.approvals a JOIN cairn.principals p ON p.principal_id = a.requested_by "
 )
 
@@ -137,7 +137,7 @@ def install(app: FastAPI, rt: Any) -> None:
             rows = await (
                 await conn.execute(
                     APPROVAL_SQL
-                    + "WHERE (%s = 'all' OR a.state = 'pending') ORDER BY a.created_at DESC LIMIT 100",
+                    + "WHERE (%s = 'all' OR a.state = 'pending') ORDER BY a.created_at DESC LIMIT 100",  # noqa: E501
                     (ctx.principal_id, state),
                 )
             ).fetchall()
@@ -158,7 +158,7 @@ def install(app: FastAPI, rt: Any) -> None:
                 return error(404, "not_found")
             votes = await (
                 await conn.execute(
-                    "SELECT p.display_name, v.vote, v.comment, v.voted_at FROM cairn.approval_votes v "
+                    "SELECT p.display_name, v.vote, v.comment, v.voted_at FROM cairn.approval_votes v "  # noqa: E501
                     "JOIN cairn.principals p ON p.principal_id = v.voter_principal "
                     "WHERE v.approval_id = %s ORDER BY v.vote_id",
                     (approval_id,),
@@ -351,9 +351,9 @@ def install(app: FastAPI, rt: Any) -> None:
             ).fetchone()
             rows = await (
                 await conn.execute(
-                    "SELECT p.policy_id, p.slug, p.title, p.state, p.current_version, p.review_days, "
+                    "SELECT p.policy_id, p.slug, p.title, p.state, p.current_version, p.review_days, "  # noqa: E501
                     "p.attest_days, pv.published_at, pv.attest_by, "
-                    "(SELECT count(*) FROM cairn.attestations a WHERE a.version_id = pv.version_id), "
+                    "(SELECT count(*) FROM cairn.attestations a WHERE a.version_id = pv.version_id), "  # noqa: E501
                     "EXISTS (SELECT 1 FROM cairn.attestations a WHERE a.version_id = pv.version_id "
                     "AND a.principal_id = %s), "
                     "(SELECT v.state FROM cairn.policy_versions v WHERE v.policy_id = p.policy_id "
@@ -380,7 +380,7 @@ def install(app: FastAPI, rt: Any) -> None:
                     "attest_by": attest_by.isoformat() if attest_by else None,
                     "review_due": review_due.date().isoformat() if review_due else None,
                     "review_overdue": bool(review_due and review_due < now),
-                    "attested": int(r[9]) if ctx.role in LEADS + ("auditor",) else None,
+                    "attested": int(r[9]) if ctx.role in LEADS + ("auditor",) else None,  # noqa: RUF005
                     "expected": expected,
                     "mine": bool(r[10]),
                     "needs_my_attestation": bool(
@@ -402,7 +402,7 @@ def install(app: FastAPI, rt: Any) -> None:
         async with scope_of(rt.pool, ctx) as conn:
             head = await (
                 await conn.execute(
-                    "SELECT policy_id, slug, title, state, current_version, owner_principal FROM cairn.policies WHERE policy_id = %s",
+                    "SELECT policy_id, slug, title, state, current_version, owner_principal FROM cairn.policies WHERE policy_id = %s",  # noqa: E501
                     (policy_id,),
                 )
             ).fetchone()
@@ -410,7 +410,7 @@ def install(app: FastAPI, rt: Any) -> None:
                 return error(404, "not_found")
             versions = await (
                 await conn.execute(
-                    "SELECT v.version, v.title, v.body, v.summary, v.state, v.published_at, v.attest_by, "
+                    "SELECT v.version, v.title, v.body, v.summary, v.state, v.published_at, v.attest_by, "  # noqa: E501
                     "p.display_name, v.approval_id FROM cairn.policy_versions v "
                     "JOIN cairn.principals p ON p.principal_id = v.created_by "
                     "WHERE v.policy_id = %s ORDER BY v.version DESC",
@@ -419,11 +419,11 @@ def install(app: FastAPI, rt: Any) -> None:
             ).fetchall()
             attestations: list[Any] = []
             missing: list[str] = []
-            if ctx.role in LEADS + ("auditor",):
+            if ctx.role in LEADS + ("auditor",):  # noqa: RUF005
                 attestations = await (
                     await conn.execute(
                         "SELECT p.display_name, a.attested_at FROM cairn.attestations a "
-                        "JOIN cairn.policy_versions v ON v.version_id = a.version_id AND v.state = 'published' "
+                        "JOIN cairn.policy_versions v ON v.version_id = a.version_id AND v.state = 'published' "  # noqa: E501
                         "JOIN cairn.principals p ON p.principal_id = a.principal_id "
                         "WHERE v.policy_id = %s ORDER BY a.attested_at",
                         (policy_id,),
@@ -431,10 +431,10 @@ def install(app: FastAPI, rt: Any) -> None:
                 ).fetchall()
                 rows = await (
                     await conn.execute(
-                        "SELECT display_name FROM cairn_meta.directory() d WHERE d.state = 'active' "
-                        "AND d.role IN ('owner', 'admin', 'manager', 'member') AND d.principal_id NOT IN ("
-                        "SELECT a.principal_id FROM cairn.attestations a JOIN cairn.policy_versions v "
-                        "ON v.version_id = a.version_id AND v.state = 'published' WHERE v.policy_id = %s) "
+                        "SELECT display_name FROM cairn_meta.directory() d WHERE d.state = 'active' "  # noqa: E501
+                        "AND d.role IN ('owner', 'admin', 'manager', 'member') AND d.principal_id NOT IN ("  # noqa: E501
+                        "SELECT a.principal_id FROM cairn.attestations a JOIN cairn.policy_versions v "  # noqa: E501
+                        "ON v.version_id = a.version_id AND v.state = 'published' WHERE v.policy_id = %s) "  # noqa: E501
                         "ORDER BY display_name",
                         (policy_id,),
                     )
@@ -553,15 +553,15 @@ def install(app: FastAPI, rt: Any) -> None:
 
     @router.get("/governance/risks")
     async def risks(request: Request) -> Response:
-        ctx, bad = await guard(rt, request, "risk.list", LEADS + ("auditor",))
+        ctx, bad = await guard(rt, request, "risk.list", LEADS + ("auditor",))  # noqa: RUF005
         if bad is not None or ctx is None:
             return bad or error(401, "unauthenticated")
         async with scope_of(rt.pool, ctx) as conn:
             rows = await (
                 await conn.execute(
-                    "SELECT r.risk_id, r.title, r.description, r.category, r.likelihood, r.impact, r.score, "
+                    "SELECT r.risk_id, r.title, r.description, r.category, r.likelihood, r.impact, r.score, "  # noqa: E501
                     "r.state, r.mitigation, r.review_by, p.display_name, r.owner_principal "
-                    "FROM cairn.risks r JOIN cairn.principals p ON p.principal_id = r.owner_principal "
+                    "FROM cairn.risks r JOIN cairn.principals p ON p.principal_id = r.owner_principal "  # noqa: E501
                     "ORDER BY (r.state = 'closed'), r.score DESC, r.risk_id"
                 )
             ).fetchall()
@@ -598,8 +598,8 @@ def install(app: FastAPI, rt: Any) -> None:
         async with scope_of(rt.pool, ctx) as conn:
             row = await (
                 await conn.execute(
-                    "INSERT INTO cairn.risks (title, description, category, likelihood, impact, owner_principal, "
-                    "mitigation, review_by, created_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING risk_id",
+                    "INSERT INTO cairn.risks (title, description, category, likelihood, impact, owner_principal, "  # noqa: E501
+                    "mitigation, review_by, created_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING risk_id",  # noqa: E501
                     (
                         body.title,
                         body.description,
@@ -648,7 +648,7 @@ def install(app: FastAPI, rt: Any) -> None:
         async with scope_of(rt.pool, ctx) as conn:
             pending = await (
                 await conn.execute(
-                    "SELECT count(*) FILTER (WHERE a.requested_by <> %s AND NOT EXISTS (SELECT 1 FROM cairn.approval_votes v "
+                    "SELECT count(*) FILTER (WHERE a.requested_by <> %s AND NOT EXISTS (SELECT 1 FROM cairn.approval_votes v "  # noqa: E501
                     "WHERE v.approval_id = a.approval_id AND v.voter_principal = %s)), count(*) "
                     "FROM cairn.approvals a WHERE a.state = 'pending'",
                     (ctx.principal_id, ctx.principal_id),
@@ -656,14 +656,14 @@ def install(app: FastAPI, rt: Any) -> None:
             ).fetchone()
             to_attest = await (
                 await conn.execute(
-                    "SELECT count(*) FROM cairn.policies p JOIN cairn.policy_versions v ON v.policy_id = p.policy_id "
-                    "AND v.state = 'published' WHERE NOT EXISTS (SELECT 1 FROM cairn.attestations a "
+                    "SELECT count(*) FROM cairn.policies p JOIN cairn.policy_versions v ON v.policy_id = p.policy_id "  # noqa: E501
+                    "AND v.state = 'published' WHERE NOT EXISTS (SELECT 1 FROM cairn.attestations a "  # noqa: E501
                     "WHERE a.version_id = v.version_id AND a.principal_id = %s)",
                     (ctx.principal_id,),
                 )
             ).fetchone()
             high = None
-            if ctx.role in LEADS + ("auditor",):
+            if ctx.role in LEADS + ("auditor",):  # noqa: RUF005
                 high = await (
                     await conn.execute(
                         "SELECT count(*) FILTER (WHERE state <> 'closed' AND score >= 15), "

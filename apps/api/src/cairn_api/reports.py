@@ -210,10 +210,10 @@ def install(app: FastAPI, rt: Any) -> None:
             async with scope_of(rt.pool, ctx) as conn:
                 row = await (
                     await conn.execute(
-                        "INSERT INTO cairn.work_reports (author_principal, report_date, done, next_up, "
+                        "INSERT INTO cairn.work_reports (author_principal, report_date, done, next_up, "  # noqa: E501
                         "blockers, links) VALUES (%s, %s, %s, %s, %s, %s) "
                         "ON CONFLICT (org_id, author_principal, report_date) DO UPDATE SET "
-                        "done = EXCLUDED.done, next_up = EXCLUDED.next_up, blockers = EXCLUDED.blockers, "
+                        "done = EXCLUDED.done, next_up = EXCLUDED.next_up, blockers = EXCLUDED.blockers, "  # noqa: E501
                         "links = EXCLUDED.links RETURNING report_id, (xmax = 0)",
                         (
                             ctx.principal_id,
@@ -290,7 +290,7 @@ def install(app: FastAPI, rt: Any) -> None:
             rows = await (
                 await conn.execute(
                     SELECT_REPORT
-                    + "WHERE w.report_date BETWEEN %s AND %s ORDER BY w.report_date, p.display_name",
+                    + "WHERE w.report_date BETWEEN %s AND %s ORDER BY w.report_date, p.display_name",  # noqa: E501
                     (window[0], window[1]),
                 )
             ).fetchall()
@@ -325,7 +325,7 @@ def install(app: FastAPI, rt: Any) -> None:
             people = await (
                 await conn.execute(
                     "SELECT principal_id, display_name, role FROM cairn_meta.directory() d "
-                    "WHERE d.state = 'active' AND d.role IN ('owner', 'admin', 'manager', 'member') "
+                    "WHERE d.state = 'active' AND d.role IN ('owner', 'admin', 'manager', 'member') "  # noqa: E501
                     "AND (%s IN ('owner', 'admin') OR d.principal_id = %s "
                     "OR d.principal_id IN (SELECT cairn.teammates()))",
                     (ctx.role, ctx.principal_id),
@@ -383,7 +383,7 @@ def install(app: FastAPI, rt: Any) -> None:
                 return error(404, "not_found")  # also for a report the caller may not read
             comments = await (
                 await conn.execute(
-                    "SELECT c.comment_id, p.display_name, c.body, c.created_at FROM cairn.report_comments c "
+                    "SELECT c.comment_id, p.display_name, c.body, c.created_at FROM cairn.report_comments c "  # noqa: E501
                     "JOIN cairn.principals p ON p.principal_id = c.author_principal "
                     "WHERE c.report_id = %s ORDER BY c.comment_id",
                     (report_id,),
@@ -439,7 +439,7 @@ def install(app: FastAPI, rt: Any) -> None:
             rows = await (
                 await conn.execute(
                     SELECT_REPORT
-                    + "WHERE w.report_date BETWEEN %s AND %s AND (%s <> 'mine' OR w.author_principal = %s) "
+                    + "WHERE w.report_date BETWEEN %s AND %s AND (%s <> 'mine' OR w.author_principal = %s) "  # noqa: E501
                     "ORDER BY w.report_date, p.display_name LIMIT %s",
                     (body.start, body.end, body.scope, ctx.principal_id, MAX_DIGEST_REPORTS),
                 )
@@ -454,8 +454,8 @@ def install(app: FastAPI, rt: Any) -> None:
             ).hexdigest()
             cached = await (
                 await conn.execute(
-                    "SELECT body, model FROM cairn.report_digests WHERE created_by = %s AND scope = %s "
-                    "AND team_id IS NULL AND period_start = %s AND period_end = %s AND input_hash = %s",
+                    "SELECT body, model FROM cairn.report_digests WHERE created_by = %s AND scope = %s "  # noqa: E501
+                    "AND team_id IS NULL AND period_start = %s AND period_end = %s AND input_hash = %s",  # noqa: E501
                     (ctx.principal_id, body.scope, body.start, body.end, digest_hash),
                 )
             ).fetchone()
@@ -478,7 +478,7 @@ def install(app: FastAPI, rt: Any) -> None:
         async with scope_of(rt.pool, ctx) as conn:
             await conn.execute(
                 "INSERT INTO cairn.report_digests (created_by, scope, period_start, period_end, "
-                "input_hash, body, model) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
+                "input_hash, body, model) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",  # noqa: E501
                 (
                     ctx.principal_id,
                     body.scope,
