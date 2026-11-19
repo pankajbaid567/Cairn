@@ -286,7 +286,7 @@ class BedrockSettings(ProviderSettings):
         5.0, alias="CAIRN_BEDROCK_CONNECT_TIMEOUT_S", gt=0, le=30
     )
     bedrock_read_timeout_s: float = Field(60.0, alias="CAIRN_BEDROCK_READ_TIMEOUT_S", gt=0, le=180)
-    bedrock_max_attempts: int = Field(3, alias="CAIRN_BEDROCK_MAX_ATTEMPTS", ge=1, le=5)
+    bedrock_max_attempts: int = Field(3, alias="CAIRN_BEDROCK_MAX_ATTEMPTS", ge=1, le=8)
     bedrock_reasoning_effort: Literal["", "low", "medium", "high"] = Field(
         "low", alias="CAIRN_BEDROCK_REASONING_EFFORT"
     )

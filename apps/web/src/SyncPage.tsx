@@ -2,6 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 
 import { describeError, getSyncSources } from './api';
 
+const TONE: Record<string, string> = {
+  Live: 'badge-ok',
+  Imported: 'badge-info',
+  Delayed: 'badge-warn',
+  Stale: 'badge-bad',
+};
+
 /** Sources the signed-in persona can read, with freshness and what is waiting to be applied. */
 export function SyncPage() {
   const sync = useQuery({
@@ -10,13 +17,30 @@ export function SyncPage() {
     refetchInterval: 15_000,
   });
   return (
-    <section aria-labelledby="sync-h">
-      <h2 id="sync-h">Sources and sync health</h2>
-      {sync.isPending ? <p>Loading…</p> : null}
-      {sync.isError ? <p role="alert">{describeError(sync.error)}</p> : null}
+    <section aria-labelledby="sync-h" className="stack">
+      <div className="page-head">
+        <h2 id="sync-h">Sources and sync health</h2>
+        <p>Where answers come from, how fresh each source is, and what is still being applied.</p>
+      </div>
+      {sync.isPending ? <div className="skeleton" style={{ height: 80 }} /> : null}
+      {sync.isError ? (
+        <p role="alert" className="notice notice-bad">
+          {describeError(sync.error)}
+        </p>
+      ) : null}
       {sync.data ? (
-        <div>
-          <p>
+        <div className="stack">
+          <div className="tiles">
+            <div className="card tile">
+              <div className="tile-num">{sync.data.sources.length}</div>
+              <div className="tile-label">sources you can read</div>
+            </div>
+            <div className="card tile">
+              <div className="tile-num">{sync.data.pending_acl + sync.data.pending_content}</div>
+              <div className="tile-label">events waiting to apply</div>
+            </div>
+          </div>
+          <p className={sync.data.pending_acl > 0 ? 'notice notice-warn' : 'muted'}>
             Waiting to apply: {sync.data.pending_acl} permission events, {sync.data.pending_content}{' '}
             content events.
             {sync.data.pending_acl > 0
@@ -24,26 +48,30 @@ export function SyncPage() {
               : ''}
           </p>
           {sync.data.sources.length === 0 ? (
-            <p>No sources you can read.</p>
+            <p className="card empty">No sources you can read.</p>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Source</th>
-                  <th scope="col">Freshness</th>
-                  <th scope="col">Last synced</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sync.data.sources.map((s) => (
-                  <tr key={s.source}>
-                    <td>{s.source}</td>
-                    <td>{s.badge}</td>
-                    <td>{s.last_synced_at ?? 'not live'}</td>
+            <div className="card table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Source</th>
+                    <th scope="col">Freshness</th>
+                    <th scope="col">Last synced</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {sync.data.sources.map((s) => (
+                    <tr key={s.source}>
+                      <td className="mono">{s.source}</td>
+                      <td>
+                        <span className={`badge ${TONE[s.badge] ?? ''}`}>{s.badge}</span>
+                      </td>
+                      <td>{s.last_synced_at ?? 'not live'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       ) : null}

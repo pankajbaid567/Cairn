@@ -372,7 +372,10 @@ def test_reranker_scores_in_order_and_truncates_passages() -> None:
 
 
 def test_reranker_bad_reply_is_bad_response_and_empty_input_is_cheap() -> None:
-    rr = BedrockLlmReranker(client(FakeRuntime(converse_ok("I cannot"))), "openai.gpt-oss-20b-1:0")
+    rr = BedrockLlmReranker(
+        client(FakeRuntime(converse_ok("I cannot"), converse_ok("still not"))),
+        "openai.gpt-oss-20b-1:0",
+    )
     with pytest.raises(WorkersAiError) as e:
         run(rr.score("q", ["a", "b"]))
     assert e.value.code == "bad_response"
@@ -506,3 +509,57 @@ def test_parse_scores_accepts_an_index_keyed_object_and_rejects_gaps() -> None:
     assert parse_scores('{"scores":{"a":8}}', 1) is None
     assert parse_scores('{"scores":[1,2,3]}', 3) == [1.0, 2.0, 3.0]
     assert parse_scores('{"scores":[1,2]}', 3) is None
+
+
+def test_cohere_embedder_batches_documents_and_marks_queries() -> None:
+    import asyncio
+
+    from cairn_retrieval.bedrock.adapters import BedrockEmbedder
+
+    calls: list[tuple[int, str]] = []
+
+    class Fake:
+        async def embed_cohere(
+            self, model: str, texts: list[str], *, input_type: str, estimate_micro_usd: int
+        ) -> list[list[float]]:
+            calls.append((len(texts), input_type))
+            return [[0.0] * 1024 for _ in texts]
+
+    emb = BedrockEmbedder(Fake(), "cohere.embed-english-v3", 1024)  # type: ignore[arg-type]
+    assert emb.model_key == "bedrock:cohere.embed-english-v3:1024"
+    asyncio.run(emb.embed_documents(["a"] * 100))
+    seen: list[int] = []
+
+    class Spy(Fake):
+        async def embed_cohere(self, model, texts, *, input_type, estimate_micro_usd):  # type: ignore[no-untyped-def]
+            seen.extend(len(t) for t in texts)
+            return [[0.0] * 1024 for _ in texts]
+
+    asyncio.run(
+        BedrockEmbedder(Spy(), "cohere.embed-english-v3", 1024).embed_documents(["z" * 5000])
+    )  # type: ignore[arg-type]
+    assert seen == [2048]
+    asyncio.run(emb.embed_query("q"))
+    assert calls == [(96, "search_document"), (4, "search_document"), (1, "search_query")]
+    with pytest.raises(ValueError, match="1024"):
+        BedrockEmbedder(Fake(), "cohere.embed-english-v3", 512)  # type: ignore[arg-type]
+
+
+def test_reranker_asks_again_once_and_scores_in_batches_of_ten() -> None:
+    from cairn_retrieval.bedrock.adapters import RERANK_BATCH
+
+    rt = FakeRuntime(converse_ok('{"scores":{"0":1}}'), converse_ok('{"scores":{"0":1,"1":2}}'))
+    rr = BedrockLlmReranker(client(rt), "openai.gpt-oss-20b-1:0")
+    assert run(rr.score("q", ["a", "b"])) == [1.0, 2.0]  # the first reply missed one, then fine
+    assert len(rt.calls) == 2
+    many = [f"p{i}" for i in range(RERANK_BATCH + 3)]
+
+    class BySize(FakeRuntime):  # batches run together, so answer by what was asked, not by order
+        def converse(self, **kw: Any) -> Any:
+            n = kw["messages"][0]["content"][0]["text"].count("\n[")
+            self.calls.append(("converse", kw))
+            return converse_ok(json.dumps({"scores": {str(i): n for i in range(n)}}))
+
+    rt2 = BySize()
+    out = run(BedrockLlmReranker(client(rt2), "openai.gpt-oss-20b-1:0").score("q", many))
+    assert out == [10.0] * RERANK_BATCH + [3.0] * 3 and len(rt2.calls) == 2

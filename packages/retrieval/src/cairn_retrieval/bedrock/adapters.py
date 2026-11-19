@@ -17,18 +17,27 @@ from cairn_retrieval.llm.types import LlmRequest, LlmResponse
 __all__ = ["BedrockEmbedder", "BedrockLlm", "BedrockLlmReranker", "parse_scores"]
 
 TITAN_DIMENSIONS: Final = (256, 512, 1024)
-EMBED_CONCURRENCY: Final = 4
+EMBED_CONCURRENCY: Final = 2
 """Titan takes one text per call, so a batch is that many concurrent calls (bounded)."""
 
 _REASONING: Final = re.compile(r"<reasoning>.*?</reasoning>", re.S)
 _STOP: Final = {"end_turn": "stop", "stop_sequence": "stop", "max_tokens": "length"}
 
 
+COHERE_BATCH: Final = 96
+COHERE_MAX_CHARS: Final = 2048
+"""Cohere Embed v3 refuses a text over 2,048 characters; longer chunks are cut to their first 2,048."""
+
+
 class BedrockEmbedder:
-    """Embeds through Amazon Titan Text Embeddings V2 (256, 512 or 1024 dimensions, normalised)."""
+    """Embeds through Amazon Titan Text Embeddings V2 (256, 512 or 1024 dimensions, normalised) or
+    Cohere Embed v3 (1,024 dimensions; documents and queries use different ``input_type``s)."""
 
     def __init__(self, client: BedrockClient, model: str, dim: int) -> None:
-        if dim not in TITAN_DIMENSIONS:
+        if model.startswith("cohere.embed"):
+            if dim != 1024:
+                raise ValueError("Cohere Embed v3 has 1024 dimensions")
+        elif dim not in TITAN_DIMENSIONS:
             raise ValueError(f"Titan Text Embeddings V2 supports {TITAN_DIMENSIONS}, not {dim}")
         self._client = client
         self._model = model
@@ -38,6 +47,8 @@ class BedrockEmbedder:
     async def embed_documents(self, texts: Sequence[str]) -> list[list[float]]:
         if any(t == "" for t in texts):
             raise ValueError("an empty text cannot be embedded")
+        if self._model.startswith("cohere.embed"):
+            return await self._cohere(list(texts), "search_document")
         gate = asyncio.Semaphore(EMBED_CONCURRENCY)
 
         async def one(text: str) -> list[float]:
@@ -49,7 +60,19 @@ class BedrockEmbedder:
     async def embed_query(self, text: str) -> list[float]:
         if text == "":
             raise ValueError("an empty query cannot be embedded")
+        if self._model.startswith("cohere.embed"):
+            return (await self._cohere([text], "search_query"))[0]
         return await self._embed(text)
+
+    async def _cohere(self, texts: list[str], input_type: str) -> list[list[float]]:
+        out: list[list[float]] = []
+        for i in range(0, len(texts), COHERE_BATCH):
+            batch = [t[:COHERE_MAX_CHARS] for t in texts[i : i + COHERE_BATCH]]
+            micro = estimate_micro_usd(self._model, sum(text_tokens(t) for t in batch))
+            out += await self._client.embed_cohere(
+                self._model, batch, input_type=input_type, estimate_micro_usd=micro
+            )
+        return out
 
     async def _embed(self, text: str) -> list[float]:
         micro = estimate_micro_usd(self._model, text_tokens(text))
@@ -110,6 +133,7 @@ _RERANK_SYSTEM: Final = (
     '{"scores":{"0":8,"1":0,"2":5}}. Include every passage number.'
 )
 _log = logging.getLogger(__name__)
+RERANK_BATCH: Final = 10
 _PASSAGE_CHARS: Final = 700
 _RERANK_MAX_TOKENS: Final = 900
 """Output bound of a rerank call. A reasoning model spends part of it before the scores."""
@@ -159,37 +183,44 @@ class BedrockLlmReranker:
         self.model_key = f"bedrock-llm-rerank:{model}"
 
     async def score(self, query: str, passages: Sequence[str]) -> list[float]:
+        """Scores in batches of ``RERANK_BATCH`` (a model keeps count far better on a short list),
+        run together; a batch whose reply cannot be read is asked once more before the error."""
         if not passages:
             return []
         if query == "" or any(p == "" for p in passages):
             raise ValueError("an empty query or passage cannot be reranked")
+        batches = [passages[i : i + RERANK_BATCH] for i in range(0, len(passages), RERANK_BATCH)]
+        parts = await asyncio.gather(*(self._score_batch(query, b) for b in batches))
+        return [s for part in parts for s in part]
+
+    async def _score_batch(self, query: str, passages: Sequence[str]) -> list[float]:
         body = "\n\n".join(f"[{i}] {p[:_PASSAGE_CHARS]}" for i, p in enumerate(passages))
         user = f"Question: {query}\n\nPassages:\n{body}"
         micro = estimate_micro_usd(
             self._model, text_tokens(_RERANK_SYSTEM) + text_tokens(user), _RERANK_MAX_TOKENS
         )
-        res = await self._client.converse(
-            self._model,
-            system=_RERANK_SYSTEM,
-            user=user,
-            max_tokens=_RERANK_MAX_TOKENS,
-            temperature=0.0,
-            estimate_micro_usd=micro,
-            reasoning_effort=self._effort,
-        )
-        scores = parse_scores(_REASONING.sub("", res.text), len(passages))
-        if scores is None:
+        res = None
+        for _attempt in range(2):
+            res = await self._client.converse(
+                self._model,
+                system=_RERANK_SYSTEM,
+                user=user,
+                max_tokens=_RERANK_MAX_TOKENS,
+                temperature=0.0,
+                estimate_micro_usd=micro,
+                reasoning_effort=self._effort,
+            )
+            scores = parse_scores(_REASONING.sub("", res.text), len(passages))
+            if scores is not None:
+                return scores
             # bounded model output (not a secret), kept to diagnose a bad reply
             _log.warning(
                 "bedrock.rerank.bad_reply",
                 extra={
                     "passages": len(passages),
                     "stop_reason": res.stop_reason,
-                    "tokens_out": res.tokens_out,
                     "reply_head": res.text[:160],
                 },
             )
-            raise WorkersAiError(
-                "bad_response", model=self._model, status=200, attempts=res.attempts
-            )
-        return scores
+        assert res is not None  # noqa: S101
+        raise WorkersAiError("bad_response", model=self._model, status=200, attempts=res.attempts)

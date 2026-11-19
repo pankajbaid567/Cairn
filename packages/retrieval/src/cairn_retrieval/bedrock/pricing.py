@@ -33,6 +33,9 @@ BEDROCK_RATES: Final[dict[str, BedrockRate]] = {
     "zai.glm-4.7": BedrockRate(0.72, 2.64),
     # Titan Text Embeddings V2: public list price, not re-read from the Mumbai price list.
     "amazon.titan-embed-text-v2:0": BedrockRate(0.02),
+    # Cohere Embed English v3: public list price, not re-read from the Mumbai price list.
+    "cohere.embed-english-v3": BedrockRate(0.10),
+    "cohere.embed-multilingual-v3": BedrockRate(0.10),
 }
 
 

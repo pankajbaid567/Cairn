@@ -17,16 +17,31 @@ export function PersonaSwitcher() {
     },
   });
 
-  if (personas.isPending) return <p role="status">Loading personas</p>;
+  if (personas.isPending)
+    return (
+      <p role="status" className="switcher-note">
+        Loading personas
+      </p>
+    );
   if (personas.error instanceof ApiError && personas.error.status === 404) {
-    return <p role="status">Persona login is not enabled on this deployment.</p>;
+    return (
+      <p role="status" className="switcher-note">
+        Persona login is not enabled on this deployment.
+      </p>
+    );
   }
   if (personas.isError)
-    return <p role="status">Personas are unavailable (the API may be waking up).</p>;
+    return (
+      <p role="status" className="switcher-note">
+        Personas are unavailable (the API may be waking up).
+      </p>
+    );
 
   return (
-    <div>
-      {personas.data.demo ? <p>Demo: the personas and all data are synthetic.</p> : null}
+    <div className="switcher">
+      {personas.data.demo ? (
+        <p className="switcher-note">Demo: the personas and all data are synthetic.</p>
+      ) : null}
       <label htmlFor={id}>Ask as </label>
       <select
         id={id}
@@ -45,7 +60,11 @@ export function PersonaSwitcher() {
           </option>
         ))}
       </select>
-      {login.isError ? <p role="alert">Could not switch persona.</p> : null}
+      {login.isError ? (
+        <p role="alert" className="switcher-note">
+          Could not switch persona.
+        </p>
+      ) : null}
     </div>
   );
 }

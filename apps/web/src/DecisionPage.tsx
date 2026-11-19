@@ -5,6 +5,14 @@ import { describeError, getDecision, searchDecisions, type AsOf } from './api';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
+const STATUS_TONE: Record<string, string> = {
+  implemented: 'badge-ok',
+  accepted: 'badge-info',
+  proposed: 'badge-plain',
+  superseded: 'badge-warn',
+  rejected: 'badge-bad',
+};
+
 /** Find a decision, then read its status, claims with sources and timeline, optionally as of a date. */
 export function DecisionPage() {
   const searchId = useId();
@@ -39,33 +47,48 @@ export function DecisionPage() {
 
   const data = page.data;
   return (
-    <section aria-labelledby={`${searchId}-h`}>
-      <h2 id={`${searchId}-h`}>Decisions</h2>
-      <form onSubmit={search}>
-        <label htmlFor={searchId}>Find a decision</label>
-        <br />
-        <input
-          id={searchId}
-          value={text}
-          maxLength={100}
-          onChange={(e) => setText(e.target.value)}
-        />{' '}
-        <button type="submit" disabled={text.trim() === ''}>
-          Search
-        </button>
+    <section aria-labelledby={`${searchId}-h`} className="stack">
+      <div className="page-head">
+        <h2 id={`${searchId}-h`}>Decisions</h2>
+        <p>
+          Find a decision, read the claims behind it with their sources, and see what we knew on any
+          date.
+        </p>
+      </div>
+      <form onSubmit={search} className="card card-pad stack">
+        <div className="field">
+          <label htmlFor={searchId}>Find a decision</label>
+          <div className="row">
+            <input
+              id={searchId}
+              value={text}
+              maxLength={100}
+              placeholder="postgres, kafka, ADR-007…"
+              style={{ flex: 1, minWidth: 200 }}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <button type="submit" disabled={text.trim() === ''}>
+              Search
+            </button>
+          </div>
+        </div>
       </form>
-      {hits.isError ? <p role="alert">{describeError(hits.error)}</p> : null}
+      {hits.isError ? (
+        <p role="alert" className="notice notice-bad">
+          {describeError(hits.error)}
+        </p>
+      ) : null}
       {hits.data ? (
         hits.data.decisions.length === 0 ? (
-          <p>No decisions found that you can see.</p>
+          <p className="card empty">No decisions found that you can see.</p>
         ) : (
-          <ul aria-label="Decision results">
+          <ul aria-label="Decision results" className="results">
             {hits.data.decisions.map((hit) => (
-              <li key={hit.key}>
+              <li key={hit.key} className="result">
                 <button type="button" onClick={() => setKey(hit.key)}>
                   {hit.key}
-                </button>{' '}
-                {hit.title}
+                </button>
+                <span>{hit.title}</span>
               </li>
             ))}
           </ul>
@@ -73,51 +96,65 @@ export function DecisionPage() {
       ) : null}
 
       {key !== null ? (
-        <div>
+        <div className="stack">
           <fieldset>
             <legend>As of</legend>
-            <label htmlFor={validId}>It held on (YYYY-MM-DD)</label>{' '}
-            <input
-              id={validId}
-              value={valid}
-              placeholder="today"
-              onChange={(e) => setValid(e.target.value)}
-            />
-            <br />
-            <label htmlFor={recordedId}>As we knew it on (YYYY-MM-DD)</label>{' '}
-            <input
-              id={recordedId}
-              value={recorded}
-              placeholder="today"
-              onChange={(e) => setRecorded(e.target.value)}
-            />
+            <div className="field-row">
+              <div className="field">
+                <label htmlFor={validId}>It held on (YYYY-MM-DD)</label>
+                <input
+                  id={validId}
+                  value={valid}
+                  placeholder="today"
+                  onChange={(e) => setValid(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor={recordedId}>As we knew it on (YYYY-MM-DD)</label>
+                <input
+                  id={recordedId}
+                  value={recorded}
+                  placeholder="today"
+                  onChange={(e) => setRecorded(e.target.value)}
+                />
+              </div>
+            </div>
           </fieldset>
           <div aria-live="polite">
-            {page.isPending ? <p>Loading…</p> : null}
-            {page.isError ? <p role="alert">{describeError(page.error)}</p> : null}
+            {page.isPending ? <div className="skeleton" style={{ height: 80 }} /> : null}
+            {page.isError ? (
+              <p role="alert" className="notice notice-bad">
+                {describeError(page.error)}
+              </p>
+            ) : null}
           </div>
         </div>
       ) : null}
 
       {data ? (
-        <article>
-          <h3>
-            {data.decision.key}: {data.decision.title}
-          </h3>
-          <p>
-            <strong>Status: {data.status}</strong> (as of {data.as_of.valid}, known{' '}
-            {data.as_of.recorded}) <span>Verification: {data.decision.verification}</span>
+        <article className="card card-pad stack">
+          <div className="decision-head">
+            <h3>
+              {data.decision.key}: {data.decision.title}
+            </h3>
+            <strong className={`badge ${STATUS_TONE[data.status] ?? ''}`}>
+              Status: {data.status}
+            </strong>
+          </div>
+          <p className="muted">
+            As of {data.as_of.valid}, known {data.as_of.recorded} ·{' '}
+            <span>Verification: {data.decision.verification}</span>
           </p>
           {data.decision.question ? <p>Question: {data.decision.question}</p> : null}
           {data.summary ? <p>{data.summary}</p> : null}
-          <h4>Claims</h4>
+          <h4 className="section-title">Claims</h4>
           {data.claims.length === 0 ? (
-            <p>No claims you can see.</p>
+            <p className="muted">No claims you can see.</p>
           ) : (
-            <ul>
+            <ul className="claims">
               {data.claims.map((claim) => (
-                <li key={claim.key}>
-                  {claim.text} <em>(tier {claim.tier})</em>
+                <li key={claim.key} className="claim">
+                  {claim.text} <em className="badge badge-plain">(tier {claim.tier})</em>
                   {claim.citations.length > 0 ? (
                     <ul aria-label={`Sources for ${claim.key}`}>
                       {claim.citations.map((c) => (
@@ -129,11 +166,11 @@ export function DecisionPage() {
               ))}
             </ul>
           )}
-          <h4>Timeline</h4>
-          <ol aria-label="Timeline">
+          <h4 className="section-title">Timeline</h4>
+          <ol aria-label="Timeline" className="timeline">
             {data.timeline.map((e, i) => (
               <li key={`${e.event}-${i}`}>
-                {e.valid_at?.slice(0, 10)} {e.event}
+                <span className="mono">{e.valid_at?.slice(0, 10)}</span> {e.event}
                 {e.by ? ` by ${e.by}` : ''}
                 {e.note ? `: ${e.note}` : ''}
               </li>

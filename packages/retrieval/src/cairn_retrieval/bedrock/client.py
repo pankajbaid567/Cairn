@@ -82,6 +82,9 @@ def _classify(exc: BaseException) -> tuple[ErrorCode, bool, int | None]:
     return "transport", True, None
 
 
+COHERE_DIM = 1024
+
+
 class BedrockClient:
     """One shared client for every Bedrock call the process makes."""
 
@@ -147,7 +150,7 @@ class BedrockClient:
                 log.warning("bedrock.call_failed", extra={"model": model, "code": code})
                 if not retryable or attempts >= self._s.bedrock_max_attempts:
                     raise failure from None
-                delay = min(8.0, 0.5 * 2 ** (attempts - 1)) * (0.5 + self._jitter())
+                delay = min(20.0, 0.5 * 2 ** (attempts - 1)) * (0.5 + self._jitter())
                 await self._sleep(delay)
                 continue
             return result, attempts, (time.monotonic() - started) * 1000.0
@@ -210,6 +213,28 @@ class BedrockClient:
             if len(vector) != dim:
                 raise ValueError("wrong embedding length")
             return EmbedResult(vector, int(payload.get("inputTextTokenCount", 0)), ms, attempts)
+        except (KeyError, TypeError, ValueError):
+            raise WorkersAiError(
+                "bad_response", model=model, status=200, attempts=attempts
+            ) from None
+
+    async def embed_cohere(
+        self, model: str, texts: list[str], *, input_type: str, estimate_micro_usd: int
+    ) -> list[list[float]]:
+        """Cohere Embed v3 on Bedrock: up to 96 texts per call, 1,024 dimensions."""
+        body = json.dumps({"texts": texts, "input_type": input_type, "truncate": "END"})
+
+        def run(rt: Any) -> Any:
+            return rt.invoke_model(
+                modelId=model, body=body, contentType="application/json", accept="application/json"
+            )
+
+        res, attempts, _ms = await self._call(model, estimate_micro_usd, run)
+        try:
+            vectors = [[float(x) for x in v] for v in json.loads(res["body"].read())["embeddings"]]
+            if len(vectors) != len(texts) or any(len(v) != COHERE_DIM for v in vectors):
+                raise ValueError("wrong embeddings")
+            return vectors
         except (KeyError, TypeError, ValueError):
             raise WorkersAiError(
                 "bad_response", model=model, status=200, attempts=attempts
