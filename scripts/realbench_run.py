@@ -16,7 +16,6 @@ import math
 import random
 import re
 import sys
-import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -32,11 +31,11 @@ from cairn_core.config import SearchSettings, load_settings
 from cairn_core.embed_dim import ensure_embedding_dimension
 from cairn_core.testing import connect_admin, load_config, temporary_database
 from cairn_eval.seed import _embed
-from cairn_retrieval.registry import AccessMode
-from cairn_retrieval.citations import parse_citation
 from cairn_retrieval.bedrock.adapters import BedrockEmbedder, BedrockLlmReranker
 from cairn_retrieval.bedrock.client import BedrockClient
+from cairn_retrieval.citations import parse_citation
 from cairn_retrieval.pipeline import search
+from cairn_retrieval.registry import AccessMode
 from cairn_retrieval.runtime import build_providers
 from cairn_retrieval.types import RetrievalConfig
 from cairn_retrieval.workflow import answer_workflow
@@ -84,7 +83,9 @@ def boot_ci(values: list[float], seed: int = 1, n: int = 2000) -> tuple[float, f
     return m, means[int(0.025 * n)], means[int(0.975 * n)]
 
 
-def paired_diff(a: list[float], b: list[float], seed: int = 2, n: int = 2000) -> tuple[float, float, float]:
+def paired_diff(
+    a: list[float], b: list[float], seed: int = 2, n: int = 2000
+) -> tuple[float, float, float]:
     d = [x - y for x, y in zip(a, b, strict=True)]
     return boot_ci(d, seed, n)
 
@@ -110,16 +111,32 @@ JUDGE_PROMPT = (
 )
 
 
-async def judge(client: BedrockClient, q: dict[str, Any], ans: str, quotes: list[str]) -> dict[str, str]:
-    prompt = JUDGE_PROMPT.format(q=q["text"], gold=q["gold_answer"], ans=ans, quotes="\n".join(f"- {t[:400]}" for t in quotes) or "none")
+async def judge(
+    client: BedrockClient, q: dict[str, Any], ans: str, quotes: list[str]
+) -> dict[str, str]:
+    prompt = JUDGE_PROMPT.format(
+        q=q["text"],
+        gold=q["gold_answer"],
+        ans=ans,
+        quotes="\n".join(f"- {t[:400]}" for t in quotes) or "none",
+    )
     for _ in range(2):
         try:
-            r = await client.converse(JUDGE, system="You output JSON only.", user=prompt, max_tokens=300, temperature=0.0, estimate_micro_usd=1500)
-            m = re.search(r"\{.*\}", re.sub(r"<reasoning>.*?</reasoning>", "", r.text, flags=re.S), re.S)
+            r = await client.converse(
+                JUDGE,
+                system="You output JSON only.",
+                user=prompt,
+                max_tokens=300,
+                temperature=0.0,
+                estimate_micro_usd=1500,
+            )
+            m = re.search(
+                r"\{.*\}", re.sub(r"<reasoning>.*?</reasoning>", "", r.text, flags=re.S), re.S
+            )
             d = json.loads(m.group(0)) if m else {}
             if d.get("correct") in ("yes", "partial", "no") and d.get("grounded") in ("yes", "no"):
                 return {"correct": d["correct"], "grounded": d["grounded"]}
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
     return {"correct": "error", "grounded": "error"}
 
@@ -137,7 +154,11 @@ async def main_async(args: argparse.Namespace) -> None:
     config = load_config()
     admin = connect_admin(config)
     started = time.time()
-    results: dict[str, Any] = {"date": time.strftime("%Y-%m-%d"), "n_questions": len(questions), "n_peps": len(peps)}
+    results: dict[str, Any] = {
+        "date": time.strftime("%Y-%m-%d"),
+        "n_questions": len(questions),
+        "n_peps": len(peps),
+    }
     with admin:
         bootstrap(admin, config.settings)
         with temporary_database(admin, config) as db:
@@ -145,21 +166,32 @@ async def main_async(args: argparse.Namespace) -> None:
                 ensure_embedding_dimension(owner, 1024)
             assert db.ingest_dsn is not None
             with psycopg.connect(db.ingest_dsn, prepare_threshold=None) as conn:
-                apply_directory(conn, parse_directory((OUT / "corpus/directory/directory.json").read_text()))
+                apply_directory(
+                    conn, parse_directory((OUT / "corpus/directory/directory.json").read_text())
+                )
                 outcomes = [import_document(conn, d) for d in docs_folder.load(OUT / "corpus/docs")]
             bad = [o.error for o in outcomes if o.error]
             if bad:
                 raise RuntimeError(f"rejected: {bad[:3]}")
             with db.connect_owner() as owner:
-                results["chunks"] = owner.execute("SELECT count(*) FROM cairn.chunks WHERE is_current").fetchone()[0]
-                ids = {str(r[0]).removeprefix("user:"): int(r[1]) for r in owner.execute("SELECT external_id, principal_id FROM cairn.principals WHERE external_id LIKE 'user:%'").fetchall()}
+                results["chunks"] = owner.execute(
+                    "SELECT count(*) FROM cairn.chunks WHERE is_current"
+                ).fetchone()[0]
+                ids = {
+                    str(r[0]).removeprefix("user:"): int(r[1])
+                    for r in owner.execute(
+                        "SELECT external_id, principal_id FROM cairn.principals WHERE external_id LIKE 'user:%'"
+                    ).fetchall()
+                }
             print("chunks", results["chunks"], flush=True)
             for name, e in embs.items():
                 t0 = time.time()
                 n = await _embed(db.ingest_dsn, e)
                 print(f"embedded {n} with {name} in {time.time() - t0:.0f}s", flush=True)
             results["embed_usd_so_far"] = None
-            pool: AsyncConnectionPool[Any] = AsyncConnectionPool(db.app_dsn, min_size=1, max_size=6, kwargs={"prepare_threshold": None}, open=False)
+            pool: AsyncConnectionPool[Any] = AsyncConnectionPool(
+                db.app_dsn, min_size=1, max_size=6, kwargs={"prepare_threshold": None}, open=False
+            )
             await pool.open()
             try:
                 rows: dict[str, list[dict[str, Any]]] = {}
@@ -170,11 +202,29 @@ async def main_async(args: argparse.Namespace) -> None:
                     cfg = RetrievalConfig(**cfg_kwargs)
                     rr = reranker if v["rerank"] else None
 
-                    async def one(q: dict[str, Any], v: dict[str, Any] = v, cfg: RetrievalConfig = cfg, rr: Any = rr) -> dict[str, Any]:
+                    async def one(
+                        q: dict[str, Any],
+                        v: dict[str, Any] = v,
+                        cfg: RetrievalConfig = cfg,
+                        rr: Any = rr,
+                    ) -> dict[str, Any]:
                         t0 = time.perf_counter()
-                        res = await search(pool, embs[v["emb"]], rr, principal_id=ids[q["asker"]], query=q["text"], cfg=cfg)
+                        res = await search(
+                            pool,
+                            embs[v["emb"]],
+                            rr,
+                            principal_id=ids[q["asker"]],
+                            query=q["text"],
+                            cfg=cfg,
+                        )
                         ranked = docs_in_order(res.ranked)
-                        return {"id": q["id"], "ranked": ranked, "ms": (time.perf_counter() - t0) * 1000, "degraded": list(res.degraded), "leak": any(n in ranked for n in q["must_not_cite"])}
+                        return {
+                            "id": q["id"],
+                            "ranked": ranked,
+                            "ms": (time.perf_counter() - t0) * 1000,
+                            "degraded": list(res.degraded),
+                            "leak": any(n in ranked for n in q["must_not_cite"]),
+                        }
 
                     t0 = time.time()
                     rows[v["name"]] = await gather_limited([one(q) for q in questions])
@@ -187,15 +237,31 @@ async def main_async(args: argparse.Namespace) -> None:
                 async def answer(q: dict[str, Any]) -> dict[str, Any]:
                     t0 = time.perf_counter()
                     try:
-                        flow = await answer_workflow(pool, emb, reranker, providers.answer, principal_id=ids[q["asker"]], question=q["text"], cfg=cfg, mode=AccessMode.RLS_FIRST, searched=("docs_folder",), max_tokens=600)
-                    except Exception as exc:  # noqa: BLE001
+                        flow = await answer_workflow(
+                            pool,
+                            emb,
+                            reranker,
+                            providers.answer,
+                            principal_id=ids[q["asker"]],
+                            question=q["text"],
+                            cfg=cfg,
+                            mode=AccessMode.RLS_FIRST,
+                            searched=("docs_folder",),
+                            max_tokens=600,
+                        )
+                    except Exception as exc:
                         return {"id": q["id"], "error": type(exc).__name__}
                     a = flow.answer
                     cited = [pep_of(parse_citation(c.id).external_id) for c in a.citations]
                     return {
-                        "id": q["id"], "abstained": a.abstained, "answer": a.answer, "cited": cited,
-                        "quotes": [c.quote for c in a.citations], "degraded": list(flow.search.degraded),
-                        "retrieved": docs_in_order(flow.search.ranked), "packed": [pep_of(c.external_id) for c in flow.packed],
+                        "id": q["id"],
+                        "abstained": a.abstained,
+                        "answer": a.answer,
+                        "cited": cited,
+                        "quotes": [c.quote for c in a.citations],
+                        "degraded": list(flow.search.degraded),
+                        "retrieved": docs_in_order(flow.search.ranked),
+                        "packed": [pep_of(c.external_id) for c in flow.packed],
                         "ms": (time.perf_counter() - t0) * 1000,
                     }
 

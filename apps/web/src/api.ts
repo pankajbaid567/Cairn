@@ -724,3 +724,23 @@ export const getAnchors = () =>
 export const anchorNow = () =>
   request<{ seq: number; head_hash: string; at: string }>('/org/audit/anchor', { method: 'POST' });
 export const EVIDENCE_PACK_URL = '/api/compliance/evidence-pack';
+
+// ---- dashboard ----
+
+export interface Dashboard {
+  role: string;
+  date: string;
+  weekend: boolean;
+  my_report_today?: boolean;
+  team_today?: { submitted: number; expected: number; blockers_recent: number };
+  approvals_waiting?: number;
+  my_requests_pending: number;
+  policies_to_attest?: number;
+  review_items_mine?: number;
+  risks?: { open: number; high: number } | null;
+  audit?: { chain_ok: boolean; events: number; last_24h: number; denied_7d: number };
+  controls?: { pass: number; fail: number; no_evidence: number };
+  members: number;
+  recent: { seq: number; at: string; action: string; outcome: string; actor: string | null }[];
+}
+export const getDashboard = () => request<Dashboard>('/dashboard');

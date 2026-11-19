@@ -31,7 +31,11 @@ def kappa(a: list[str], b: list[str]) -> float:
 
 
 def main() -> int:
-    rows = [r for r in csv.DictReader(SHEET.open()) if r["human_correct"].strip() and r["human_grounded"].strip()]
+    rows = [
+        r
+        for r in csv.DictReader(SHEET.open())
+        if r["human_correct"].strip() and r["human_grounded"].strip()
+    ]
     if not rows:
         print("no human labels filled in yet")
         return 1
@@ -39,8 +43,15 @@ def main() -> int:
         ai = [r[f"ai_{field}"] for r in rows]
         hu = [r[f"human_{field}"].strip().lower() for r in rows]
         agree = sum(x == y for x, y in zip(ai, hu, strict=True))
-        print(f"{field}: {agree} of {len(rows)} agree ({agree / len(rows):.0%}), kappa {kappa(ai, hu):.2f}")
-        print("  AI says yes:", sum(x == "yes" for x in ai) / len(ai), " human says yes:", sum(x == "yes" for x in hu) / len(hu))
+        print(
+            f"{field}: {agree} of {len(rows)} agree ({agree / len(rows):.0%}), kappa {kappa(ai, hu):.2f}"
+        )
+        print(
+            "  AI says yes:",
+            sum(x == "yes" for x in ai) / len(ai),
+            " human says yes:",
+            sum(x == "yes" for x in hu) / len(hu),
+        )
     return 0
 
 

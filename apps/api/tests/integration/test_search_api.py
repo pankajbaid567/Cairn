@@ -52,6 +52,7 @@ def test_personas_login_me_and_logout(client: TestClient) -> None:
         "carla",
         "priya",
         "dev",
+        "iris",
     ]
     login(client, "ben")
     assert client.get("/me").json() == {"persona": "ben", "display_name": "Ben"}

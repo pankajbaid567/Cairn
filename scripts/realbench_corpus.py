@@ -75,9 +75,7 @@ def main() -> int:
     raw_dir.mkdir(parents=True, exist_ok=True)
     tree = json.loads(get(TREE))["tree"]
     names = sorted(
-        t["path"].split("/")[-1]
-        for t in tree
-        if re.fullmatch(r"peps/pep-\d{4}\.rst", t["path"])
+        t["path"].split("/")[-1] for t in tree if re.fullmatch(r"peps/pep-\d{4}\.rst", t["path"])
     )
     candidates: list[dict[str, Any]] = []
     for name in names:
@@ -98,7 +96,17 @@ def main() -> int:
         candidates.append({"number": number, "fields": fields, "status": status, "text": text})
     step = max(1, len(candidates) // WANT)
     chosen_numbers = {c["number"] for c in candidates[::step][:WANT]}
-    (out / "all_titles.json").write_text(json.dumps([{"number": c["number"], "title": c["fields"]["Title"]} for c in candidates if c["number"] not in chosen_numbers][:60], indent=1) + "\n")
+    (out / "all_titles.json").write_text(
+        json.dumps(
+            [
+                {"number": c["number"], "title": c["fields"]["Title"]}
+                for c in candidates
+                if c["number"] not in chosen_numbers
+            ][:60],
+            indent=1,
+        )
+        + "\n"
+    )
     chosen = candidates[::step][:WANT]
     docs = out / "corpus" / "docs" / "peps"
     docs.mkdir(parents=True, exist_ok=True)
@@ -108,23 +116,49 @@ def main() -> int:
     for c in chosen:
         f, n = c["fields"], c["number"]
         acl = acl_for(n)
-        read = {"public": ["group:public"], "core": ["team:core", "team:steering"], "steering": ["team:steering"]}[acl]
+        read = {
+            "public": ["group:public"],
+            "core": ["team:core", "team:steering"],
+            "steering": ["team:steering"],
+        }[acl]
         created = f.get("Created", "")
         m = re.match(r"(\d{1,2})-([A-Za-z]{3})-(\d{4})", created)
-        months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
-        date = f"{m.group(3)}-{months.index(m.group(2)) + 1:02d}-{int(m.group(1)):02d}" if m else "2000-01-01"
+        months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
+        date = (
+            f"{m.group(3)}-{months.index(m.group(2)) + 1:02d}-{int(m.group(1)):02d}"
+            if m
+            else "2000-01-01"
+        )
         title = f"PEP {n}: {f['Title']}"
         front = (
             "---\ncairn_format: doc-v1\nkind: adr_file\nrepo: peps\n"
             f"path: pep-{n:04d}.md\ntitle: {json.dumps(title)}\nauthor: {json.dumps(f.get('Author', ''))}\n"
             f"date: '{date}'\nread:\n" + "".join(f"- {r}\n" for r in read) + "---\n"
         )
-        facts = [f"Status: {c['status']}", f"Author: {f.get('Author', 'unknown')}", f"Created: {created}"]
+        facts = [
+            f"Status: {c['status']}",
+            f"Author: {f.get('Author', 'unknown')}",
+            f"Created: {created}",
+        ]
         for key in ("Replaces", "Superseded-By"):
             if f.get(key):
                 facts.append(f"{key}: PEP {f[key]}")
         (docs / f"pep-{n:04d}.md").write_text(
-            front + f"# {title}\n\n" + "; ".join(facts) + ".\n\n" + c["text"] + "\n", encoding="utf-8"
+            front + f"# {title}\n\n" + "; ".join(facts) + ".\n\n" + c["text"] + "\n",
+            encoding="utf-8",
         )
         meta.append(
             {
@@ -144,7 +178,10 @@ def main() -> int:
     directory = {
         "as_of": "2026-11-19",
         "format": "cairn-directory-v1",
-        "groups": [{"id": "team:core", "name": "Core developers"}, {"id": "team:steering", "name": "Steering council"}],
+        "groups": [
+            {"id": "team:core", "name": "Core developers"},
+            {"id": "team:steering", "name": "Steering council"},
+        ],
         "memberships": [
             {"from": "2020-01-01", "group": "team:core", "user": "alice"},
             {"from": "2020-01-01", "group": "team:core", "user": "carol"},
@@ -157,13 +194,17 @@ def main() -> int:
         ],
     }
     (out / "corpus" / "directory").mkdir(parents=True, exist_ok=True)
-    (out / "corpus" / "directory" / "directory.json").write_text(json.dumps(directory, indent=2) + "\n")
+    (out / "corpus" / "directory" / "directory.json").write_text(
+        json.dumps(directory, indent=2) + "\n"
+    )
     (out / "peps.json").write_text(json.dumps(meta, indent=2) + "\n")
     by_status: dict[str, int] = {}
     for m in meta:
         by_status[m["status"]] = by_status.get(m["status"], 0) + 1
     acls = {a: sum(1 for m in meta if m["acl"] == a) for a in ("public", "core", "steering")}
-    print(f"{len(meta)} PEPs, {sum(m['chars'] for m in meta) // 1000} k chars; statuses {by_status}; acl {acls}")
+    print(
+        f"{len(meta)} PEPs, {sum(m['chars'] for m in meta) // 1000} k chars; statuses {by_status}; acl {acls}"
+    )
     return 0
 
 

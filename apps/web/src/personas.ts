@@ -4,6 +4,7 @@ export const PERSONA_ROLES: Record<string, string> = {
   ben: 'Software engineer (member). Reads shared engineering material, not private channels.',
   carla: 'HR partner (manager). Reads HR-private conversations that engineers cannot see.',
   dev: 'Engineering manager and workspace owner. Sees everything, including the audit trail.',
+  iris: 'Security engineer with the auditor role. Reads the audit trail, controls and evidence, but no content.',
   priya: 'Security admin (admin). Manages people; reads security policies and incident channels.',
 };
 

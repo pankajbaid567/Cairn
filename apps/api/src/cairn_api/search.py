@@ -60,6 +60,7 @@ PERSONAS: Final = (
     ("carla", "Carla"),
     ("priya", "Priya"),
     ("dev", "Dev"),
+    ("iris", "Iris"),
 )
 CONNECTORS: Final = ("chat_export", "meeting_notes", "docs_folder")
 SNIPPET_CHARS: Final = 300

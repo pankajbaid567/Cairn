@@ -54,8 +54,16 @@ def main() -> int:
         except ssm.exceptions.InvocationDoesNotExist:
             continue
         if inv["Status"] not in ("InProgress", "Pending"):
-            print(inv["Status"], inv["StandardOutputContent"].strip()[-120:], inv["StandardErrorContent"].strip()[-200:])
-            return 0 if inv["Status"] == "Success" and "build_exit=0" in inv["StandardOutputContent"] else 1
+            print(
+                inv["Status"],
+                inv["StandardOutputContent"].strip()[-120:],
+                inv["StandardErrorContent"].strip()[-200:],
+            )
+            return (
+                0
+                if inv["Status"] == "Success" and "build_exit=0" in inv["StandardOutputContent"]
+                else 1
+            )
     print("timed out waiting for the host")
     return 1
 

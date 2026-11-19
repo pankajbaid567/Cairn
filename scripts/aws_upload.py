@@ -1,6 +1,6 @@
 """Upload the deployment tarballs to the artifact bucket with the local AWS profile.
 
-    AWS_PROFILE=pankaj-aws uv run --with awscrt python scripts/aws_upload.py var/cairn-src.tar.gz var/cairn-web.tar.gz
+AWS_PROFILE=pankaj-aws uv run --with awscrt python scripts/aws_upload.py var/cairn-src.tar.gz var/cairn-web.tar.gz
 """
 
 from __future__ import annotations
@@ -17,7 +17,9 @@ def main(paths: list[str]) -> int:
     s3 = boto3.client("s3", region_name="ap-south-1")
     for p in paths:
         path = Path(p)
-        s3.upload_file(str(path), BUCKET, path.name.replace("cairn-src", "cairn-src").split("/")[-1])
+        s3.upload_file(
+            str(path), BUCKET, path.name.replace("cairn-src", "cairn-src").split("/")[-1]
+        )
         print("uploaded", path.name)
     return 0
 

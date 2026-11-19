@@ -62,7 +62,9 @@ def passage_of(body: str, rng: random.Random) -> str:
     return "\n\n".join(out)[:2200]
 
 
-async def draft(client: BedrockClient, title: str, body: str, kind: str, rng: random.Random) -> dict[str, str] | None:
+async def draft(
+    client: BedrockClient, title: str, body: str, kind: str, rng: random.Random
+) -> dict[str, str] | None:
     for _ in range(4):
         passage = passage_of(body, rng)
         if not passage:
@@ -79,7 +81,7 @@ async def draft(client: BedrockClient, title: str, body: str, kind: str, rng: ra
             )
             m = re.search(r"\{.*\}", res.text, re.S)
             d = json.loads(m.group(0)) if m else {}
-        except Exception:  # noqa: BLE001 - a bad draft is retried with another passage
+        except Exception:
             continue
         q, a, quote = (str(d.get(k, "")).strip() for k in ("question", "answer", "quote"))
         if not (q.endswith("?") and a and quote and norm(quote) in norm(body)):
@@ -97,11 +99,24 @@ def qid(kind: str, key: str) -> str:
 async def main_async(out: Path, seed: int) -> None:
     rng = random.Random(seed)
     peps = json.loads((out / "peps.json").read_text())
-    docs = {p["number"]: (out / "corpus/docs/peps" / f"pep-{p['number']:04d}.md").read_text().split("\n---\n", 1)[1] for p in peps}
-    client = BedrockClient(SearchSettings.model_validate({
-        "CAIRN_DB_HOST": "h", "CAIRN_APP_DB_PASSWORD": "x", "CAIRN_SESSION_SECRET": "x" * 40,
-        "CAIRN_AUDIT_HASH_KEY": "y" * 40, "CAIRN_BEDROCK_REGION": "ap-south-1",
-        "CAIRN_BEDROCK_DAILY_USD": "5"}))
+    docs = {
+        p["number"]: (out / "corpus/docs/peps" / f"pep-{p['number']:04d}.md")
+        .read_text()
+        .split("\n---\n", 1)[1]
+        for p in peps
+    }
+    client = BedrockClient(
+        SearchSettings.model_validate(
+            {
+                "CAIRN_DB_HOST": "h",
+                "CAIRN_APP_DB_PASSWORD": "x",
+                "CAIRN_SESSION_SECRET": "x" * 40,
+                "CAIRN_AUDIT_HASH_KEY": "y" * 40,
+                "CAIRN_BEDROCK_REGION": "ap-south-1",
+                "CAIRN_BEDROCK_DAILY_USD": "5",
+            }
+        )
+    )
     gate = asyncio.Semaphore(4)
 
     async def make(p: dict[str, Any], kind: str, k: int) -> dict[str, Any] | None:
@@ -123,12 +138,30 @@ async def main_async(out: Path, seed: int) -> None:
     drafts = [d for d in await asyncio.gather(*jobs) if d]
     questions: list[dict[str, Any]] = []
 
-    def add(kind: str, asker: str, text: str, gold: list[int], expected: str, quote: str = "", answer: str = "", must_not: list[int] | None = None, key: str = "") -> None:
-        questions.append({
-            "id": qid(kind, f"{asker}|{text}|{key}"), "kind": kind, "asker": asker, "text": text,
-            "gold_peps": gold, "expected": expected, "gold_quote": quote, "gold_answer": answer,
-            "must_not_cite": must_not or [],
-        })
+    def add(
+        kind: str,
+        asker: str,
+        text: str,
+        gold: list[int],
+        expected: str,
+        quote: str = "",
+        answer: str = "",
+        must_not: list[int] | None = None,
+        key: str = "",
+    ) -> None:
+        questions.append(
+            {
+                "id": qid(kind, f"{asker}|{text}|{key}"),
+                "kind": kind,
+                "asker": asker,
+                "text": text,
+                "gold_peps": gold,
+                "expected": expected,
+                "gold_quote": quote,
+                "gold_answer": answer,
+                "must_not_cite": must_not or [],
+            }
+        )
 
     for d in drafts:
         n, acl = d["pep"], d["acl"]
@@ -144,19 +177,61 @@ async def main_async(out: Path, seed: int) -> None:
     # header questions, built by code
     pub = [p for p in peps if p["acl"] == "public"]
     for p in pub[::6][:10]:
-        add("header", "alice", f"Who wrote the proposal titled '{p['title']}'?", [p["number"]], "answer", p["author"], p["author"])
+        add(
+            "header",
+            "alice",
+            f"Who wrote the proposal titled '{p['title']}'?",
+            [p["number"]],
+            "answer",
+            p["author"],
+            p["author"],
+        )
     for p in pub[3::6][:10]:
-        add("header", "alice", f"What is the status of the proposal titled '{p['title']}'?", [p["number"]], "answer", f"Status: {p['status']}", p["status"])
+        add(
+            "header",
+            "alice",
+            f"What is the status of the proposal titled '{p['title']}'?",
+            [p["number"]],
+            "answer",
+            f"Status: {p['status']}",
+            p["status"],
+        )
     for p in pub:
         if p["superseded_by"]:
-            add("header", "alice", f"Which proposal superseded the one titled '{p['title']}'?", [p["number"]], "answer", p["superseded_by"], p["superseded_by"])
+            add(
+                "header",
+                "alice",
+                f"Which proposal superseded the one titled '{p['title']}'?",
+                [p["number"]],
+                "answer",
+                p["superseded_by"],
+                p["superseded_by"],
+            )
     # unanswerable
-    tree = json.loads(Path(out / "all_titles.json").read_text()) if (out / "all_titles.json").exists() else []
+    tree = (
+        json.loads(Path(out / "all_titles.json").read_text())
+        if (out / "all_titles.json").exists()
+        else []
+    )
     present = {p["number"] for p in peps}
     for t in [x for x in tree if x["number"] not in present][:12]:
-        add("unanswerable", "alice", f"What does the proposal titled '{t['title']}' decide?", [], "abstain", key=str(t["number"]))
+        add(
+            "unanswerable",
+            "alice",
+            f"What does the proposal titled '{t['title']}' decide?",
+            [],
+            "abstain",
+            key=str(t["number"]),
+        )
     for n in (9001, 9100, 9250, 9500, 9999):
-        add("unanswerable", "alice", f"What does PEP {n} propose and who approved it?", [], "abstain", key=str(n))
+        add(
+            "unanswerable",
+            "alice",
+            f"What does PEP {n} propose and who approved it?",
+            [],
+            "abstain",
+            key=str(n),
+        )
     for text in (
         "What did the Rust RFC process decide about async traits?",
         "What is the release date of Python 4.0?",
@@ -168,7 +243,9 @@ async def main_async(out: Path, seed: int) -> None:
     ):
         add("unanswerable", "alice", text, [], "abstain")
     for q in questions:
-        q["split"] = "dev" if int(hashlib.sha256(q["id"].encode()).hexdigest(), 16) % 2 == 0 else "test"
+        q["split"] = (
+            "dev" if int(hashlib.sha256(q["id"].encode()).hexdigest(), 16) % 2 == 0 else "test"
+        )
     (out / "questions.json").write_text(json.dumps(questions, indent=2) + "\n")
     kinds: dict[str, int] = {}
     for q in questions:

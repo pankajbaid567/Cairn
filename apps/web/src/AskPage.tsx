@@ -11,7 +11,15 @@ const MAX_QUESTION = 500;
 /** Ask a question as the chosen persona and show the cited answer. */
 export function AskPage({ withPersona = true }: { withPersona?: boolean }) {
   const id = useId();
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState(() => {
+    try {
+      const carried = sessionStorage.getItem('cairn-prefill') ?? '';
+      if (carried) sessionStorage.removeItem('cairn-prefill');
+      return carried;
+    } catch {
+      return '';
+    }
+  });
   const ask = useMutation({ mutationFn: postAnswer, mutationKey: ['answer'] });
 
   function run(text: string) {

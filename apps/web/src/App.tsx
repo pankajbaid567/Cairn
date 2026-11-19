@@ -4,13 +4,18 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { getSession, signOut, switchOrg, type Session } from './api';
 import { AskPage } from './AskPage';
 import { AuthPages, AuthShell } from './AuthPages';
+import { DashboardPage } from './DashboardPage';
 import { DecisionPage } from './DecisionPage';
 import {
   AskIcon,
   AuditIcon,
   BrandMark,
+  ComplianceIcon,
   DecisionsIcon,
+  GovernanceIcon,
+  HomeIcon,
   PeopleIcon,
+  ReportsIcon,
   ReviewIcon,
   SettingsIcon,
   SourcesIcon,
@@ -31,6 +36,7 @@ import { initials } from './personas';
 import { Loading, RoleBadge } from './ui';
 
 type View =
+  | 'dashboard'
   | 'reports'
   | 'governance'
   | 'compliance'
@@ -51,6 +57,27 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
+  {
+    id: 'dashboard',
+    label: 'Home',
+    sub: 'What needs you today',
+    icon: <HomeIcon />,
+    group: 'Work',
+  },
+  {
+    id: 'reports',
+    label: 'Daily reports',
+    sub: 'What everyone got done',
+    icon: <ReportsIcon />,
+    group: 'Work',
+  },
+  {
+    id: 'governance',
+    label: 'Governance',
+    sub: 'Approvals, policies and risks',
+    icon: <GovernanceIcon />,
+    group: 'Work',
+  },
   {
     id: 'ask',
     label: 'Ask',
@@ -80,6 +107,13 @@ const NAV: NavItem[] = [
     group: 'Knowledge',
   },
   {
+    id: 'compliance',
+    label: 'Compliance',
+    sub: 'Controls, access reviews and evidence',
+    icon: <ComplianceIcon />,
+    group: 'Workspace',
+  },
+  {
     id: 'people',
     label: 'People',
     sub: 'Members, teams and invitations',
@@ -106,7 +140,7 @@ function readRoute(): { view: View; invite: string | null; auth: string } {
   const raw = window.location.hash.replace(/^#\/?/, '');
   const [head, ...rest] = raw.split('/');
   if (head === 'invite' && rest[0]) return { view: 'ask', invite: rest.join('/'), auth: '' };
-  const view = NAV.some((n) => n.id === head) ? (head as View) : 'reports';
+  const view = NAV.some((n) => n.id === head) ? (head as View) : 'dashboard';
   return { view, invite: null, auth: head ?? '' };
 }
 
@@ -235,6 +269,7 @@ function Shell({ session }: { session: Session }) {
           <UserMenu session={session} />
         </header>
         <main className="content">
+          {view === 'dashboard' ? <DashboardPage session={session} /> : null}
           {view === 'reports' ? <ReportsPage session={session} /> : null}
           {view === 'governance' ? <GovernancePage session={session} /> : null}
           {view === 'ask' ? <AskPage withPersona={false} /> : null}

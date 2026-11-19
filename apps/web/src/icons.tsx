@@ -82,6 +82,11 @@ export const ComplianceIcon = () => (
     <path d="M9 4h6v3H9zM9 14l2 2 4-4" />
   </Icon>
 );
+export const HomeIcon = () => (
+  <Icon>
+    <path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9Z" />
+  </Icon>
+);
 export const CopyIcon = () => (
   <Icon size={15}>
     <rect x="9" y="9" width="11" height="11" rx="2" />
